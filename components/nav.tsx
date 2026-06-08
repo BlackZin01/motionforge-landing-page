@@ -119,16 +119,21 @@ export function Nav() {
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center text-sm px-4 py-2 transition-colors duration-200"
+              className="inline-flex items-center justify-center text-sm font-bold uppercase tracking-wide px-6 py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
                 color: "var(--color-forge-white)",
                 border: "1px solid rgba(255,255,255,0.20)",
+                transition: "border-color 220ms ease, transform 220ms ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.50)"
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = "rgba(255,255,255,0.55)"
+                el.style.transform = "scale(1.025)"
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.20)"
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = "rgba(255,255,255,0.20)"
+                el.style.transform = "scale(1)"
               }}
             >
               Entrar
