@@ -108,7 +108,7 @@ export function Hero() {
             marginBottom: 24,
           }}
         >
-          Seu produto. Vídeo pronto. 60 segundos.
+          Seu Produto.<br />Vídeo Pronto.<br />Em 60 Segundos.
         </motion.h1>
 
         {/* Subtítulo — fadeUp delay 0.2s */}
