@@ -88,35 +88,18 @@ export function CTAFinal() {
           viewport={{ once: true, amount: 0.3 }}
           variants={stagger}
         >
-          <motion.p
-            variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--color-forge-orange)",
-              marginBottom: 20,
-            }}
-          >
-            Pronto para começar
-          </motion.p>
-
           <motion.h2
             variants={fadeUp}
             style={{
               fontFamily: "var(--font-bebas)",
-              fontSize: "clamp(42px, 7vw, 72px)",
+              fontSize: "clamp(52px, 9vw, 96px)",
               lineHeight: 1,
               letterSpacing: "3px",
               color: "var(--color-forge-white)",
               marginBottom: 24,
             }}
           >
-            Seu concorrente já está
-            <br />
-            <span style={{ color: "var(--color-forge-orange)" }}>acelerando.</span>
+            Forge Your Content
           </motion.h2>
 
           <motion.p
@@ -130,8 +113,8 @@ export function CTAFinal() {
               margin: "0 auto 40px",
             }}
           >
-            Monte seu primeiro workflow em 20 minutos.
-            Sem briefing. Sem equipe. Sem espera.
+            Você escolhe o modelo. Você monta o workflow. Você controla o volume.{" "}
+            Assinou, já gera.
           </motion.p>
 
           <motion.div
@@ -143,45 +126,97 @@ export function CTAFinal() {
               gap: 16,
             }}
           >
-            <button
-              onClick={handleCTA}
-              style={{
-                padding: "16px 52px",
-                background: "var(--color-forge-orange)",
-                color: "var(--color-forge-white)",
-                fontFamily: "var(--font-sans)",
-                fontSize: 14,
-                fontWeight: 700,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                border: "none",
-                cursor: "pointer",
-                boxShadow: "0 0 32px rgba(255,77,0,0.45)",
-                transition: "box-shadow 220ms ease, transform 220ms ease",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLButtonElement
-                el.style.boxShadow = "0 0 56px rgba(255,77,0,0.7)"
-                el.style.transform = "scale(1.03)"
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLButtonElement
-                el.style.boxShadow = "0 0 32px rgba(255,77,0,0.45)"
-                el.style.transform = "scale(1)"
-              }}
-            >
-              Ver planos e começar
-            </button>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12 }}>
+              <a
+                href="#planos"
+                onClick={handleCTA}
+                style={{
+                  padding: "16px 44px",
+                  background: "var(--color-forge-orange)",
+                  color: "var(--color-forge-white)",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 0 32px rgba(255,77,0,0.45)",
+                  transition: "box-shadow 220ms ease, transform 220ms ease",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLAnchorElement
+                  el.style.boxShadow = "0 0 56px rgba(255,77,0,0.7)"
+                  el.style.transform = "scale(1.03)"
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLAnchorElement
+                  el.style.boxShadow = "0 0 32px rgba(255,77,0,0.45)"
+                  el.style.transform = "scale(1)"
+                }}
+              >
+                Ver Planos
+              </a>
+              <a
+                href="#mecanismo"
+                style={{
+                  padding: "16px 44px",
+                  background: "transparent",
+                  color: "var(--color-forge-white)",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid rgba(255,255,255,0.22)",
+                  transition: "border-color 220ms ease, transform 220ms ease",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLAnchorElement
+                  el.style.borderColor = "rgba(255,255,255,0.55)"
+                  el.style.transform = "scale(1.015)"
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLAnchorElement
+                  el.style.borderColor = "rgba(255,255,255,0.22)"
+                  el.style.transform = "scale(1)"
+                }}
+              >
+                Ver como funciona
+              </a>
+            </div>
 
             <p
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: 13,
+                fontSize: 12,
                 color: "var(--color-forge-muted)",
-                margin: 0,
+                margin: "8px 0 0",
+                maxWidth: 480,
+                lineHeight: 1.6,
               }}
             >
-              Sem contrato · Cancele quando quiser · Acesso imediato
+              Para donos de loja: Assina o Starter, sobe o primeiro produto,
+              vê o resultado em 60 segundos.
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 12,
+                color: "var(--color-forge-muted)",
+                margin: 0,
+                maxWidth: 480,
+                lineHeight: 1.6,
+              }}
+            >
+              Para agências: Assina o Agency, cria os workspaces dos seus
+              clientes, entrega essa semana.
             </p>
           </motion.div>
         </motion.div>

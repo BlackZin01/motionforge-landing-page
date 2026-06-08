@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { Logo } from "@/components/ui/logo"
 import { trackEvent } from "@/lib/pixels"
 
@@ -114,18 +115,36 @@ export function Nav() {
             })}
           </ul>
 
-          {/* CTA — desktop */}
-          <a
-            href="#planos"
-            className="hidden md:inline-flex items-center justify-center text-sm font-bold uppercase tracking-wide px-6 py-3 transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-            style={{
-              background: "var(--color-forge-orange)",
-              color: "#FFFFFF",
-            }}
-            onClick={handleCtaClick}
-          >
-            Começar agora
-          </a>
+          {/* CTAs — desktop */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center text-sm px-4 py-2 transition-colors duration-200"
+              style={{
+                color: "var(--color-forge-white)",
+                border: "1px solid rgba(255,255,255,0.20)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.50)"
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.20)"
+              }}
+            >
+              Entrar
+            </Link>
+            <a
+              href="#planos"
+              className="inline-flex items-center justify-center text-sm font-bold uppercase tracking-wide px-6 py-3 transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{
+                background: "var(--color-forge-orange)",
+                color: "#FFFFFF",
+              }}
+              onClick={handleCtaClick}
+            >
+              Começar agora
+            </a>
+          </div>
 
           {/* Botão hamburger — mobile */}
           <button
@@ -212,6 +231,20 @@ export function Nav() {
           className="flex flex-1 flex-col justify-center gap-8 px-8"
           role="list"
         >
+          <li key="entrar-mobile">
+            <Link
+              href="/login"
+              className="inline-flex items-center text-base font-medium transition-colors duration-200"
+              style={{
+                color: "var(--color-forge-white)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                padding: "10px 20px",
+              }}
+              onClick={() => setMenuOpen(false)}
+            >
+              Entrar
+            </Link>
+          </li>
           {NAV_LINKS.map(({ label, href }) => (
             <li key={href}>
               <a

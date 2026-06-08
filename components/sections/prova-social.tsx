@@ -23,7 +23,19 @@ const METRICS = [
   { value: 1240, label: "lojas ativas" },
   { value: 87,   label: "agências escalando" },
   { value: 47,   label: "variações por SKU por sessão (média)" },
-] as const
+  { value: 847,  label: "pedidos em 48h (maior resultado individual)", prefix: "+" },
+  { value: 23,   label: "vendas orgânicas no mês 1 (sem tráfego pago)", prefix: "R$ ", suffix: "k" },
+]
+
+const PLATFORMS = [
+  "TikTok Shop BR",
+  "Meta Ads",
+  "Instagram Shopping",
+  "Shopee",
+  "Mercado Livre",
+  "Hotmart",
+  "Kiwify",
+]
 
 const TESTIMONIALS = [
   {
@@ -31,14 +43,44 @@ const TESTIMONIALS = [
       "Primeiro mês com a MotionForge: saímos de 8 para 61 vídeos por semana. Mesmo time, mesmo orçamento.",
     author: "Carla Mendes",
     role: "Head de Conteúdo · Agência Konversa · Moda feminina",
+    result: "",
   },
   {
     quote:
       "Montei o workflow em 20 minutos. Agora rodo 50 variações por produto sem abrir outra ferramenta.",
     author: "Bruno Tavares",
     role: "Dono de loja · NutriFit Shop · Suplementos · TikTok Shop BR",
+    result: "",
   },
-] as const
+  {
+    quote:
+      "Postei 30 variações do mesmo produto em uma tarde. Dois viralizaram no mesmo dia. 847 pedidos em 48h.",
+    author: "Felipe Andrade",
+    role: "Loja Bella Skin · Skincare · TikTok Shop BR",
+    result: "847 pedidos em 48h",
+  },
+  {
+    quote:
+      "Minha conta foi de 12k pra 180k seguidores em 6 semanas. O segredo foi volume — 15 vídeos por dia com a MotionForge.",
+    author: "Juliana Costa",
+    role: "@julianafit.shop · Moda fitness · 180k seguidores",
+    result: "180k seguidores em 6 semanas",
+  },
+  {
+    quote:
+      "Gerencio 8 clientes de TikTok Shop com 2 pessoas na equipe. Antes precisaria de 12. A margem da agência dobrou.",
+    author: "Rafael Souza",
+    role: "Sócio · Agência Viral Content · São Paulo",
+    result: "equipe de 2, resultado de 12",
+  },
+  {
+    quote:
+      "R$ 23.000 em vendas no primeiro mês usando só os vídeos gerados pela MotionForge. Produto de R$ 49. Sem tráfego pago.",
+    author: "Mariana Lima",
+    role: "Loja Casa & Estilo · Decoração · TikTok Shop BR",
+    result: "R$ 23k orgânico no mês 1",
+  },
+]
 
 /* ── Componente ─────────────────────────────────────────────── */
 export function ProvaSocial() {
@@ -55,16 +97,16 @@ export function ProvaSocial() {
     >
       <div className="mx-auto max-w-7xl px-6 py-24 lg:py-32">
 
-        {/* ── Métricas 2×2 ──────────────────────────────────── */}
+        {/* ── Métricas 3×2 ──────────────────────────────────── */}
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.15 }}
           variants={stagger}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-px mb-20"
+          className="grid grid-cols-2 lg:grid-cols-3 gap-px mb-20"
           style={{ background: "var(--color-forge-border)" }}
         >
-          {METRICS.map(({ value, label }) => (
+          {METRICS.map(({ value, label, prefix, suffix }) => (
             <motion.div
               key={label}
               variants={fadeUp}
@@ -78,10 +120,12 @@ export function ProvaSocial() {
             >
               <NumberTicker
                 value={value}
-                duration={1.6}
+                duration={2}
+                prefix={prefix ?? ""}
+                suffix={suffix ?? ""}
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "clamp(36px, 4vw, 52px)",
+                  fontSize: "clamp(32px, 3.5vw, 48px)",
                   fontWeight: 700,
                   color: "var(--color-forge-cyan)",
                   lineHeight: 1,
@@ -103,41 +147,79 @@ export function ProvaSocial() {
           ))}
         </motion.div>
 
+        {/* ── Barra de plataformas ───────────────────────────── */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          style={{
+            textAlign: "center",
+            fontFamily: "var(--font-sans)",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "var(--color-forge-muted)",
+            opacity: 0.35,
+            marginBottom: 40,
+          }}
+        >
+          {PLATFORMS.join("  ·  ")}
+        </motion.p>
+
         {/* ── Depoimentos ───────────────────────────────────── */}
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
+          viewport={{ once: true, amount: 0.1 }}
           variants={stagger}
           className="grid grid-cols-1 lg:grid-cols-2 gap-4"
         >
-          {TESTIMONIALS.map(({ quote, author, role }) => (
+          {TESTIMONIALS.map(({ quote, author, role, result }) => (
             <motion.blockquote
               key={author}
               variants={fadeUp}
               style={{
                 margin: 0,
-                padding: "32px 28px",
+                padding: "28px 24px",
                 background: "var(--color-forge-graphite)",
                 borderLeft: "3px solid var(--color-forge-orange)",
                 display: "flex",
                 flexDirection: "column",
-                gap: 20,
+                gap: 16,
               }}
             >
               {/* Citação */}
               <p
                 style={{
                   fontFamily: "var(--font-sans)",
-                  fontSize: 17,
+                  fontSize: 16,
                   lineHeight: 1.65,
                   color: "var(--color-forge-white)",
                   margin: 0,
                   fontStyle: "normal",
+                  flex: 1,
                 }}
               >
                 &ldquo;{quote}&rdquo;
               </p>
+
+              {/* Resultado em destaque */}
+              {result && (
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "var(--color-forge-cyan)",
+                    margin: 0,
+                    textShadow: "0 0 12px rgba(0,229,255,0.4)",
+                  }}
+                >
+                  {result}
+                </p>
+              )}
 
               {/* Autor */}
               <footer
@@ -146,7 +228,7 @@ export function ProvaSocial() {
                   flexDirection: "column",
                   gap: 2,
                   borderTop: "1px solid var(--color-forge-border)",
-                  paddingTop: 16,
+                  paddingTop: 14,
                 }}
               >
                 <span
