@@ -176,15 +176,7 @@ function PlanCard({ plan }: { plan: Plan }) {
 
     gsap.set(card, { transformPerspective: 900 })
 
-    const onEnter = () => {
-      gsap.to(card, { scale: 1.025, duration: 0.3, ease: "power2.out", overwrite: "auto" })
-      gsap.to(glare, { opacity: 1, duration: 0.25 })
-    }
-
-    const onMove = (e: MouseEvent) => {
-      const r = card.getBoundingClientRect()
-      const x = (e.clientX - r.left) / r.width
-      const y = (e.clientY - r.top) / r.height
+    const applyTilt = (x: number, y: number) => {
       gsap.to(card, {
         rotateX: (y - 0.5) * -10,
         rotateY: (x - 0.5) * 10,
@@ -195,7 +187,7 @@ function PlanCard({ plan }: { plan: Plan }) {
       glare.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.08) 0%, transparent 55%)`
     }
 
-    const onLeave = () => {
+    const resetTilt = () => {
       gsap.to(card, {
         rotateX: 0, rotateY: 0, scale: 1,
         duration: 0.7, ease: "elastic.out(1, 0.5)",
@@ -204,14 +196,43 @@ function PlanCard({ plan }: { plan: Plan }) {
       gsap.to(glare, { opacity: 0, duration: 0.4 })
     }
 
+    /* ── Mouse (desktop) ── */
+    const onEnter = () => {
+      gsap.to(card, { scale: 1.025, duration: 0.3, ease: "power2.out", overwrite: "auto" })
+      gsap.to(glare, { opacity: 1, duration: 0.25 })
+    }
+    const onMove = (e: MouseEvent) => {
+      const r = card.getBoundingClientRect()
+      applyTilt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height)
+    }
+    const onLeave = () => resetTilt()
+
+    /* ── Touch (mobile) ── */
+    const onTouchStart = () => {
+      gsap.to(card, { scale: 1.025, duration: 0.25, ease: "power2.out", overwrite: "auto" })
+      gsap.to(glare, { opacity: 1, duration: 0.2 })
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      const r = card.getBoundingClientRect()
+      applyTilt((touch.clientX - r.left) / r.width, (touch.clientY - r.top) / r.height)
+    }
+    const onTouchEnd = () => resetTilt()
+
     card.addEventListener("mouseenter", onEnter)
     card.addEventListener("mousemove", onMove)
     card.addEventListener("mouseleave", onLeave)
+    card.addEventListener("touchstart", onTouchStart, { passive: true })
+    card.addEventListener("touchmove", onTouchMove, { passive: true })
+    card.addEventListener("touchend", onTouchEnd)
 
     return () => {
       card.removeEventListener("mouseenter", onEnter)
       card.removeEventListener("mousemove", onMove)
       card.removeEventListener("mouseleave", onLeave)
+      card.removeEventListener("touchstart", onTouchStart)
+      card.removeEventListener("touchmove", onTouchMove)
+      card.removeEventListener("touchend", onTouchEnd)
     }
   }, [])
 
