@@ -49,11 +49,29 @@ const CARDS: CardData[] = [
   },
 ]
 
-/* ── Todos os modelos para o marquee ────────────────────────── */
-const ALL_MODELS = [
-  "Veo 3.1 Lite", "Seedance 2.0", "Kling v3.0 Pro", "Kling O1", "Hailuo 2.3", "Wan 2.7",
-  "Nano Banana Pro 4K", "Nano Banana 2", "FLUX 2 Pro", "Ideogram v3", "Imagen 4 Fast",
-  "GPT Image 2", "Omni",
+/* ── Marquee com tamanho e cor por destaque ─────────────────── */
+interface MarqueeItem {
+  name: string
+  color: string
+  size: number
+  weight: number
+  opacity: number
+}
+
+const MARQUEE_ITEMS: MarqueeItem[] = [
+  { name: "Kling O1",           color: "var(--color-forge-cyan)",   size: 24, weight: 700, opacity: 1    },
+  { name: "Veo 3.1 Lite",       color: "var(--color-forge-cyan)",   size: 13, weight: 500, opacity: 0.55 },
+  { name: "GPT Image 2",        color: "var(--color-forge-white)",  size: 20, weight: 700, opacity: 0.85 },
+  { name: "Nano Banana Pro 4K", color: "var(--color-forge-orange)", size: 18, weight: 700, opacity: 0.9  },
+  { name: "Seedance 2.0",       color: "var(--color-forge-cyan)",   size: 13, weight: 500, opacity: 0.5  },
+  { name: "FLUX 2 Pro",         color: "var(--color-forge-orange)", size: 15, weight: 500, opacity: 0.65 },
+  { name: "Kling v3.0 Pro",     color: "var(--color-forge-cyan)",   size: 16, weight: 600, opacity: 0.7  },
+  { name: "Omni",               color: "var(--color-forge-white)",  size: 22, weight: 700, opacity: 1    },
+  { name: "Hailuo 2.3",         color: "var(--color-forge-cyan)",   size: 12, weight: 500, opacity: 0.45 },
+  { name: "Ideogram v3",        color: "var(--color-forge-orange)", size: 14, weight: 500, opacity: 0.6  },
+  { name: "Nano Banana 2",      color: "var(--color-forge-orange)", size: 12, weight: 500, opacity: 0.45 },
+  { name: "Wan 2.7",            color: "var(--color-forge-cyan)",   size: 12, weight: 500, opacity: 0.4  },
+  { name: "Imagen 4 Fast",      color: "var(--color-forge-orange)", size: 15, weight: 500, opacity: 0.65 },
 ]
 
 /* ── Componente de card ─────────────────────────────────────── */
@@ -141,7 +159,9 @@ export function Arsenal() {
           >
             Os melhores modelos do mercado.
             <br />
-            Um único lugar. Você no controle.
+            Um único lugar.
+            <br />
+            Você no controle.
           </motion.h2>
 
           <motion.p
@@ -194,41 +214,53 @@ export function Arsenal() {
             overflow: "hidden",
             borderTop: "1px solid var(--color-forge-border)",
             borderBottom: "1px solid var(--color-forge-border)",
-            paddingBlock: 18,
+            paddingBlock: 22,
             maskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
           }}
         >
-          {/* Track duplicado para loop perfeito */}
           <div
             style={{
               display: "flex",
-              gap: 32,
+              alignItems: "center",
+              gap: 0,
               width: "max-content",
-              animation: "marquee 28s linear infinite",
+              animation: "marquee 38s linear infinite",
             }}
           >
-            {/* Duas cópias para loop contínuo */}
-            {[...ALL_MODELS, ...ALL_MODELS].map((name, i) => (
+            {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
               <span
                 key={i}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 32,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: "var(--color-forge-muted)",
-                  whiteSpace: "nowrap",
+                  gap: 44,
+                  paddingInline: 22,
                 }}
               >
-                {name}
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: item.size,
+                    fontWeight: item.weight,
+                    color: item.color,
+                    opacity: item.opacity,
+                    whiteSpace: "nowrap",
+                    letterSpacing: item.size >= 18 ? "0.03em" : "0.01em",
+                    lineHeight: 1,
+                  }}
+                >
+                  {item.name}
+                </span>
                 <span
                   aria-hidden="true"
-                  style={{ color: "var(--color-forge-orange)", fontSize: 6 }}
+                  style={{
+                    color: "rgba(255,255,255,0.12)",
+                    fontSize: 5,
+                    lineHeight: 1,
+                  }}
                 >
-                  ●
+                  ◆
                 </span>
               </span>
             ))}
