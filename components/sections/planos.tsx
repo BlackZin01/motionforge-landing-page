@@ -1,7 +1,9 @@
 "use client"
 
+import { useRef, useEffect } from "react"
 import type { Variants } from "framer-motion"
 import { motion } from "framer-motion"
+import gsap from "gsap"
 import { trackEvent } from "@/lib/pixels"
 
 /* ── Variantes ──────────────────────────────────────────────── */
@@ -164,6 +166,54 @@ function CheckItem({
 
 function PlanCard({ plan }: { plan: Plan }) {
   const { id, price, credits, estimate, desc, pills, extras, featured, ctaLabel, variant } = plan
+  const cardRef = useRef<HTMLDivElement>(null)
+  const glareRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const card = cardRef.current
+    const glare = glareRef.current
+    if (!card || !glare) return
+
+    gsap.set(card, { transformPerspective: 900 })
+
+    const onEnter = () => {
+      gsap.to(card, { scale: 1.025, duration: 0.3, ease: "power2.out", overwrite: "auto" })
+      gsap.to(glare, { opacity: 1, duration: 0.25 })
+    }
+
+    const onMove = (e: MouseEvent) => {
+      const r = card.getBoundingClientRect()
+      const x = (e.clientX - r.left) / r.width
+      const y = (e.clientY - r.top) / r.height
+      gsap.to(card, {
+        rotateX: (y - 0.5) * -10,
+        rotateY: (x - 0.5) * 10,
+        duration: 0.3,
+        ease: "power2.out",
+        overwrite: "auto",
+      })
+      glare.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.08) 0%, transparent 55%)`
+    }
+
+    const onLeave = () => {
+      gsap.to(card, {
+        rotateX: 0, rotateY: 0, scale: 1,
+        duration: 0.7, ease: "elastic.out(1, 0.5)",
+        overwrite: "auto",
+      })
+      gsap.to(glare, { opacity: 0, duration: 0.4 })
+    }
+
+    card.addEventListener("mouseenter", onEnter)
+    card.addEventListener("mousemove", onMove)
+    card.addEventListener("mouseleave", onLeave)
+
+    return () => {
+      card.removeEventListener("mouseenter", onEnter)
+      card.removeEventListener("mousemove", onMove)
+      card.removeEventListener("mouseleave", onLeave)
+    }
+  }, [])
 
   function handleCTA() {
     trackEvent("InitiateCheckout", {
@@ -175,6 +225,7 @@ function PlanCard({ plan }: { plan: Plan }) {
 
   return (
     <motion.div
+      ref={cardRef}
       variants={fadeUp}
       style={{
         position: "relative",
@@ -187,6 +238,18 @@ function PlanCard({ plan }: { plan: Plan }) {
           : "1px solid var(--color-forge-border)",
       }}
     >
+      {/* Glare overlay — segue o cursor */}
+      <div
+        ref={glareRef}
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: 0,
+          pointerEvents: "none",
+          zIndex: 15,
+        }}
+      />
       {/* Spotlight no featured */}
       {featured && (
         <div
@@ -272,6 +335,19 @@ function PlanCard({ plan }: { plan: Plan }) {
             }}
           >
             {price.toLocaleString("pt-BR")}
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 20,
+              fontWeight: 700,
+              lineHeight: 1,
+              color: "rgba(245,245,245,0.35)",
+              alignSelf: "flex-end",
+              marginBottom: 3,
+            }}
+          >
+            ,00
           </span>
           <span
             style={{

@@ -236,20 +236,6 @@ export function Nav() {
           className="flex flex-1 flex-col justify-center gap-8 px-8"
           role="list"
         >
-          <li key="entrar-mobile">
-            <Link
-              href="/login"
-              className="inline-flex items-center text-base font-medium transition-colors duration-200"
-              style={{
-                color: "var(--color-forge-white)",
-                border: "1px solid rgba(255,255,255,0.25)",
-                padding: "10px 20px",
-              }}
-              onClick={() => setMenuOpen(false)}
-            >
-              Entrar
-            </Link>
-          </li>
           {NAV_LINKS.map(({ label, href }) => (
             <li key={href}>
               <a
@@ -268,8 +254,20 @@ export function Nav() {
           ))}
         </ul>
 
-        {/* CTA no rodapé do overlay */}
-        <div className="px-8 pb-12">
+        {/* CTAs no rodapé do overlay */}
+        <div className="flex flex-col gap-3 px-8 pb-12">
+          <Link
+            href="/login"
+            className="flex w-full items-center justify-center text-sm font-bold uppercase tracking-wide px-6 py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{
+              color: "var(--color-forge-white)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              transition: "border-color 200ms ease",
+            }}
+            onClick={() => setMenuOpen(false)}
+          >
+            Entrar
+          </Link>
           <a
             href="#planos"
             className="flex w-full items-center justify-center text-sm font-bold uppercase tracking-wide px-6 py-4 transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
