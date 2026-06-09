@@ -158,7 +158,7 @@ export function Mecanismo() {
               color: "var(--color-forge-muted)",
             }}
           >
-            A MotionForge não usa um modelo de IA. Usa os melhores. O Forge
+            A MotionForge não usa um modelo de IA. Usa um time deles. O Forge
             Engine conecta Nano Banana Pro, Veo 3.1, Seedance, Kling, GPT Image
             2 e Omni em workflows que você monta uma vez e executa em escala.
           </motion.p>
