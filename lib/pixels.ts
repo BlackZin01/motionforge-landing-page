@@ -5,11 +5,14 @@ export type PixelEvent =
   | "ViewContent"
   | "InitiateCheckout"
   | "Lead"
+  | "Login"
+  | "CompleteRegistration"
 
 export interface TrackParams {
   value?: number
   currency?: string
   content_name?: string
+  method?: string
 }
 
 export function trackEvent(event: PixelEvent, params: TrackParams = {}): void {
