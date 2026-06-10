@@ -21,7 +21,7 @@ export function NumberTicker({
   style,
 }: NumberTickerProps) {
   const ref = useRef<HTMLSpanElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "0px 0px -50px 0px" })
+  const isInView = useInView(ref, { once: true, margin: "0px" })
 
   useEffect(() => {
     if (!isInView || !ref.current) return

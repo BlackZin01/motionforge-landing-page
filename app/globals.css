@@ -46,6 +46,12 @@ body {
   to   { transform: translateX(-50%); }
 }
 
+/* ── Scanline (hero mockup) ────────────────────────────────── */
+@keyframes scanline {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
 /* ── Acessibilidade: reduced motion ────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
