@@ -42,7 +42,8 @@ export function SocialButtons({ action = "login" }: SocialButtonsProps) {
   const label = action === "login" ? "Continuar" : "Cadastrar"
 
   const btnStyle: React.CSSProperties = {
-    flex: 1,
+    flex: "1 1 0",
+    minWidth: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -50,14 +51,13 @@ export function SocialButtons({ action = "login" }: SocialButtonsProps) {
     background: "transparent",
     border: "1px solid rgba(255,255,255,0.12)",
     borderRadius: 8,
-    padding: "10px 16px",
+    padding: "10px 10px",
     fontSize: 13,
     fontWeight: 600,
     color: "var(--color-forge-white)",
     fontFamily: "var(--font-sans)",
     cursor: "pointer",
     transition: "border-color 200ms ease, background 200ms ease",
-    whiteSpace: "nowrap",
   }
 
   return (
