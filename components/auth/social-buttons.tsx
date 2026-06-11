@@ -76,7 +76,7 @@ export function SocialButtons({ action = "login" }: SocialButtonsProps) {
             "rgba(255,255,255,0.12)"
           ;(e.currentTarget as HTMLButtonElement).style.background = "transparent"
         }}
-        onClick={() => console.log("Google auth")}
+        onClick={() => { window.location.href = "https://api.motionforge.com.br/auth/google" }}
       >
         <GoogleIcon />
         {label} com Google
@@ -96,7 +96,7 @@ export function SocialButtons({ action = "login" }: SocialButtonsProps) {
             "rgba(255,255,255,0.12)"
           ;(e.currentTarget as HTMLButtonElement).style.background = "transparent"
         }}
-        onClick={() => console.log("GitHub auth")}
+        onClick={() => { window.location.href = "https://api.motionforge.com.br/auth/github" }}
       >
         <GitHubIcon />
         {label} com GitHub
