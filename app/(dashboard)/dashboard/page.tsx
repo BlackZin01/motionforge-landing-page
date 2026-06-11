@@ -21,6 +21,20 @@ const MOCK = {
 
 const hasGenerations = true
 
+// ─── Saudação baseada no horário de Brasília (UTC-3) ─────────────────────────
+
+function getSaudacao(): string {
+  const now = new Date()
+  // Converte para horário de Brasília
+  const horaBrasilia = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+  ).getHours()
+
+  if (horaBrasilia >= 5 && horaBrasilia < 12) return "Bom dia"
+  if (horaBrasilia >= 12 && horaBrasilia < 18) return "Boa tarde"
+  return "Boa noite"
+}
+
 // ─── Variantes de animação ───────────────────────────────────────────────────
 
 const EASE_FORGE = [0.22, 1, 0.36, 1] as const
@@ -125,7 +139,7 @@ export default function DashboardHomePage() {
             marginBottom: "4px",
           }}
         >
-          Bom dia, Matheus.
+          {getSaudacao()}, Matheus.
         </h1>
         <p
           style={{
