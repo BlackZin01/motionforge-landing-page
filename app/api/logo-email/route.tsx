@@ -12,57 +12,60 @@ export async function GET() {
           justifyContent: "center",
           gap: 10,
           background: "#0D0D0D",
-          width: 200,
-          height: 40,
+          width: 240,
+          height: 48,
         }}
       >
-        {/* Anel play */}
+        {/* Ícone: círculo laranja com ▶ */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 28,
-            height: 28,
+            width: 32,
+            height: 32,
             borderRadius: "50%",
             border: "2px solid #FF4D00",
-            position: "relative",
           }}
         >
-          <div
-            style={{
-              width: 0,
-              height: 0,
-              borderTop: "6px solid transparent",
-              borderBottom: "6px solid transparent",
-              borderLeft: "10px solid #FF4D00",
-              marginLeft: 3,
-            }}
-          />
+          <span style={{ color: "#FF4D00", fontSize: 14, marginLeft: 2 }}>▶</span>
         </div>
-        {/* Wordmark */}
+
+        {/* motion em branco */}
         <span
           style={{
-            fontFamily: "sans-serif",
-            fontSize: 20,
+            fontSize: 26,
             fontWeight: 700,
             color: "#F5F5F5",
+            fontFamily: "sans-serif",
             letterSpacing: "-0.5px",
           }}
         >
           motion
-          <span style={{ color: "rgba(245,245,245,0.42)", fontStyle: "italic" }}>
-            forge
-          </span>
+        </span>
+
+        {/* ponto separador laranja */}
+        <span style={{ color: "#FF4D00", fontSize: 26, lineHeight: 1, marginTop: 4 }}>·</span>
+
+        {/* forge em italic muted */}
+        <span
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            fontStyle: "italic",
+            color: "rgba(245,245,245,0.4)",
+            fontFamily: "sans-serif",
+            letterSpacing: "-0.5px",
+          }}
+        >
+          forge
         </span>
       </div>
     ),
     {
-      width: 200,
-      height: 40,
-      headers: {
-        "Cache-Control": "public, max-age=86400",
-      },
+      width: 240,
+      height: 48,
+      headers: { "Cache-Control": "public, max-age=3600" },
     }
   )
 }
