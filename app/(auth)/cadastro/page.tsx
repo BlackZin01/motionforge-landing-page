@@ -98,9 +98,25 @@ export default function CadastroPage() {
     if (!validate()) return
     setStatus("loading")
     trackEvent("CompleteRegistration", { currency: "BRL" })
-    await new Promise((r) => setTimeout(r, 1400))
-    console.log("cadastro", { name, email })
-    router.push("/dashboard")
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        const field = data.error?.includes("E-mail") ? "email" : undefined
+        setErrors(field ? { email: data.error } : { name: data.error ?? "Erro ao criar conta." })
+        setStatus("idle")
+        return
+      }
+      if (typeof window !== "undefined") localStorage.setItem("mf_token", data.token)
+      router.push("/dashboard")
+    } catch {
+      setErrors({ name: "Erro ao conectar com o servidor. Tente novamente." })
+      setStatus("idle")
+    }
   }
 
   /* ── Estilos de input ─────────────────────────────────────── */

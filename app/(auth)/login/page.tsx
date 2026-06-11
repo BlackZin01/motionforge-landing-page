@@ -48,6 +48,11 @@ function EyeIcon({ open }: { open: boolean }) {
 /* ── Tipos de estado ────────────────────────────────────────── */
 type Status = "idle" | "loading" | "error"
 
+/* ── Helpers de auth ─────────────────────────────────────────── */
+function saveSession(token: string) {
+  if (typeof window !== "undefined") localStorage.setItem("mf_token", token)
+}
+
 /* ── Página ─────────────────────────────────────────────────── */
 export default function LoginPage() {
   const router = useRouter()
@@ -74,11 +79,26 @@ export default function LoginPage() {
   async function handleSubmit() {
     if (!validate()) return
     setStatus("loading")
+    setErrors({})
     trackEvent("Login", { method: "email" })
-    /* substituir por chamada real à API */
-    await new Promise((r) => setTimeout(r, 1200))
-    console.log("login", { email, password })
-    router.push("/dashboard")
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setErrors({ general: data.error ?? "Credenciais inválidas." })
+        setStatus("error")
+        return
+      }
+      saveSession(data.token)
+      router.push("/dashboard")
+    } catch {
+      setErrors({ general: "Erro ao conectar com o servidor. Tente novamente." })
+      setStatus("error")
+    }
   }
 
   /* ── Estilos de input ─────────────────────────────────────── */
