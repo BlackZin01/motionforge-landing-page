@@ -128,12 +128,8 @@ export function StatsHUD({ credits, videos, images, workflows }: StatsHUDProps) 
   return (
     <div
       ref={ref}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(1, 1fr)",
-        gap: "2px",
-      }}
-      className="sm:grid-cols-2 lg:grid-cols-4"
+      style={{ gap: "8px" }}
+      className="grid grid-cols-2 lg:grid-cols-4"
     >
       {/* Card 1 — Créditos */}
       <StatCard

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { Zap, ChevronDown, User, LogOut } from "lucide-react"
 import { CreditBar } from "./credit-bar"
+import { Logo } from "@/components/ui/logo"
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -64,9 +65,17 @@ export default function Topbar({ title, credits, total, renewDays, userName }: T
         zIndex: 30,
       }}
     >
-      {/* ── Esquerda: título da página ── */}
-      <div style={{ flex: 1 }}>
+      {/* ── Esquerda: logo em mobile / título em desktop ── */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+        {/* Logo — visível apenas em mobile (sidebar oculta) */}
+        <div className="flex md:hidden">
+          <Link href="/">
+            <Logo size="nav" />
+          </Link>
+        </div>
+        {/* Título da página — visível apenas em desktop */}
         <span
+          className="hidden md:inline"
           style={{
             fontFamily: "'DM Sans', sans-serif",
             fontSize: "13px",
@@ -80,8 +89,10 @@ export default function Topbar({ title, credits, total, renewDays, userName }: T
 
       {/* ── Direita: credit bar + botão gerar + avatar ── */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {/* Barra de créditos */}
-        <CreditBar credits={credits} total={total} renewDays={renewDays} />
+        {/* Barra de créditos — oculta em telas pequenas */}
+        <div className="hidden sm:flex">
+          <CreditBar credits={credits} total={total} renewDays={renewDays} />
+        </div>
 
         {/* Botão ⚡ Gerar → vai para o Studio */}
         <Link
@@ -105,7 +116,7 @@ export default function Topbar({ title, credits, total, renewDays, userName }: T
           }}
         >
           <Zap size={12} />
-          Gerar
+          <span className="hidden xs:inline">Gerar</span>
         </Link>
 
         {/* Avatar + dropdown */}

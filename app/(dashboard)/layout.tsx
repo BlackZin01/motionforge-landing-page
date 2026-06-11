@@ -2,9 +2,9 @@
 
 import type { ReactNode } from "react"
 import Sidebar from "@/components/dashboard/sidebar"
-import Topbar from "@/components/dashboard/topbar"
 import ToastProvider from "@/components/dashboard/shared/toast"
 import { DashboardTopbarWrapper } from "./dashboard-topbar-wrapper"
+import { MobileNav } from "@/components/dashboard/mobile-nav"
 
 // ─── Dados mock ───────────────────────────────────────────────────────────────
 // TODO: integrar API — buscar do servidor/Supabase
@@ -30,8 +30,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           background: "#0D0D0D",
         }}
       >
-        {/* Sidebar — hidden em mobile (md:flex via className) */}
-        <div style={{ display: "flex", flexShrink: 0 }} className="hidden md:flex">
+        {/* Sidebar — hidden em mobile */}
+        <div className="hidden md:flex flex-shrink-0">
           <Sidebar
             userName={MOCK_USER.userName}
             plan={MOCK_USER.plan}
@@ -58,12 +58,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             userName={MOCK_USER.userName}
           />
 
-          {/* Área de conteúdo scrollável */}
-          <main style={{ flex: 1, overflowY: "auto" }}>
+          {/* Área de conteúdo scrollável — padding bottom em mobile para não ficar atrás da nav */}
+          <main style={{ flex: 1, overflowY: "auto" }} className="pb-16 md:pb-0">
             {children}
           </main>
         </div>
       </div>
+
+      {/* Navegação bottom — apenas mobile */}
+      <MobileNav />
     </ToastProvider>
   )
 }
