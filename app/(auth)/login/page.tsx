@@ -98,6 +98,18 @@ export default function LoginPage() {
         return
       }
       saveSession(data.token)
+      // Busca e cacheia dados do usuário antes de redirecionar (evita spinner no dashboard)
+      try {
+        const meRes = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${data.token}` },
+        })
+        if (meRes.ok) {
+          const userData = await meRes.json()
+          localStorage.setItem("mf_user", JSON.stringify(userData))
+        }
+      } catch {
+        // Falha silenciosa — o AuthProvider vai buscar no próximo carregamento
+      }
       router.push("/dashboard")
     } catch {
       setErrors({ general: "Erro ao conectar com o servidor. Tente novamente." })

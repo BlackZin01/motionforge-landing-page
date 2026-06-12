@@ -71,6 +71,22 @@ function normalizeUser(data: Record<string, unknown>): AuthUser {
   }
 }
 
+// ─── Fetch com timeout ────────────────────────────────────────────────────────
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  ms = 8000
+): Promise<Response> {
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), ms)
+  try {
+    return await fetch(url, { ...options, signal: controller.signal })
+  } finally {
+    clearTimeout(id)
+  }
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -90,38 +106,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem("mf_token")
 
     if (!token) {
+      setLoading(false)
       router.replace("/login")
       return
     }
 
-    // Sincroniza o cookie para o middleware conseguir ler
+    // Sincroniza cookie para o proxy server-side conseguir ler
     setCookie("mf_token", token)
 
-    // Usa cache para exibição imediata enquanto valida
+    // Carrega cache imediatamente — evita spinner se já passou pelo login antes
     const cached = localStorage.getItem("mf_user")
     if (cached) {
       try {
         setUser(JSON.parse(cached))
-        setLoading(false)
-      } catch {}
+        setLoading(false) // mostra dashboard com dados cached, valida em background
+      } catch {
+        localStorage.removeItem("mf_user")
+      }
     }
 
-    // Valida o token com a API e atualiza dados
-    fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    // Valida token e atualiza dados em background (timeout de 8s)
+    fetchWithTimeout(
+      "/api/auth/me",
+      { headers: { Authorization: `Bearer ${token}` } },
+      8000
+    )
       .then((r) => {
-        if (!r.ok) throw new Error("Token inválido")
+        // Apenas 401 = token definitivamente inválido → logout
+        if (r.status === 401) {
+          logout()
+          return null
+        }
+        if (!r.ok) return null // outro erro de servidor → mantém sessão
         return r.json()
       })
-      .then((data: Record<string, unknown>) => {
+      .then((data: Record<string, unknown> | null) => {
+        if (!data) return
         const userData = normalizeUser(data)
         setUser(userData)
         localStorage.setItem("mf_user", JSON.stringify(userData))
       })
       .catch(() => {
-        // Token inválido ou expirado → força novo login
-        logout()
+        // Timeout ou erro de rede → se tem cache, mantém logado
+        // Se não tem cache, mostra tela de erro mas não força logout
+        if (!cached) {
+          // Sem cache e sem API: força logout para evitar tela vazia
+          logout()
+        }
       })
       .finally(() => {
         setLoading(false)
