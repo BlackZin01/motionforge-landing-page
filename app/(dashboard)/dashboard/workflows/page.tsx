@@ -576,8 +576,9 @@ export default function WorkflowsPage() {
                     transition: "opacity 0.2s ease",
                   }}
                   onMouseEnter={(e) => {
-                    if (nodes.length > 0)
-                      ;(e.currentTarget as HTMLButtonElement).style.opacity = "0.88"
+                    if (nodes.length > 0) {
+                      (e.currentTarget as HTMLButtonElement).style.opacity = "0.88"
+                    }
                   }}
                   onMouseLeave={(e) => {
                     ;(e.currentTarget as HTMLButtonElement).style.opacity = "1"
