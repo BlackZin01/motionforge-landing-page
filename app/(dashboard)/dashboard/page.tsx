@@ -8,18 +8,7 @@ import { StatsHUD } from "@/components/dashboard/home/stats-hud"
 import { UsageChart } from "@/components/dashboard/home/usage-chart"
 import { RecentGrid } from "@/components/dashboard/home/recent-grid"
 import { Skeleton } from "@/components/dashboard/shared/skeleton"
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-// TODO: integrar API — buscar dados reais do usuário autenticado
-
-const MOCK = {
-  credits: 3847,
-  videos: 43,
-  images: 84,
-  workflows: 6,
-}
-
-const hasGenerations = true
+import { useAuth } from "@/lib/auth-context"
 
 // ─── Saudação baseada no horário de Brasília (UTC-3) ─────────────────────────
 
@@ -91,14 +80,17 @@ function LoadingSkeleton() {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function DashboardHomePage() {
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800)
-    return () => clearTimeout(timer)
-  }, [])
+    if (!authLoading) {
+      const timer = setTimeout(() => setLoading(false), 400)
+      return () => clearTimeout(timer)
+    }
+  }, [authLoading])
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div
         style={{
@@ -111,6 +103,9 @@ export default function DashboardHomePage() {
       </div>
     )
   }
+
+  const firstName = user?.name?.split(" ")[0] ?? "Usuário"
+  const credits   = user?.credits ?? 0
 
   return (
     <div
@@ -139,7 +134,7 @@ export default function DashboardHomePage() {
             marginBottom: "4px",
           }}
         >
-          {getSaudacao()}, Matheus.
+          {getSaudacao()}, {firstName}.
         </h1>
         <p
           style={{
@@ -147,7 +142,7 @@ export default function DashboardHomePage() {
             color: "rgba(245,245,245,0.4)",
           }}
         >
-          Você tem {MOCK.credits.toLocaleString("pt-BR")} créditos. Pronto pra gerar?
+          Você tem {credits.toLocaleString("pt-BR")} créditos. Pronto pra gerar?
         </p>
       </motion.div>
 
@@ -159,10 +154,10 @@ export default function DashboardHomePage() {
         animate="visible"
       >
         <StatsHUD
-          credits={MOCK.credits}
-          videos={MOCK.videos}
-          images={MOCK.images}
-          workflows={MOCK.workflows}
+          credits={credits}
+          videos={0}
+          images={0}
+          workflows={0}
         />
       </motion.div>
 
@@ -183,7 +178,8 @@ export default function DashboardHomePage() {
         initial="hidden"
         animate="visible"
       >
-        {hasGenerations ? (
+        {/* Mostra grid se usuário tem gerações, senão CTA vazio */}
+        {false ? (
           <RecentGrid />
         ) : (
           /* CTA para primeiro uso */

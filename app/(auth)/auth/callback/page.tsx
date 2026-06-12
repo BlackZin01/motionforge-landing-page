@@ -32,6 +32,9 @@ function CallbackInner() {
 
     // Salva o token (mesma chave usada no login normal)
     localStorage.setItem("mf_token", token)
+    // Sincroniza cookie para o middleware
+    const maxAge = 7 * 24 * 60 * 60
+    document.cookie = `mf_token=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; SameSite=Lax`
 
     // Busca dados do usuário para guardar no storage
     fetch("/api/auth/me", {

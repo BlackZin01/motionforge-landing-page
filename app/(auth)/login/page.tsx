@@ -50,7 +50,11 @@ type Status = "idle" | "loading" | "error"
 
 /* ── Helpers de auth ─────────────────────────────────────────── */
 function saveSession(token: string) {
-  if (typeof window !== "undefined") localStorage.setItem("mf_token", token)
+  if (typeof window === "undefined") return
+  localStorage.setItem("mf_token", token)
+  // Sincroniza cookie para o middleware conseguir proteger rotas server-side
+  const maxAge = 7 * 24 * 60 * 60
+  document.cookie = `mf_token=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; SameSite=Lax`
 }
 
 /* ── Página ─────────────────────────────────────────────────── */

@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import { Zap, Home, Clock, GitBranch, Gem, Settings } from "lucide-react"
+import { motion } from "framer-motion"
+import { Zap, Home, Clock, GitBranch, Gem, Settings, LogOut } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -13,6 +13,7 @@ interface SidebarProps {
   plan: "Starter" | "Pro" | "Agency"
   credits: number
   total: number
+  onLogout: () => void
 }
 
 // ─── Itens de navegação ───────────────────────────────────────────────────────
@@ -36,7 +37,7 @@ const PLAN_BADGE: Record<"Starter" | "Pro" | "Agency", { bg: string; color: stri
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function Sidebar({ userName, plan, credits, total }: SidebarProps) {
+export default function Sidebar({ userName, plan, credits, total, onLogout }: SidebarProps) {
   const pathname = usePathname()
 
   // Determina se o item está ativo
@@ -242,6 +243,37 @@ export default function Sidebar({ userName, plan, credits, total }: SidebarProps
               </Link>
             )}
           </div>
+
+          {/* Botão de logout */}
+          <button
+            onClick={onLogout}
+            title="Sair"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: "6px",
+              color: "rgba(245,245,245,0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "6px",
+              transition: "color 150ms ease, background 150ms ease",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget
+              el.style.color = "#ef4444"
+              el.style.background = "rgba(239,68,68,0.08)"
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget
+              el.style.color = "rgba(245,245,245,0.25)"
+              el.style.background = "transparent"
+            }}
+          >
+            <LogOut size={14} />
+          </button>
         </div>
       </div>
     </aside>

@@ -14,18 +14,18 @@ interface TopbarProps {
   total: number
   renewDays: number
   userName: string
+  onLogout: () => void
 }
 
 // ─── Items do dropdown ────────────────────────────────────────────────────────
 
-const DROPDOWN_ITEMS = [
-  { icon: User,   label: "Perfil", href: "/dashboard/configuracoes" },
-  { icon: LogOut, label: "Sair",   href: "/"                         },
+const DROPDOWN_LINKS = [
+  { icon: User, label: "Perfil", href: "/dashboard/configuracoes" },
 ] as const
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function Topbar({ title, credits, total, renewDays, userName }: TopbarProps) {
+export default function Topbar({ title, credits, total, renewDays, userName, onLogout }: TopbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -177,7 +177,7 @@ export default function Topbar({ title, credits, total, renewDays, userName }: T
                 zIndex: 50,
               }}
             >
-              {DROPDOWN_ITEMS.map((item) => {
+              {DROPDOWN_LINKS.map((item) => {
                 const Icon = item.icon
                 return (
                   <Link
@@ -212,6 +212,43 @@ export default function Topbar({ title, credits, total, renewDays, userName }: T
                   </Link>
                 )
               })}
+
+              {/* Divider */}
+              <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", margin: "4px 0" }} />
+
+              {/* Botão Sair */}
+              <button
+                onClick={() => { setDropdownOpen(false); onLogout() }}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 10px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  color: "rgba(245,245,245,0.7)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  transition: "background 150ms ease, color 150ms ease",
+                  textAlign: "left",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget
+                  el.style.background = "rgba(239,68,68,0.08)"
+                  el.style.color = "#ef4444"
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget
+                  el.style.background = "transparent"
+                  el.style.color = "rgba(245,245,245,0.7)"
+                }}
+              >
+                <LogOut size={14} />
+                Sair
+              </button>
             </div>
           )}
         </div>
