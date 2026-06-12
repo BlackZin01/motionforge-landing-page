@@ -10,17 +10,36 @@ import {
   ResponsiveContainer,
 } from "recharts"
 
-// ─── Dados mock — 30 dias de consumo ─────────────────────────────────────────
-// TODO: integrar API — buscar histórico real de créditos por dia
+// ─── Mês atual dinâmico ───────────────────────────────────────────────────────
 
-const data = Array.from({ length: 30 }, (_, i) => ({
-  day: `${i + 1}/06`,
-  credits: Math.floor(Math.random() * 160 + 20),
-}))
+const MONTHS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
+
+function getCurrentMonthLabel() {
+  const now = new Date()
+  return `${MONTHS[now.getMonth()]} ${now.getFullYear()}`
+}
+
+function getDaysInCurrentMonth() {
+  const now = new Date()
+  const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+  const month = now.getMonth() + 1
+  return Array.from({ length: days }, (_, i) => ({
+    day: `${i + 1}/${month < 10 ? "0" + month : month}`,
+    credits: 0,
+  }))
+}
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 
-export function UsageChart() {
+interface UsageChartProps {
+  // TODO: aceitar dados reais da API — por enquanto sempre vazio
+  data?: { day: string; credits: number }[]
+}
+
+export function UsageChart({ data }: UsageChartProps) {
+  const chartData = data ?? getDaysInCurrentMonth()
+  const hasActivity = chartData.some((d) => d.credits > 0)
+
   return (
     <div
       style={{
@@ -36,6 +55,7 @@ export function UsageChart() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: "16px",
         }}
       >
         <span
@@ -46,7 +66,7 @@ export function UsageChart() {
             color: "#F5F5F5",
           }}
         >
-          Consumo — Junho 2026
+          Consumo — {getCurrentMonthLabel()}
         </span>
 
         <span
@@ -62,45 +82,79 @@ export function UsageChart() {
         </span>
       </div>
 
-      {/* Gráfico */}
-      <div style={{ height: "180px", marginTop: "16px" }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-            <CartesianGrid
-              stroke="rgba(255,255,255,0.04)"
-              strokeDasharray="3 3"
-            />
-            <XAxis
-              dataKey="day"
-              tick={{ fill: "rgba(245,245,245,0.25)", fontSize: 10 }}
-              tickLine={false}
-              axisLine={false}
-              interval={4}
-            />
-            <YAxis hide />
-            <Tooltip
-              contentStyle={{
-                background: "#1A1A1A",
-                border: "1px solid rgba(255,255,255,0.06)",
-                borderRadius: 8,
-                fontSize: 12,
-              }}
-              labelStyle={{ color: "#F5F5F5" }}
-              itemStyle={{ color: "#FF4D00" }}
-              cursor={{ stroke: "rgba(255,77,0,0.2)", strokeWidth: 1 }}
-            />
-            <Area
-              type="monotone"
-              dataKey="credits"
-              stroke="#FF4D00"
-              strokeWidth={2}
-              fill="rgba(255,77,0,0.06)"
-              dot={false}
-              activeDot={{ r: 4, fill: "#FF4D00", stroke: "none" }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Gráfico ou empty state */}
+      {!hasActivity ? (
+        <div
+          style={{
+            height: "180px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "12px",
+              color: "rgba(245,245,245,0.25)",
+              margin: 0,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            Nenhuma geração neste mês ainda.
+          </p>
+          <p
+            style={{
+              fontSize: "11px",
+              color: "rgba(245,245,245,0.18)",
+              margin: 0,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            O gráfico aparecerá após sua primeira geração.
+          </p>
+        </div>
+      ) : (
+        <div style={{ height: "180px" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <CartesianGrid
+                stroke="rgba(255,255,255,0.04)"
+                strokeDasharray="3 3"
+              />
+              <XAxis
+                dataKey="day"
+                tick={{ fill: "rgba(245,245,245,0.25)", fontSize: 10 }}
+                tickLine={false}
+                axisLine={false}
+                interval={4}
+              />
+              <YAxis hide />
+              <Tooltip
+                contentStyle={{
+                  background: "#1A1A1A",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 8,
+                  fontSize: 12,
+                }}
+                labelStyle={{ color: "#F5F5F5" }}
+                itemStyle={{ color: "#FF4D00" }}
+                cursor={{ stroke: "rgba(255,77,0,0.2)", strokeWidth: 1 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="credits"
+                stroke="#FF4D00"
+                strokeWidth={2}
+                fill="rgba(255,77,0,0.06)"
+                dot={false}
+                activeDot={{ r: 4, fill: "#FF4D00", stroke: "none" }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   )
 }

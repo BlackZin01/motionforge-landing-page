@@ -11,7 +11,21 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     })
     const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+
+    const response = NextResponse.json(data, { status: res.status })
+
+    // Define cookie server-side para garantir que o middleware leia corretamente
+    if (res.ok && data.token) {
+      response.cookies.set("mf_token", data.token, {
+        httpOnly: false, // precisa ser false para o auth-context ler via document.cookie
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60,
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      })
+    }
+
+    return response
   } catch {
     return NextResponse.json({ error: "Erro ao conectar com o servidor" }, { status: 503 })
   }

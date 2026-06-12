@@ -8,6 +8,7 @@ import { Zap, Video, Image, GitBranch } from "lucide-react"
 
 interface StatsHUDProps {
   credits: number
+  totalCredits?: number
   videos: number
   images: number
   workflows: number
@@ -116,14 +117,14 @@ function StatCard({
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
-export function StatsHUD({ credits, videos, images, workflows }: StatsHUDProps) {
+export function StatsHUD({ credits, totalCredits = 5000, videos, images, workflows }: StatsHUDProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: "-40px" })
 
   // Dados de créditos
-  const TOTAL_CREDITS = 5000
-  const USED = TOTAL_CREDITS - credits
-  const usedPercent = (USED / TOTAL_CREDITS) * 100
+  const TOTAL_CREDITS = totalCredits
+  const USED = Math.max(0, TOTAL_CREDITS - credits)
+  const usedPercent = TOTAL_CREDITS > 0 ? (USED / TOTAL_CREDITS) * 100 : 0
 
   return (
     <div

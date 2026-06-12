@@ -52,7 +52,8 @@ type Status = "idle" | "loading" | "error"
 function saveSession(token: string) {
   if (typeof window === "undefined") return
   localStorage.setItem("mf_token", token)
-  // Sincroniza cookie para o middleware conseguir proteger rotas server-side
+  // Cookie já é definido pelo servidor no header Set-Cookie da rota /api/auth/login
+  // Aqui apenas sincronizamos para garantir compatibilidade (ex: OAuth)
   const maxAge = 7 * 24 * 60 * 60
   document.cookie = `mf_token=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; SameSite=Lax`
 }

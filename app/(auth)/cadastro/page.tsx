@@ -111,7 +111,21 @@ export default function CadastroPage() {
         setStatus("idle")
         return
       }
-      if (typeof window !== "undefined") localStorage.setItem("mf_token", data.token)
+      if (typeof window !== "undefined") {
+        localStorage.setItem("mf_token", data.token)
+        // Cacheia dados do usuário para evitar spinner no dashboard
+        try {
+          const meRes = await fetch("/api/auth/me", {
+            headers: { Authorization: `Bearer ${data.token}` },
+          })
+          if (meRes.ok) {
+            const userData = await meRes.json()
+            localStorage.setItem("mf_user", JSON.stringify(userData))
+          }
+        } catch {
+          // Falha silenciosa — AuthProvider vai buscar depois
+        }
+      }
       router.push("/dashboard")
     } catch {
       setErrors({ name: "Erro ao conectar com o servidor. Tente novamente." })

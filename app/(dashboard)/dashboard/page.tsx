@@ -104,8 +104,9 @@ export default function DashboardHomePage() {
     )
   }
 
-  const firstName = user?.name?.split(" ")[0] ?? "Usuário"
-  const credits   = user?.credits ?? 0
+  const firstName    = user?.name?.split(" ")[0] ?? "Usuário"
+  const credits      = user?.credits ?? 0
+  const totalCredits = user?.totalCredits ?? 5000
 
   return (
     <div
@@ -155,6 +156,7 @@ export default function DashboardHomePage() {
       >
         <StatsHUD
           credits={credits}
+          totalCredits={totalCredits}
           videos={0}
           images={0}
           workflows={0}
