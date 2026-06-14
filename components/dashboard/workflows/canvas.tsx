@@ -16,15 +16,18 @@ import {
   MarkerType,
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
-import { Zap, CheckCircle, Save, ArrowLeft } from "lucide-react"
-import { TriggerNode, ModelNode, OutputNode, MODEL_COSTS } from "./node-card"
+import { Zap, CheckCircle, Save, ArrowLeft, Image as ImageIcon, AlignLeft, Mic } from "lucide-react"
+import { TriggerNode, ModelNode, OutputNode, ImageNode, TextNode, VoiceNode, MODEL_COSTS, VOICE_MODELS } from "./node-card"
 
 // ─── Node types (definido fora do componente — obrigatório no React Flow) ─────
 
 const NODE_TYPES = {
   trigger: TriggerNode,
   model: ModelNode,
-  output: OutputNode,
+  result: OutputNode,
+  image: ImageNode,
+  text: TextNode,
+  voice: VoiceNode,
 }
 
 const EDGE_DEFAULTS = {
@@ -37,8 +40,8 @@ const INITIAL_NODES: Node[] = [
   {
     id: "trigger-1",
     type: "trigger",
-    position: { x: 80, y: 180 },
-    data: {},
+    position: { x: 80, y: 160 },
+    data: { prompt: "" },
   },
 ]
 
@@ -67,9 +70,10 @@ function EditorInner({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const idRef = useRef(100)
 
+  const outputQty = (nodes.find((n) => n.type === "result")?.data as { quantity?: number })?.quantity ?? 1
   const totalCost = nodes
-    .filter((n) => n.type === "model")
-    .reduce((acc, n) => acc + ((n.data as { cost?: number }).cost ?? 0), 0)
+    .filter((n) => n.type === "model" || n.type === "voice")
+    .reduce((acc, n) => acc + ((n.data as { cost?: number }).cost ?? 0), 0) * outputQty
 
   const onConnect = useCallback(
     (connection: Connection) =>
@@ -84,8 +88,21 @@ function EditorInner({
       {
         id,
         type: "model",
-        position: { x: 200 + (nds.length * 70) % 350, y: 120 + (nds.length * 50) % 280 },
-        data: { model: "Seedance Fast", cost: 25 },
+        position: { x: 200 + (nds.length * 70) % 350, y: 100 + (nds.length * 50) % 280 },
+        data: { model: "Seedance Fast", cost: 25, aspectRatio: "9:16", outputType: "video" },
+      },
+    ])
+  }
+
+  function addImageNode() {
+    const id = `image-${++idRef.current}`
+    setNodes((nds) => [
+      ...nds,
+      {
+        id,
+        type: "image",
+        position: { x: 80 + (nds.length * 40) % 200, y: 340 + (nds.length * 30) % 120 },
+        data: {},
       },
     ])
   }
@@ -96,9 +113,35 @@ function EditorInner({
       ...nds,
       {
         id,
-        type: "output",
-        position: { x: 520 + (nds.length * 40) % 200, y: 180 },
-        data: {},
+        type: "result",
+        position: { x: 520 + (nds.length * 40) % 200, y: 160 },
+        data: { quantity: 1 },
+      },
+    ])
+  }
+
+  function addTextNode() {
+    const id = `text-${++idRef.current}`
+    setNodes((nds) => [
+      ...nds,
+      {
+        id,
+        type: "text",
+        position: { x: 80 + (nds.length * 40) % 200, y: 460 + (nds.length * 20) % 80 },
+        data: { content: "" },
+      },
+    ])
+  }
+
+  function addVoiceNode() {
+    const id = `voice-${++idRef.current}`
+    setNodes((nds) => [
+      ...nds,
+      {
+        id,
+        type: "voice",
+        position: { x: 340 + (nds.length * 50) % 200, y: 340 + (nds.length * 30) % 100 },
+        data: { model: "ElevenLabs", cost: VOICE_MODELS["ElevenLabs"] },
       },
     ])
   }
@@ -296,9 +339,27 @@ function EditorInner({
             />
             <div style={{ width: 1, height: 20, background: "rgba(255,255,255,.06)" }} />
             <ToolbarBtn
+              icon={<ImageIcon size={13} />}
+              label="Imagem"
+              onClick={addImageNode}
+            />
+            <div style={{ width: 1, height: 20, background: "rgba(255,255,255,.06)" }} />
+            <ToolbarBtn
               icon={<CheckCircle size={13} />}
               label="Saída"
               onClick={addOutputNode}
+            />
+            <div style={{ width: 1, height: 20, background: "rgba(255,255,255,.06)" }} />
+            <ToolbarBtn
+              icon={<AlignLeft size={13} />}
+              label="Texto"
+              onClick={addTextNode}
+            />
+            <div style={{ width: 1, height: 20, background: "rgba(255,255,255,.06)" }} />
+            <ToolbarBtn
+              icon={<Mic size={13} />}
+              label="Voz IA"
+              onClick={addVoiceNode}
             />
           </div>
         </div>

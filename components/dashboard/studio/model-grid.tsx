@@ -37,9 +37,10 @@ interface ModelGridProps {
 
 const IMAGE_MODELS: ImageModel[] = [
   { id: "nano-banana-2", name: "Nano Banana 2", cost: 2, tag: "FAST", minPlan: "Starter" },
-  { id: "nano-banana-pro", name: "Nano Banana Pro", cost: 8, tag: "PRO", minPlan: "Pro", badge: "Pro" },
+  { id: "gpt-image-2", name: "GPT Image 2", cost: 10, tag: "STD", minPlan: "Starter" },
   { id: "flux-2-dev", name: "FLUX 2 Dev", cost: 3, tag: "STD", minPlan: "Starter" },
   { id: "flux-2-pro", name: "FLUX 2 Pro", cost: 5, tag: "PRO", minPlan: "Pro", badge: "Pro" },
+  { id: "nano-banana-pro", name: "Nano Banana Pro", cost: 8, tag: "PRO", minPlan: "Pro", badge: "Pro" },
   { id: "ideogram-v3", name: "Ideogram v3", cost: 3, tag: "STD", minPlan: "Starter" },
   { id: "imagen-4-fast", name: "Imagen 4 Fast", cost: 2, tag: "FAST", minPlan: "Agency", badge: "Agency" },
 ]

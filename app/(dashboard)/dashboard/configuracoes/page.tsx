@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Camera, Save, AlertTriangle } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -32,11 +33,13 @@ const ASPECT_OPTIONS = ["16:9", "9:16", "1:1"]
 // ─── Componente ──────────────────────────────────────────────────────────────
 
 export default function ConfiguracoesPage() {
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<ActiveTab>("perfil")
 
   // ─── Estado — Perfil ──────────────────────────────────────────────────────
-  const [name, setName] = useState("Matheus Victor")
-  const [email] = useState("matheus@motionforge.com.br")
+  const [name, setName] = useState(user?.name ?? "")
+  const email = user?.email ?? ""
+  const plan  = user?.plan  ?? "Starter"
 
   // ─── Estado — Preferências ────────────────────────────────────────────────
   const [defaultImageModel, setDefaultImageModel] = useState("nano-banana-2")
@@ -191,7 +194,7 @@ export default function ConfiguracoesPage() {
                   fontFamily: "'DM Sans', sans-serif",
                 }}
               >
-                M
+                {(name || email || "U")[0].toUpperCase()}
               </span>
             </div>
 
@@ -251,9 +254,9 @@ export default function ConfiguracoesPage() {
             <label style={labelStyle}>Plano</label>
             <span
               style={{
-                background: "rgba(0,229,255,0.08)",
-                border: "1px solid rgba(0,229,255,0.2)",
-                color: "#00E5FF",
+                background: plan === "Agency" ? "rgba(74,222,128,.08)" : plan === "Pro" ? "rgba(0,229,255,.08)" : "rgba(245,245,245,.06)",
+                border: `1px solid ${plan === "Agency" ? "rgba(74,222,128,.2)" : plan === "Pro" ? "rgba(0,229,255,.2)" : "rgba(245,245,245,.1)"}`,
+                color: plan === "Agency" ? "#4ADE80" : plan === "Pro" ? "#00E5FF" : "rgba(245,245,245,.6)",
                 fontSize: "12px",
                 fontWeight: 700,
                 padding: "4px 12px",
@@ -263,7 +266,7 @@ export default function ConfiguracoesPage() {
                 display: "inline-block",
               }}
             >
-              Pro
+              {plan}
             </span>
           </div>
 

@@ -47,7 +47,7 @@ export default function Sidebar({ userName, plan, credits, total, onLogout }: Si
     return pathname === href
   }
 
-  const planBadge = PLAN_BADGE[plan]
+  const planBadge = PLAN_BADGE[plan] ?? PLAN_BADGE["Starter"]
   const initial = userName.charAt(0).toUpperCase()
 
   return (

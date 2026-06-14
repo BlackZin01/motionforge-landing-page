@@ -3,14 +3,9 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Zap } from "lucide-react"
-
-// ─── Constantes mock ──────────────────────────────────────────────────────────
-// TODO: integrar API — buscar saldo e histórico de créditos do usuário
-
-const CREDITS = 3847
-const TOTAL = 5000
-const USED = TOTAL - CREDITS
-const RENEW_DAYS = 18
+import Link from "next/link"
+import { useAuth } from "@/lib/auth-context"
+import { useToast } from "@/components/dashboard/shared/toast"
 
 const TOPUPS = [
   { id: "500", credits: 500, price: "R$ 29", popular: false },
@@ -20,36 +15,75 @@ const TOPUPS = [
   { id: "10000", credits: 10000, price: "R$ 297", popular: false },
 ]
 
-const HISTORY = Array.from({ length: 12 }, (_, i) => ({
-  id: String(i + 1),
-  date: `${11 - i}/06/26`,
-  action: ["Geração vídeo", "Geração imagem", "Top-up créditos", "Geração vídeo"][i % 4],
-  model: ["Seedance 2.0", "FLUX 2 Dev", "—", "Kling Std"][i % 4],
-  credits: ["-35", "-3", "+2500", "-45"][i % 4],
-}))
+interface HistoryRow { id: string; date: string; action: string; model: string; credits: string }
+
+// ─── Badge de plano ───────────────────────────────────────────────────────────
+
+const PLAN_COLORS: Record<string, { bg: string; border: string; color: string }> = {
+  Starter: { bg: "rgba(245,245,245,.06)", border: "rgba(245,245,245,.1)", color: "rgba(245,245,245,.6)" },
+  Pro:     { bg: "rgba(0,229,255,.08)",   border: "rgba(0,229,255,.2)",   color: "#00E5FF" },
+  Agency:  { bg: "rgba(74,222,128,.08)",  border: "rgba(74,222,128,.2)",  color: "#4ADE80" },
+}
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+}
+
 export default function CreditosPage() {
+  const { user } = useAuth()
+  const { toast } = useToast()
+
+  const credits    = user?.credits     ?? 0
+  const total      = user?.totalCredits ?? 5000
+  const renewDays  = user?.renewDays   ?? 30
+  const plan       = user?.plan        ?? "Starter"
+  const used       = total - credits
+
+  const [history, setHistory] = useState<HistoryRow[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem("mf_token") ?? ""
+    fetch("/api/generations?limit=20&offset=0", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : { items: [] })
+      .then(data => {
+        const rows: HistoryRow[] = (data.items ?? []).map((g: { id: string; created_at: string; type: string; model_id: string; credits_used: number }) => ({
+          id: g.id,
+          date: formatDate(g.created_at),
+          action: g.type === "image" ? "Geração de imagem" : "Geração de vídeo",
+          model: g.model_id,
+          credits: `-${g.credits_used}`,
+        }))
+        setHistory(rows)
+      })
+      .catch(() => {})
+      .finally(() => setLoadingHistory(false))
+  }, [])
+
   // Animação do contador de créditos
   const [animatedCredits, setAnimatedCredits] = useState(0)
 
   useEffect(() => {
+    if (!credits) return
     const duration = 1500
     const steps = 60
-    const increment = CREDITS / steps
+    const increment = credits / steps
     let current = 0
     const timer = setInterval(() => {
       current += increment
-      if (current >= CREDITS) {
-        setAnimatedCredits(CREDITS)
+      if (current >= credits) {
+        setAnimatedCredits(credits)
         clearInterval(timer)
       } else {
         setAnimatedCredits(Math.floor(current))
       }
     }, duration / steps)
     return () => clearInterval(timer)
-  }, [])
+  }, [credits])
 
   return (
     <div
@@ -116,7 +150,7 @@ export default function CreditosPage() {
             <span
               style={{ fontSize: "11px", color: "rgba(245,245,245,0.4)" }}
             >
-              {TOTAL.toLocaleString("pt-BR")}
+              {total.toLocaleString("pt-BR")}
             </span>
           </div>
 
@@ -130,7 +164,7 @@ export default function CreditosPage() {
           >
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${(USED / TOTAL) * 100}%` }}
+              animate={{ width: `${total > 0 ? (used / total) * 100 : 0}%` }}
               transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
               style={{
                 height: "100%",
@@ -149,8 +183,8 @@ export default function CreditosPage() {
             fontFamily: "'DM Sans', sans-serif",
           }}
         >
-          {USED.toLocaleString("pt-BR")} usados de {TOTAL.toLocaleString("pt-BR")} · Renova em{" "}
-          {RENEW_DAYS} dias
+          {used.toLocaleString("pt-BR")} usados de {total.toLocaleString("pt-BR")} · Renova em{" "}
+          {renewDays} dias
         </p>
       </div>
 
@@ -176,9 +210,9 @@ export default function CreditosPage() {
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span
                 style={{
-                  background: "rgba(0,229,255,0.08)",
-                  border: "1px solid rgba(0,229,255,0.2)",
-                  color: "#00E5FF",
+                  background: PLAN_COLORS[plan]?.bg ?? PLAN_COLORS.Starter.bg,
+                  border: `1px solid ${PLAN_COLORS[plan]?.border ?? PLAN_COLORS.Starter.border}`,
+                  color: PLAN_COLORS[plan]?.color ?? PLAN_COLORS.Starter.color,
                   fontSize: "10px",
                   fontWeight: 700,
                   padding: "2px 8px",
@@ -188,18 +222,18 @@ export default function CreditosPage() {
                   textTransform: "uppercase",
                 }}
               >
-                Pro
+                {plan}
               </span>
             </div>
             <span
               style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: "18px",
+                fontSize: "14px",
                 fontWeight: 700,
                 color: "#F5F5F5",
               }}
             >
-              R$ 497/mês
+              Plano ativo
             </span>
             <span
               style={{
@@ -208,14 +242,19 @@ export default function CreditosPage() {
                 fontFamily: "'DM Sans', sans-serif",
               }}
             >
-              Renova 11/07/26
+              {renewDays > 0 ? `Renova em ${renewDays} dias` : "Sem renovação programada"}
             </span>
           </div>
 
           {/* Ações */}
           <div style={{ display: "flex", gap: "8px" }}>
-            {/* TODO: integrar API de gerenciamento de assinatura */}
             <button
+              onClick={() =>
+                toast({
+                  message: "Para gerenciar sua assinatura, entre em contato: suporte@motionforge.com.br",
+                  type: "info",
+                })
+              }
               style={{
                 background: "transparent",
                 border: "1px solid rgba(255,255,255,0.1)",
@@ -242,8 +281,8 @@ export default function CreditosPage() {
               Gerenciar
             </button>
 
-            {/* TODO: link para página de upgrade */}
-            <button
+            <Link
+              href="/#planos"
               style={{
                 background: "#FF4D00",
                 border: "none",
@@ -254,17 +293,20 @@ export default function CreditosPage() {
                 fontWeight: 700,
                 cursor: "pointer",
                 fontFamily: "'DM Sans', sans-serif",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
                 transition: "opacity 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLButtonElement).style.opacity = "0.88"
+                ;(e.currentTarget as HTMLAnchorElement).style.opacity = "0.88"
               }}
               onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLButtonElement).style.opacity = "1"
+                ;(e.currentTarget as HTMLAnchorElement).style.opacity = "1"
               }}
             >
               Upgrade
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -418,89 +460,88 @@ export default function CreditosPage() {
             overflow: "hidden",
           }}
         >
-          {/* Header da tabela */}
-          <div
-            style={{
-              display: "flex",
-              background: "rgba(255,255,255,0.02)",
-              padding: "8px 16px",
-            }}
-          >
-            {["Data", "Ação", "Modelo", "Créditos"].map((col) => (
-              <span
-                key={col}
-                style={{
-                  flex: col === "Ação" ? 2 : 1,
-                  fontSize: "11px",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  color: "rgba(245,245,245,0.4)",
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: 700,
-                }}
-              >
-                {col}
-              </span>
-            ))}
-          </div>
-
-          {/* Linhas */}
-          {HISTORY.map((row, i) => (
+          {loadingHistory ? (
+            <div style={{ padding: "32px", textAlign: "center" }}>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "13px", color: "rgba(245,245,245,.35)", margin: 0 }}>
+                Carregando histórico...
+              </p>
+            </div>
+          ) : history.length === 0 ? (
             <div
-              key={row.id}
               style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "10px 16px",
-                borderBottom:
-                  i < HISTORY.length - 1
-                    ? "1px solid rgba(255,255,255,0.04)"
-                    : "none",
+                padding: "40px 24px",
+                textAlign: "center",
               }}
             >
-              <span
+              <p
                 style={{
-                  flex: 1,
-                  fontSize: "12px",
-                  color: "rgba(245,245,245,0.4)",
                   fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "13px",
+                  color: "rgba(245,245,245,0.35)",
+                  margin: 0,
                 }}
               >
-                {row.date}
-              </span>
-              <span
-                style={{
-                  flex: 2,
-                  fontSize: "12px",
-                  color: "#F5F5F5",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >
-                {row.action}
-              </span>
-              <span
-                style={{
-                  flex: 1,
-                  fontSize: "12px",
-                  color: "rgba(245,245,245,0.4)",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >
-                {row.model}
-              </span>
-              <span
-                style={{
-                  flex: 1,
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: row.credits.startsWith("+") ? "#4ADE80" : "#FF4D00",
-                }}
-              >
-                {row.credits}
-              </span>
+                Nenhuma movimentação ainda. Suas gerações e recargas aparecerão aqui.
+              </p>
             </div>
-          ))}
+          ) : (
+            <>
+              {/* Header da tabela */}
+              <div
+                style={{
+                  display: "flex",
+                  background: "rgba(255,255,255,0.02)",
+                  padding: "8px 16px",
+                }}
+              >
+                {["Data", "Ação", "Modelo", "Créditos"].map((col) => (
+                  <span
+                    key={col}
+                    style={{
+                      flex: col === "Ação" ? 2 : 1,
+                      fontSize: "11px",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                      color: "rgba(245,245,245,0.4)",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {col}
+                  </span>
+                ))}
+              </div>
+
+              {/* Linhas */}
+              {history.map((row, i) => (
+                <div
+                  key={row.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "10px 16px",
+                    borderBottom:
+                      i < history.length - 1
+                        ? "1px solid rgba(255,255,255,0.04)"
+                        : "none",
+                  }}
+                >
+                  <span style={{ flex: 1, fontSize: "12px", color: "rgba(245,245,245,0.4)", fontFamily: "'DM Sans', sans-serif" }}>
+                    {row.date}
+                  </span>
+                  <span style={{ flex: 2, fontSize: "12px", color: "#F5F5F5", fontFamily: "'DM Sans', sans-serif" }}>
+                    {row.action}
+                  </span>
+                  <span style={{ flex: 1, fontSize: "12px", color: "rgba(245,245,245,0.4)", fontFamily: "'DM Sans', sans-serif" }}>
+                    {row.model}
+                  </span>
+                  <span style={{ flex: 1, fontFamily: "'Space Grotesk', sans-serif", fontSize: "12px", fontWeight: 600, color: row.credits.startsWith("+") ? "#4ADE80" : "#FF4D00" }}>
+                    {row.credits}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context"
 import Sidebar from "@/components/dashboard/sidebar"
 import Topbar from "@/components/dashboard/topbar"
 import { MobileNav } from "@/components/dashboard/mobile-nav"
+import { UpgradeBanner } from "@/components/dashboard/shared/upgrade-banner"
 import { usePathname } from "next/navigation"
 
 // ─── Mapeamento pathname → título da página ───────────────────────────────────
@@ -107,6 +108,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           userName={userName}
           onLogout={logout}
         />
+
+        {/* Banner de upgrade / sem créditos */}
+        <UpgradeBanner credits={credits} plan={plan} />
 
         {/* Área scrollável — pb-16 em mobile p/ não ficar atrás da nav */}
         <main style={{ flex: 1, overflowY: "auto" }} className="pb-16 md:pb-0">

@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ImageIcon, Video } from "lucide-react"
-
-// ─── Tipos ───────────────────────────────────────────────────────────────────
+import { ImageIcon, Video, Download } from "lucide-react"
 
 interface GenerationCardProps {
   id: string
@@ -12,19 +10,25 @@ interface GenerationCardProps {
   credits: number
   date: string
   compact?: boolean
+  outputUrl?: string
+  prompt?: string
 }
 
-// ─── Componente ──────────────────────────────────────────────────────────────
+function downloadFile(url: string, filename: string) {
+  const a = document.createElement("a")
+  a.href = url
+  a.download = filename
+  a.target = "_blank"
+  a.rel = "noopener noreferrer"
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
 
 export function GenerationCard({
-  type,
-  model,
-  credits,
-  date,
-  compact = false,
+  type, model, credits, date, compact = false, outputUrl, prompt,
 }: GenerationCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-
   const typeLabel = type === "image" ? "IMAGEM" : "VÍDEO"
 
   return (
@@ -45,139 +49,87 @@ export function GenerationCard({
         style={{
           aspectRatio: "16/9",
           background: "linear-gradient(135deg, #1A1A1A, #0D0D0D)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "relative", overflow: "hidden",
         }}
       >
-        {type === "image" ? (
-          <ImageIcon size={24} style={{ color: "rgba(255,77,0,0.3)" }} />
+        {outputUrl ? (
+          type === "video" ? (
+            <video
+              src={outputUrl}
+              muted
+              loop
+              playsInline
+              autoPlay={isHovered}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <img
+              src={outputUrl}
+              alt={prompt ?? model}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          )
         ) : (
-          <Video size={24} style={{ color: "rgba(255,77,0,0.3)" }} />
+          type === "image"
+            ? <ImageIcon size={24} style={{ color: "rgba(255,77,0,0.3)" }} />
+            : <Video size={24} style={{ color: "rgba(255,77,0,0.3)" }} />
         )}
 
-        {/* Badge tipo — superior esquerdo */}
+        {/* Badge tipo */}
         <div
           style={{
-            position: "absolute",
-            top: "6px",
-            left: "6px",
-            background: "rgba(0,0,0,0.6)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            fontSize: "9px",
-            letterSpacing: "1.5px",
-            textTransform: "uppercase",
-            padding: "2px 6px",
-            borderRadius: "4px",
-            color: "rgba(245,245,245,0.7)",
+            position: "absolute", top: "6px", left: "6px",
+            background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.1)",
+            fontSize: "9px", letterSpacing: "1.5px", textTransform: "uppercase",
+            padding: "2px 6px", borderRadius: "4px", color: "rgba(245,245,245,0.7)",
           }}
         >
           {typeLabel}
         </div>
 
-        {/* Badge modelo — superior direito */}
-        <div
-          style={{
-            position: "absolute",
-            top: "6px",
-            right: "6px",
-            background: "rgba(255,77,0,0.08)",
-            border: "1px solid rgba(255,77,0,0.2)",
-            fontSize: "9px",
-            color: "#FF4D00",
-            padding: "2px 6px",
-            borderRadius: "4px",
-          }}
-        >
-          {model}
-        </div>
-
         {/* Hover overlay */}
         <div
           style={{
-            position: "absolute",
-            inset: 0,
-            background: isHovered ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0)",
+            position: "absolute", inset: 0,
+            background: isHovered ? "rgba(0,0,0,0.65)" : "rgba(0,0,0,0)",
             transition: "background 0.2s ease",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
           }}
         >
-          {isHovered && (
-            <>
-              <button
-                style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "6px",
-                  padding: "4px 8px",
-                  fontSize: "10px",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                ⬇ Download
-              </button>
-              <button
-                style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "6px",
-                  padding: "4px 8px",
-                  fontSize: "10px",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                🔁 Regen
-              </button>
-              <button
-                style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "6px",
-                  padding: "4px 8px",
-                  fontSize: "10px",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                🗑 Deletar
-              </button>
-            </>
+          {isHovered && outputUrl && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                const ext = type === "video" ? "mp4" : "png"
+                downloadFile(outputUrl, `motionforge-${Date.now()}.${ext}`)
+              }}
+              style={{
+                background: "#FF4D00", border: "none",
+                borderRadius: "6px", padding: "5px 10px",
+                fontSize: "10px", fontWeight: 700, color: "white",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: "4px",
+                fontFamily: "'DM Sans',sans-serif",
+              }}
+            >
+              <Download size={11} /> Download
+            </button>
           )}
         </div>
       </div>
 
-      {/* Footer (não compact) */}
+      {/* Footer */}
       {!compact && (
         <div
           style={{
-            background: "rgba(0,0,0,0.3)",
-            padding: "6px 10px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            background: "rgba(0,0,0,0.3)", padding: "6px 10px",
+            display: "flex", justifyContent: "space-between", alignItems: "center",
           }}
         >
-          <span
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "10px",
-              color: "#00E5FF",
-            }}
-          >
+          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "10px", color: "#00E5FF" }}>
             {credits} cr.
           </span>
-          <span
-            style={{
-              fontSize: "10px",
-              color: "rgba(245,245,245,0.4)",
-            }}
-          >
+          <span style={{ fontSize: "10px", color: "rgba(245,245,245,0.4)" }}>
             {date}
           </span>
         </div>

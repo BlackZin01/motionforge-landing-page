@@ -1,9 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { Play, Pencil, Trash2, Plus, GitBranch } from "lucide-react"
 import type { Node, Edge } from "@xyflow/react"
-import WorkflowEditor from "@/components/dashboard/workflows/canvas"
+
+const WorkflowEditor = dynamic(
+  () => import("@/components/dashboard/workflows/canvas"),
+  { ssr: false }
+)
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -116,10 +121,11 @@ export default function WorkflowsPage() {
   function handleSave(nodes: Node[], edges: Edge[]) {
     const name = workflowName.trim() || "Workflow sem nome"
     const modelNodes = nodes.filter((n) => n.type === "model")
-    const totalCost = modelNodes.reduce(
-      (acc, n) => acc + ((n.data as { cost?: number }).cost ?? 0),
-      0
-    )
+    const outputQty = (nodes.find((n) => n.type === "result")?.data as { quantity?: number })?.quantity ?? 1
+    const baseCost = nodes
+      .filter((n) => n.type === "model" || n.type === "voice")
+      .reduce((acc, n) => acc + ((n.data as { cost?: number }).cost ?? 0), 0)
+    const totalCost = baseCost * outputQty
 
     if (editingId) {
       setWorkflows((prev) =>

@@ -26,6 +26,7 @@ interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
   logout: () => void
+  refreshUser: () => Promise<void>
 }
 
 // ─── Contexto ─────────────────────────────────────────────────────────────────
@@ -34,6 +35,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
   logout: () => {},
+  refreshUser: async () => {},
 })
 
 export function useAuth() {
@@ -53,6 +55,16 @@ function deleteCookie(name: string) {
 
 // ─── Normalizar user da API ───────────────────────────────────────────────────
 
+const VALID_PLANS: AuthUser["plan"][] = ["Starter", "Pro", "Agency"]
+
+function normalizePlan(raw: unknown): AuthUser["plan"] {
+  if (typeof raw !== "string") return "Starter"
+  const lower = raw.toLowerCase()
+  if (lower === "pro") return "Pro"
+  if (lower === "agency") return "Agency"
+  return "Starter" // free, starter, unknown → Starter
+}
+
 function normalizeUser(data: Record<string, unknown>): AuthUser {
   const name =
     (data.name as string) ||
@@ -64,7 +76,7 @@ function normalizeUser(data: Record<string, unknown>): AuthUser {
     id: String(data.id ?? ""),
     name,
     email: String(data.email ?? ""),
-    plan: (data.plan as AuthUser["plan"]) ?? "Starter",
+    plan: normalizePlan(data.plan),
     credits: Number(data.credits ?? 0),
     totalCredits: Number(data.totalCredits ?? data.total_credits ?? 5000),
     renewDays: Number(data.renewDays ?? data.renew_days ?? 30),
@@ -102,6 +114,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.replace("/login")
   }, [router])
 
+  const refreshUser = useCallback(async () => {
+    const token = localStorage.getItem("mf_token")
+    if (!token) return
+    try {
+      const res = await fetch("/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      const userData = normalizeUser(data)
+      setUser(userData)
+      localStorage.setItem("mf_user", JSON.stringify(userData))
+    } catch {}
+  }, [])
+
   useEffect(() => {
     const token = localStorage.getItem("mf_token")
 
@@ -118,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cached = localStorage.getItem("mf_user")
     if (cached) {
       try {
-        setUser(JSON.parse(cached))
+        setUser(normalizeUser(JSON.parse(cached)))
         setLoading(false) // mostra dashboard com dados cached, valida em background
       } catch {
         localStorage.removeItem("mf_user")
@@ -161,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
+    <AuthContext.Provider value={{ user, loading, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )
