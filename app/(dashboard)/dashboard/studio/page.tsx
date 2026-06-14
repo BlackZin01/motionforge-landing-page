@@ -41,10 +41,29 @@ export default function StudioPage() {
     return () => window.removeEventListener("resize", check)
   }, [])
 
-  // Para o polling ao desmontar
+  // Para o polling ao desmontar e restaura título
   useEffect(() => {
-    return () => { if (pollingRef.current) clearInterval(pollingRef.current) }
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+      document.title = "Studio | MotionForge"
+    }
   }, [])
+
+  // Pede permissão de notificação do browser
+  function requestNotificationPermission() {
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      Notification.requestPermission()
+    }
+  }
+
+  function fireNotification(title: string, body: string) {
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification(title, {
+        body,
+        icon: "/favicon.ico",
+      })
+    }
+  }
 
   // ── Polling de status do job ────────────────────────────────────────────────
   function startPolling(jobId: string) {
@@ -63,13 +82,18 @@ export default function StudioPage() {
           if (pollingRef.current) clearInterval(pollingRef.current)
           setOutputUrl(data.output_url ?? null)
           setGenerationState("done")
+          document.title = "✅ Pronto! | MotionForge"
+          setTimeout(() => { document.title = "Studio | MotionForge" }, 5000)
           await refreshUser()
           toast({ message: "Geração concluída! ✓", type: "success" })
+          fireNotification("MotionForge — Pronto! 🎬", "Sua geração foi concluída. Clique para ver o resultado.")
         } else if (data.status === "failed") {
           if (pollingRef.current) clearInterval(pollingRef.current)
           setGenerationState("error")
-          await refreshUser() // estorno já feito no backend
+          document.title = "Studio | MotionForge"
+          await refreshUser()
           toast({ message: "A geração falhou. Créditos estornados.", type: "error" })
+          fireNotification("MotionForge — Falhou", "A geração falhou. Seus créditos foram estornados.")
         }
       } catch {}
     }, 3000)
@@ -83,6 +107,8 @@ export default function StudioPage() {
     setCurrentPrompt(config.prompt)
     setOutputUrl(null)
     setGenerationState("generating")
+    document.title = "⚡ Gerando... | MotionForge"
+    requestNotificationPermission()
     if (isMobile) setMobileTab("output")
 
     try {
@@ -121,8 +147,11 @@ export default function StudioPage() {
         setOutputUrl(data.outputUrl)
         setCurrentCredits(data.creditsUsed ?? 0)
         setGenerationState("done")
+        document.title = "✅ Pronto! | MotionForge"
+        setTimeout(() => { document.title = "Studio | MotionForge" }, 5000)
         await refreshUser()
         toast({ message: "Imagem gerada! ✓", type: "success" })
+        fireNotification("MotionForge — Pronto! 🖼️", "Sua imagem foi gerada. Clique para ver.")
         return
       }
 

@@ -39,11 +39,12 @@ const TYPE_STYLES: Record<Toast["type"], { border: string; color: string }> = {
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
   const styles = TYPE_STYLES[toast.type]
 
-  // Auto-dismiss após 3s
+  // Auto-dismiss: 5s para success, 4s para error, 3s para info
   useEffect(() => {
-    const timer = setTimeout(() => onDismiss(toast.id), 3000)
+    const ms = toast.type === "success" ? 5000 : toast.type === "error" ? 4000 : 3000
+    const timer = setTimeout(() => onDismiss(toast.id), ms)
     return () => clearTimeout(timer)
-  }, [toast.id, onDismiss])
+  }, [toast.id, toast.type, onDismiss])
 
   return (
     <motion.div
