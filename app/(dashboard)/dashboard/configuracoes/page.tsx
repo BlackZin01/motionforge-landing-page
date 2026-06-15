@@ -3,12 +3,9 @@
 import { useState } from "react"
 import { Camera, Save, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
-
-// ─── Tipos ───────────────────────────────────────────────────────────────────
+import { useToast } from "@/components/dashboard/shared/toast"
 
 type ActiveTab = "perfil" | "preferencias" | "seguranca"
-
-// ─── Modelos disponíveis ──────────────────────────────────────────────────────
 
 const IMAGE_MODELS = [
   { value: "nano-banana-2", label: "Nano Banana Pro" },
@@ -30,46 +27,96 @@ const VIDEO_MODELS = [
 
 const ASPECT_OPTIONS = ["16:9", "9:16", "1:1"]
 
-// ─── Componente ──────────────────────────────────────────────────────────────
-
 export default function ConfiguracoesPage() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
+  const { toast } = useToast()
   const [activeTab, setActiveTab] = useState<ActiveTab>("perfil")
 
-  // ─── Estado — Perfil ──────────────────────────────────────────────────────
+  // Perfil
   const [name, setName] = useState(user?.name ?? "")
   const email = user?.email ?? ""
   const plan  = user?.plan  ?? "Starter"
+  const [savingProfile, setSavingProfile] = useState(false)
 
-  // ─── Estado — Preferências ────────────────────────────────────────────────
+  // Preferências (client-side)
   const [defaultImageModel, setDefaultImageModel] = useState("nano-banana-2")
   const [defaultVideoModel, setDefaultVideoModel] = useState("seedance-20")
   const [defaultAspect, setDefaultAspect] = useState("16:9")
   const [autoSave, setAutoSave] = useState(true)
 
-  // ─── Estado — Segurança ───────────────────────────────────────────────────
+  // Segurança
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [savingPassword, setSavingPassword] = useState(false)
 
-  // ─── Estado — Feedback de salvo ──────────────────────────────────────────
-  const [saved, setSaved] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-
-  // ─── Handler salvar ──────────────────────────────────────────────────────
-  // TODO: integrar API de atualização de perfil/preferências
-
-  function handleSave() {
-    setSubmitting(true)
-    setTimeout(() => {
-      setSubmitting(false)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    }, 1000)
+  // ─── Salvar perfil ────────────────────────────────────────────────────────
+  async function handleSaveProfile() {
+    if (!name.trim() || name.trim().length < 2) {
+      toast({ message: "Nome deve ter pelo menos 2 caracteres.", type: "error" })
+      return
+    }
+    setSavingProfile(true)
+    try {
+      const token = localStorage.getItem("mf_token") ?? ""
+      const res = await fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name: name.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast({ message: data.error ?? "Erro ao salvar.", type: "error" })
+        return
+      }
+      await refreshUser()
+      toast({ message: "Perfil atualizado com sucesso.", type: "success" })
+    } catch {
+      toast({ message: "Erro de conexão. Tente novamente.", type: "error" })
+    } finally {
+      setSavingProfile(false)
+    }
   }
 
-  // ─── Estilos compartilhados ───────────────────────────────────────────────
+  // ─── Alterar senha ────────────────────────────────────────────────────────
+  async function handleChangePassword() {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({ message: "Preencha todos os campos.", type: "error" })
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ message: "As senhas não coincidem.", type: "error" })
+      return
+    }
+    if (newPassword.length < 8) {
+      toast({ message: "Nova senha deve ter pelo menos 8 caracteres.", type: "error" })
+      return
+    }
+    setSavingPassword(true)
+    try {
+      const token = localStorage.getItem("mf_token") ?? ""
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast({ message: data.error ?? "Erro ao alterar senha.", type: "error" })
+        return
+      }
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      toast({ message: "Senha alterada com sucesso.", type: "success" })
+    } catch {
+      toast({ message: "Erro de conexão. Tente novamente.", type: "error" })
+    } finally {
+      setSavingPassword(false)
+    }
+  }
 
+  // ─── Estilos ──────────────────────────────────────────────────────────────
   const inputStyle: React.CSSProperties = {
     background: "#0D0D0D",
     border: "1px solid rgba(255,255,255,0.06)",
@@ -82,7 +129,6 @@ export default function ConfiguracoesPage() {
     boxSizing: "border-box",
     fontFamily: "'DM Sans', sans-serif",
   }
-
   const labelStyle: React.CSSProperties = {
     fontSize: "12px",
     color: "rgba(245,245,245,0.4)",
@@ -93,7 +139,6 @@ export default function ConfiguracoesPage() {
     textTransform: "uppercase",
     letterSpacing: "1px",
   }
-
   const cardStyle: React.CSSProperties = {
     background: "#111111",
     border: "1px solid rgba(255,255,255,0.06)",
@@ -103,473 +148,190 @@ export default function ConfiguracoesPage() {
     flexDirection: "column",
     gap: "16px",
   }
-
-  // ─── Render ──────────────────────────────────────────────────────────────
+  const btnPrimary = (loading: boolean): React.CSSProperties => ({
+    background: "#FF4D00",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    padding: "10px 20px",
+    fontWeight: 700,
+    fontSize: "13px",
+    fontFamily: "'DM Sans', sans-serif",
+    cursor: loading ? "wait" : "pointer",
+    opacity: loading ? 0.6 : 1,
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    alignSelf: "flex-start",
+    transition: "opacity 0.2s ease",
+  })
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        maxWidth: "600px",
-        margin: "0 auto",
-      }}
-    >
-      {/* Título */}
-      <h1
-        style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "22px",
-          fontWeight: 700,
-          color: "#F5F5F5",
-          marginBottom: "20px",
-        }}
-      >
+    <div style={{ padding: "24px", maxWidth: "600px", margin: "0 auto" }}>
+      <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "22px", fontWeight: 700, color: "#F5F5F5", marginBottom: "20px" }}>
         Configurações
       </h1>
 
       {/* Tabs */}
-      <div
-        style={{
-          display: "flex",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
-          marginBottom: "24px",
-          gap: 0,
-        }}
-      >
+      <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "24px" }}>
         {(["perfil", "preferencias", "seguranca"] as ActiveTab[]).map((tab) => {
-          const labels: Record<ActiveTab, string> = {
-            perfil: "Perfil",
-            preferencias: "Preferências",
-            seguranca: "Segurança",
-          }
+          const labels: Record<ActiveTab, string> = { perfil: "Perfil", preferencias: "Preferências", seguranca: "Segurança" }
           const isActive = activeTab === tab
           return (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                background: "none",
-                border: "none",
-                borderBottom: `2px solid ${isActive ? "#FF4D00" : "transparent"}`,
-                color: isActive ? "#F5F5F5" : "rgba(245,245,245,0.4)",
-                padding: "10px 16px",
-                fontSize: "13px",
-                fontFamily: "'DM Sans', sans-serif",
-                fontWeight: isActive ? 700 : 400,
-                cursor: "pointer",
-                transition: "color 0.15s ease, border-color 0.15s ease",
-                marginBottom: "-1px",
-              }}
-            >
+            <button key={tab} onClick={() => setActiveTab(tab)} style={{
+              background: "none", border: "none",
+              borderBottom: `2px solid ${isActive ? "#FF4D00" : "transparent"}`,
+              color: isActive ? "#F5F5F5" : "rgba(245,245,245,0.4)",
+              padding: "10px 16px", fontSize: "13px",
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: isActive ? 700 : 400,
+              cursor: "pointer", transition: "color 0.15s, border-color 0.15s",
+              marginBottom: "-1px",
+            }}>
               {labels[tab]}
             </button>
           )
         })}
       </div>
 
-      {/* ─── ABA PERFIL ───────────────────────────────────────────────────────── */}
+      {/* ─── ABA PERFIL ──────────────────────────────────────────────────────── */}
       {activeTab === "perfil" && (
         <div style={cardStyle}>
-          {/* Avatar + upload */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            {/* Avatar placeholder */}
-            <div
-              style={{
-                width: "64px",
-                height: "64px",
-                borderRadius: "50%",
-                background: "rgba(255,77,0,0.1)",
-                border: "1px solid rgba(255,77,0,0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "26px",
-                  fontWeight: 700,
-                  color: "#FF4D00",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >
+            <div style={{
+              width: "64px", height: "64px", borderRadius: "50%",
+              background: "rgba(255,77,0,0.1)", border: "1px solid rgba(255,77,0,0.2)",
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <span style={{ fontSize: "26px", fontWeight: 700, color: "#FF4D00", fontFamily: "'DM Sans', sans-serif" }}>
                 {(name || email || "U")[0].toUpperCase()}
               </span>
             </div>
-
-            {/* Botão trocar foto */}
-            {/* TODO: upload para Supabase Storage */}
-            <button
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "rgba(245,245,245,0.4)",
-                fontSize: "12px",
-                fontFamily: "'DM Sans', sans-serif",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                transition: "color 0.15s ease",
-              }}
-              onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLButtonElement).style.color = "#F5F5F5"
-              }}
-              onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLButtonElement).style.color =
-                  "rgba(245,245,245,0.4)"
-              }}
-            >
-              <Camera size={12} />
-              Trocar foto
+            <button style={{ background: "none", border: "none", cursor: "not-allowed", color: "rgba(245,245,245,0.25)", fontSize: "12px", fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: "4px" }} disabled>
+              <Camera size={12} /> Trocar foto (em breve)
             </button>
           </div>
 
-          {/* Campo nome */}
           <div>
             <label style={labelStyle}>Nome</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={inputStyle}
-            />
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
           </div>
 
-          {/* Campo email (readonly) */}
           <div>
             <label style={labelStyle}>E-mail</label>
-            <input
-              type="email"
-              value={email}
-              readOnly
-              disabled
-              style={{ ...inputStyle, opacity: 0.5, cursor: "not-allowed" }}
-            />
+            <input type="email" value={email} readOnly disabled style={{ ...inputStyle, opacity: 0.5, cursor: "not-allowed" }} />
           </div>
 
-          {/* Plano */}
           <div>
             <label style={labelStyle}>Plano</label>
-            <span
-              style={{
-                background: plan === "Agency" ? "rgba(74,222,128,.08)" : plan === "Pro" ? "rgba(0,229,255,.08)" : "rgba(245,245,245,.06)",
-                border: `1px solid ${plan === "Agency" ? "rgba(74,222,128,.2)" : plan === "Pro" ? "rgba(0,229,255,.2)" : "rgba(245,245,245,.1)"}`,
-                color: plan === "Agency" ? "#4ADE80" : plan === "Pro" ? "#00E5FF" : "rgba(245,245,245,.6)",
-                fontSize: "12px",
-                fontWeight: 700,
-                padding: "4px 12px",
-                borderRadius: "9999px",
-                fontFamily: "'DM Sans', sans-serif",
-                letterSpacing: "1px",
-                display: "inline-block",
-              }}
-            >
+            <span style={{
+              background: plan === "Agency" ? "rgba(74,222,128,.08)" : plan === "Pro" ? "rgba(0,229,255,.08)" : "rgba(245,245,245,.06)",
+              border: `1px solid ${plan === "Agency" ? "rgba(74,222,128,.2)" : plan === "Pro" ? "rgba(0,229,255,.2)" : "rgba(245,245,245,.1)"}`,
+              color: plan === "Agency" ? "#4ADE80" : plan === "Pro" ? "#00E5FF" : "rgba(245,245,245,.6)",
+              fontSize: "12px", fontWeight: 700, padding: "4px 12px", borderRadius: "9999px",
+              fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", display: "inline-block",
+            }}>
               {plan}
             </span>
           </div>
 
-          {/* Botão salvar */}
-          <button
-            onClick={handleSave}
-            disabled={submitting}
-            style={{
-              background: saved ? "#4ADE80" : "#FF4D00",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "10px 20px",
-              fontWeight: 700,
-              fontSize: "13px",
-              fontFamily: "'DM Sans', sans-serif",
-              cursor: submitting ? "wait" : "pointer",
-              transition: "background 0.3s ease, opacity 0.2s ease",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              alignSelf: "flex-start",
-            }}
-          >
+          <button onClick={handleSaveProfile} disabled={savingProfile} style={btnPrimary(savingProfile)}>
             <Save size={14} />
-            {saved ? "Salvo!" : submitting ? "Salvando..." : "Salvar alterações"}
+            {savingProfile ? "Salvando..." : "Salvar alterações"}
           </button>
         </div>
       )}
 
-      {/* ─── ABA PREFERÊNCIAS ─────────────────────────────────────────────────── */}
+      {/* ─── ABA PREFERÊNCIAS ────────────────────────────────────────────────── */}
       {activeTab === "preferencias" && (
         <div style={{ ...cardStyle, gap: "20px" }}>
-          {/* Modelo padrão de imagem */}
           <div>
             <label style={labelStyle}>Modelo padrão — Imagem</label>
-            <select
-              value={defaultImageModel}
-              onChange={(e) => setDefaultImageModel(e.target.value)}
-              style={{ ...inputStyle, cursor: "pointer" }}
-            >
-              {IMAGE_MODELS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
+            <select value={defaultImageModel} onChange={(e) => setDefaultImageModel(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+              {IMAGE_MODELS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </div>
-
-          {/* Modelo padrão de vídeo */}
           <div>
             <label style={labelStyle}>Modelo padrão — Vídeo</label>
-            <select
-              value={defaultVideoModel}
-              onChange={(e) => setDefaultVideoModel(e.target.value)}
-              style={{ ...inputStyle, cursor: "pointer" }}
-            >
-              {VIDEO_MODELS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
+            <select value={defaultVideoModel} onChange={(e) => setDefaultVideoModel(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+              {VIDEO_MODELS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </div>
-
-          {/* Aspecto padrão */}
           <div>
             <label style={labelStyle}>Aspecto padrão</label>
             <div style={{ display: "flex", gap: "8px" }}>
               {ASPECT_OPTIONS.map((aspect) => {
                 const isActive = defaultAspect === aspect
                 return (
-                  <button
-                    key={aspect}
-                    onClick={() => setDefaultAspect(aspect)}
-                    style={{
-                      background: isActive ? "rgba(255,77,0,0.1)" : "rgba(255,255,255,0.04)",
-                      border: `1px solid ${isActive ? "rgba(255,77,0,0.4)" : "rgba(255,255,255,0.06)"}`,
-                      borderRadius: "8px",
-                      padding: "8px 16px",
-                      color: isActive ? "#FF4D00" : "rgba(245,245,245,0.4)",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      cursor: "pointer",
-                      transition: "all 0.15s ease",
-                    }}
-                  >
+                  <button key={aspect} onClick={() => setDefaultAspect(aspect)} style={{
+                    background: isActive ? "rgba(255,77,0,0.1)" : "rgba(255,255,255,0.04)",
+                    border: `1px solid ${isActive ? "rgba(255,77,0,0.4)" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: "8px", padding: "8px 16px",
+                    color: isActive ? "#FF4D00" : "rgba(245,245,245,0.4)",
+                    fontSize: "13px", fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif",
+                    cursor: "pointer", transition: "all 0.15s",
+                  }}>
                     {aspect}
                   </button>
                 )
               })}
             </div>
           </div>
-
-          {/* Toggle auto-save */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "13px",
-                color: "#F5F5F5",
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "13px", color: "#F5F5F5", fontFamily: "'DM Sans', sans-serif" }}>
               Salvar automaticamente as gerações
             </span>
-
-            {/* Toggle switch */}
-            <div
-              onClick={() => setAutoSave((prev) => !prev)}
-              style={{
-                position: "relative",
-                width: "40px",
-                height: "22px",
-                borderRadius: "11px",
-                background: autoSave ? "#FF4D00" : "rgba(255,255,255,0.1)",
-                cursor: "pointer",
-                transition: "background 0.25s ease",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: "3px",
-                  left: autoSave ? "20px" : "3px",
-                  width: "16px",
-                  height: "16px",
-                  background: "white",
-                  borderRadius: "50%",
-                  transition: "left 0.25s ease",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-                }}
-              />
+            <div onClick={() => setAutoSave(p => !p)} style={{
+              position: "relative", width: "40px", height: "22px", borderRadius: "11px",
+              background: autoSave ? "#FF4D00" : "rgba(255,255,255,0.1)", cursor: "pointer",
+              transition: "background 0.25s", flexShrink: 0,
+            }}>
+              <div style={{
+                position: "absolute", top: "3px", left: autoSave ? "20px" : "3px",
+                width: "16px", height: "16px", background: "white", borderRadius: "50%",
+                transition: "left 0.25s", boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+              }} />
             </div>
           </div>
-
-          {/* Botão salvar preferências */}
-          {/* TODO: integrar API de atualização de preferências */}
-          <button
-            onClick={handleSave}
-            disabled={submitting}
-            style={{
-              background: saved ? "#4ADE80" : "#FF4D00",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "10px 20px",
-              fontWeight: 700,
-              fontSize: "13px",
-              fontFamily: "'DM Sans', sans-serif",
-              cursor: submitting ? "wait" : "pointer",
-              transition: "background 0.3s ease",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              alignSelf: "flex-start",
-            }}
-          >
-            <Save size={14} />
-            {saved ? "Salvo!" : submitting ? "Salvando..." : "Salvar preferências"}
+          <button onClick={() => toast({ message: "Preferências salvas.", type: "success" })} style={btnPrimary(false)}>
+            <Save size={14} /> Salvar preferências
           </button>
         </div>
       )}
 
-      {/* ─── ABA SEGURANÇA ────────────────────────────────────────────────────── */}
+      {/* ─── ABA SEGURANÇA ───────────────────────────────────────────────────── */}
       {activeTab === "seguranca" && (
         <div style={cardStyle}>
-          {/* Form alterar senha */}
           <div>
             <label style={labelStyle}>Senha atual</label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              style={inputStyle}
-              placeholder="••••••••"
-            />
+            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} style={inputStyle} placeholder="••••••••" />
           </div>
-
           <div>
             <label style={labelStyle}>Nova senha</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              style={inputStyle}
-              placeholder="••••••••"
-            />
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} style={inputStyle} placeholder="••••••••" />
           </div>
-
           <div>
             <label style={labelStyle}>Confirmar nova senha</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              style={inputStyle}
-              placeholder="••••••••"
-            />
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} style={inputStyle} placeholder="••••••••" />
           </div>
-
-          {/* Botão alterar senha */}
-          {/* TODO: integrar API de alteração de senha */}
-          <button
-            style={{
-              background: "#FF4D00",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "10px 20px",
-              fontWeight: 700,
-              fontSize: "13px",
-              fontFamily: "'DM Sans', sans-serif",
-              cursor: "pointer",
-              alignSelf: "flex-start",
-              transition: "opacity 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.opacity = "0.88"
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.opacity = "1"
-            }}
-          >
-            Alterar senha
+          <button onClick={handleChangePassword} disabled={savingPassword} style={btnPrimary(savingPassword)}>
+            {savingPassword ? "Alterando..." : "Alterar senha"}
           </button>
 
-          {/* Zona de perigo */}
-          <div
-            style={{
-              marginTop: "16px",
-              padding: "20px",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: "8px",
-              background: "rgba(239,68,68,0.03)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
+          <div style={{ marginTop: "8px", padding: "20px", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "8px", background: "rgba(239,68,68,0.03)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <AlertTriangle size={16} style={{ color: "#ef4444" }} />
-              <span
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: "#ef4444",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >
-                Zona de perigo
-              </span>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "#ef4444", fontFamily: "'DM Sans', sans-serif" }}>Zona de perigo</span>
             </div>
-
-            <p
-              style={{
-                fontSize: "12px",
-                color: "rgba(245,245,245,0.4)",
-                marginTop: "8px",
-                fontFamily: "'DM Sans', sans-serif",
-                lineHeight: 1.5,
-              }}
-            >
+            <p style={{ fontSize: "12px", color: "rgba(245,245,245,0.4)", marginTop: "8px", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
               Deletar sua conta remove permanentemente todos os seus dados.
             </p>
-
-            {/* Botão deletar conta */}
-            {/* TODO: confirmar com modal antes de deletar — integrar API */}
             <button
-              onClick={() => {
-                // TODO: confirmar com modal antes de deletar
-              }}
+              onClick={() => toast({ message: "Entre em contato com o suporte para deletar sua conta.", type: "info" })}
               style={{
-                marginTop: "12px",
-                background: "transparent",
-                border: "1px solid rgba(239,68,68,0.3)",
-                color: "#F87171",
-                borderRadius: "6px",
-                padding: "8px 16px",
-                fontSize: "12px",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
-                transition: "border-color 0.15s ease, background 0.15s ease",
-              }}
-              onMouseEnter={(e) => {
-                const btn = e.currentTarget as HTMLButtonElement
-                btn.style.borderColor = "rgba(239,68,68,0.6)"
-                btn.style.background = "rgba(239,68,68,0.06)"
-              }}
-              onMouseLeave={(e) => {
-                const btn = e.currentTarget as HTMLButtonElement
-                btn.style.borderColor = "rgba(239,68,68,0.3)"
-                btn.style.background = "transparent"
+                marginTop: "12px", background: "transparent", border: "1px solid rgba(239,68,68,0.3)",
+                color: "#F87171", borderRadius: "6px", padding: "8px 16px", fontSize: "12px",
+                cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
               }}
             >
               Deletar conta
