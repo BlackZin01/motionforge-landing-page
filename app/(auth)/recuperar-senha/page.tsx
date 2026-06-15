@@ -15,7 +15,7 @@ function Spinner() {
   )
 }
 
-type Status = "idle" | "loading" | "sent"
+type Status = "idle" | "loading"
 
 export default function RecuperarSenhaPage() {
   const router = useRouter()
@@ -32,12 +32,17 @@ export default function RecuperarSenhaPage() {
     setError("")
     setStatus("loading")
     try {
-      await fetch("/api/auth/forgot-password", {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       })
-      // sempre redireciona — não revela se email existe
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? "Erro ao enviar o código.")
+        setStatus("idle")
+        return
+      }
       if (typeof window !== "undefined") {
         sessionStorage.setItem("mf_recovery_email", email)
       }
