@@ -10,35 +10,31 @@ export default function Icon() {
         style={{
           width: 32,
           height: 32,
-          background: "#0D0D0D",
-          borderRadius: 7,
+          background: "#FF4D00",
+          borderRadius: 8,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          position: "relative",
         }}
       >
-        {/* Anel laranja */}
         <div
           style={{
-            position: "absolute",
-            width: 24,
-            height: 24,
+            width: 20,
+            height: 20,
             borderRadius: "50%",
-            border: "2.2px solid #FF4D00",
+            border: "2px solid rgba(255,255,255,0.9)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          {/* Triângulo play — usando borda CSS */}
           <div
             style={{
               width: 0,
               height: 0,
-              borderTop: "5px solid transparent",
-              borderBottom: "5px solid transparent",
-              borderLeft: "9px solid #FF4D00",
+              borderTop: "4.5px solid transparent",
+              borderBottom: "4.5px solid transparent",
+              borderLeft: "8px solid white",
               marginLeft: 2,
             }}
           />
