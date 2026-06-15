@@ -20,6 +20,7 @@ export interface AuthUser {
   credits: number
   totalCredits: number
   renewDays: number
+  isAdmin: boolean
 }
 
 interface AuthContextValue {
@@ -80,6 +81,7 @@ function normalizeUser(data: Record<string, unknown>): AuthUser {
     credits: Number(data.credits ?? 0),
     totalCredits: Number(data.totalCredits ?? data.total_credits ?? 5000),
     renewDays: Number(data.renewDays ?? data.renew_days ?? 30),
+    isAdmin: Boolean(data.isAdmin ?? data.is_admin ?? false),
   }
 }
 

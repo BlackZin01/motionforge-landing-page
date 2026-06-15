@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Zap, Home, Clock, GitBranch, Gem, Settings, LogOut } from "lucide-react"
+import { Zap, Home, Clock, GitBranch, Gem, Settings, LogOut, Users, Film, DollarSign, Webhook, Cpu, Handshake, Shield } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -14,7 +14,18 @@ interface SidebarProps {
   credits: number
   total: number
   onLogout: () => void
+  isAdmin?: boolean
 }
+
+const ADMIN_NAV_ITEMS = [
+  { href: "/dashboard/admin/usuarios",   label: "Usuários",    icon: Users       },
+  { href: "/dashboard/admin/geracoes",   label: "Gerações",    icon: Film        },
+  { href: "/dashboard/admin/financeiro", label: "Financeiro",  icon: DollarSign  },
+  { href: "/dashboard/admin/webhooks",   label: "Webhooks",    icon: Webhook     },
+  { href: "/dashboard/admin/modelos",    label: "Modelos",     icon: Cpu         },
+  { href: "/dashboard/admin/afiliados",  label: "Afiliados",   icon: Handshake   },
+  { href: "/dashboard/admin/seguranca",  label: "Segurança",   icon: Shield      },
+] as const
 
 // ─── Itens de navegação ───────────────────────────────────────────────────────
 
@@ -37,7 +48,7 @@ const PLAN_BADGE: Record<"Starter" | "Pro" | "Agency", { bg: string; color: stri
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function Sidebar({ userName, plan, credits, total, onLogout }: SidebarProps) {
+export default function Sidebar({ userName, plan, credits, total, onLogout, isAdmin }: SidebarProps) {
   const pathname = usePathname()
 
   // Determina se o item está ativo
@@ -101,7 +112,6 @@ export default function Sidebar({ userName, plan, credits, total, onLogout }: Si
                 fontFamily: "'DM Sans', sans-serif",
                 marginBottom: "2px",
                 transition: "background 150ms ease, color 150ms ease",
-                // Cor e fundo dependem do estado
                 color: active
                   ? "#FF4D00"
                   : item.special
@@ -116,9 +126,7 @@ export default function Sidebar({ userName, plan, credits, total, onLogout }: Si
                   ? "2px solid rgba(255,77,0,0.3)"
                   : "2px solid transparent",
               }}
-              // Hover via CSS é aplicado inline — usamos onMouse para override simples
             >
-              {/* Indicador de active com layoutId */}
               {active && (
                 <motion.span
                   layoutId="nav-indicator"
@@ -139,7 +147,6 @@ export default function Sidebar({ userName, plan, credits, total, onLogout }: Si
 
               <span style={{ flex: 1 }}>{item.label}</span>
 
-              {/* Dot pulsante exclusivo do Studio */}
               {item.special && (
                 <motion.div
                   animate={{ scale: [1, 1.4, 1] }}
@@ -156,6 +163,49 @@ export default function Sidebar({ userName, plan, credits, total, onLogout }: Si
             </Link>
           )
         })}
+
+        {/* ── Seção Admin ── */}
+        {isAdmin && (
+          <>
+            <div style={{ margin: "12px 0 6px", padding: "0 12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.05)" }} />
+              <span style={{ fontSize: "10px", fontWeight: 700, color: "rgba(245,245,245,0.25)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "2px", textTransform: "uppercase" }}>
+                ADMIN
+              </span>
+              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.05)" }} />
+            </div>
+            {ADMIN_NAV_ITEMS.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(item.href + "/")
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "7px 12px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    textDecoration: "none",
+                    fontFamily: "'DM Sans', sans-serif",
+                    marginBottom: "2px",
+                    transition: "background 150ms ease, color 150ms ease",
+                    color: active ? "#00E5FF" : "rgba(245,245,245,0.35)",
+                    background: active ? "rgba(0,229,255,0.06)" : "transparent",
+                    borderLeft: active ? "2px solid #00E5FF" : "2px solid transparent",
+                  }}
+                >
+                  <Icon size={13} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+                  <span style={{ flex: 1 }}>{item.label}</span>
+                </Link>
+              )
+            })}
+          </>
+        )}
       </nav>
 
       {/* ── Rodapé: info do usuário ── */}

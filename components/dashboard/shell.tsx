@@ -69,6 +69,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const credits    = user?.credits     ?? 0
   const total      = user?.totalCredits ?? 5000
   const renewDays  = user?.renewDays   ?? 30
+  const isAdmin    = user?.isAdmin     ?? false
 
   return (
     <div
@@ -87,6 +88,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           credits={credits}
           total={total}
           onLogout={logout}
+          isAdmin={isAdmin}
         />
       </div>
 
