@@ -113,7 +113,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <UpgradeBanner credits={credits} plan={plan} />
 
         {/* Área scrollável — pb-16 em mobile p/ não ficar atrás da nav */}
-        <main style={{ flex: 1, overflowY: "auto" }} className="pb-16 md:pb-0">
+        <main style={{ flex: 1, overflowY: "scroll", scrollbarWidth: "none" }} className="pb-16 md:pb-0 [&::-webkit-scrollbar]:hidden">
           {children}
         </main>
       </div>
