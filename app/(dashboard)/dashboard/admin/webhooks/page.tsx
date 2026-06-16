@@ -13,7 +13,7 @@ interface WebhookLog {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  container: { padding: "24px" },
+  container: {},
   title: { fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", marginBottom: "16px" },
   row: { display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" as const },
   select: { background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "8px", padding: "8px 12px", color: "#F5F5F5", fontSize: "13px", fontFamily: "'DM Sans', sans-serif", outline: "none", cursor: "pointer" },
@@ -70,7 +70,7 @@ export default function AdminWebhooksPage() {
   }
 
   return (
-    <div style={s.container}>
+    <div style={s.container} className="p-4 sm:p-6">
       <h1 style={s.title}>Webhooks <span style={{ fontWeight: 400, color: "rgba(245,245,245,0.4)", fontSize: "14px" }}>({total})</span></h1>
 
       <div style={s.row}>

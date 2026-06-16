@@ -97,7 +97,7 @@ export default function AdminModelosPage() {
   const sectionTitle: React.CSSProperties = { fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.35)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "12px" }
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div className="p-4 sm:p-6">
       <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", marginBottom: "20px" }}>Modelos</h1>
 
       <div style={sectionStyle}>

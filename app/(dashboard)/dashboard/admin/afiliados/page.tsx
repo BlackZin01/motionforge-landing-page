@@ -60,7 +60,7 @@ export default function AdminAfiliadosPage() {
   }
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div className="p-4 sm:p-6">
       <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", marginBottom: "20px" }}>Afiliados</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "24px" }}>

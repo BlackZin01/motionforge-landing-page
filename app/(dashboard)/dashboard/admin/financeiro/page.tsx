@@ -44,7 +44,7 @@ export default function AdminFinanceiroPage() {
   const planColors: Record<string, string> = { starter: "rgba(245,245,245,0.5)", pro: "#00E5FF", agency: "#4ADE80" }
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div className="p-4 sm:p-6">
       <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", marginBottom: "20px" }}>Financeiro</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px", marginBottom: "20px" }}>
@@ -93,7 +93,7 @@ export default function AdminFinanceiroPage() {
         {data.recentTopups.length === 0 ? (
           <div style={{ color: "rgba(245,245,245,0.3)", fontSize: "13px", fontFamily: "'DM Sans', sans-serif" }}>Nenhum dado disponível</div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>{["Usuário", "Plano", "Data"].map(h => <th key={h} style={{ textAlign: "left", fontSize: "10px", fontWeight: 700, color: "rgba(245,245,245,0.3)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", textTransform: "uppercase", padding: "6px 8px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>{h}</th>)}</tr>
             </thead>
@@ -108,7 +108,7 @@ export default function AdminFinanceiroPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
     </div>

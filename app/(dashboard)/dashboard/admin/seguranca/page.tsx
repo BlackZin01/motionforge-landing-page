@@ -144,7 +144,7 @@ export default function AdminSegurancaPage() {
   const sectionTitle: React.CSSProperties = { fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.35)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "16px" }
 
   return (
-    <div style={{ padding: "24px", maxWidth: "700px" }}>
+    <div className="p-4 sm:p-6" style={{ maxWidth: "700px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
         <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5" }}>Segurança</h1>
         {emergency && (

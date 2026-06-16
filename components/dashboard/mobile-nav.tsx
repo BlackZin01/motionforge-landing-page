@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Zap, Home, Clock, Gem, Settings } from "lucide-react"
+import { Zap, Home, Clock, Gem, Settings, Shield } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 // ─── Itens da navegação mobile ────────────────────────────────────────────────
 
@@ -14,16 +15,23 @@ const NAV_ITEMS = [
   { href: "/dashboard/configuracoes", label: "Config.",   icon: Settings },
 ] as const
 
+const ADMIN_NAV_ITEM = { href: "/dashboard/admin/usuarios", label: "Admin", icon: Shield }
+
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export function MobileNav() {
   const pathname = usePathname()
+  const { user } = useAuth()
+  const isAdmin = user?.isAdmin ?? false
 
   function isActive(href: string): boolean {
     if (href === "/dashboard") return pathname === "/dashboard"
     if (href === "/dashboard/studio") return pathname.startsWith("/dashboard/studio")
+    if (href === "/dashboard/admin/usuarios") return pathname.startsWith("/dashboard/admin")
     return pathname === href
   }
+
+  const allItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS
 
   return (
     <nav
@@ -43,10 +51,11 @@ export function MobileNav() {
         zIndex: 50,
       }}
     >
-      {NAV_ITEMS.map((item) => {
+      {allItems.map((item) => {
         const active = isActive(item.href)
         const Icon = item.icon
         const isStudio = item.href === "/dashboard/studio"
+        const isAdminLink = item.href === "/dashboard/admin/usuarios"
 
         return (
           <Link
@@ -61,11 +70,13 @@ export function MobileNav() {
               gap: "3px",
               textDecoration: "none",
               position: "relative",
-              background: isStudio ? "rgba(255,77,0,0.06)" : "transparent",
+              background: isStudio ? "rgba(255,77,0,0.06)" : isAdminLink ? "rgba(0,229,255,0.04)" : "transparent",
               borderTop: active
-                ? "2px solid #FF4D00"
+                ? isAdminLink ? "2px solid #00E5FF" : "2px solid #FF4D00"
                 : isStudio
                 ? "2px solid rgba(255,77,0,0.3)"
+                : isAdminLink
+                ? "2px solid rgba(0,229,255,0.2)"
                 : "2px solid transparent",
             }}
           >
@@ -74,9 +85,11 @@ export function MobileNav() {
               strokeWidth={1.8}
               style={{
                 color: active
-                  ? "#FF4D00"
+                  ? isAdminLink ? "#00E5FF" : "#FF4D00"
                   : isStudio
                   ? "rgba(255,77,0,0.7)"
+                  : isAdminLink
+                  ? "rgba(0,229,255,0.45)"
                   : "rgba(245,245,245,0.35)",
                 transition: "color 150ms ease",
               }}
@@ -87,9 +100,11 @@ export function MobileNav() {
                 fontFamily: "'DM Sans', sans-serif",
                 fontWeight: active ? 700 : 400,
                 color: active
-                  ? "#FF4D00"
+                  ? isAdminLink ? "#00E5FF" : "#FF4D00"
                   : isStudio
                   ? "rgba(255,77,0,0.7)"
+                  : isAdminLink
+                  ? "rgba(0,229,255,0.45)"
                   : "rgba(245,245,245,0.35)",
                 textTransform: "uppercase",
                 letterSpacing: "0.5px",
