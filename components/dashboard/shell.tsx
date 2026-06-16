@@ -109,10 +109,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           renewDays={renewDays}
           userName={userName}
           onLogout={logout}
+          isAdmin={isAdmin}
         />
 
         {/* Banner de upgrade / sem créditos */}
-        <UpgradeBanner credits={credits} plan={plan} />
+        <UpgradeBanner credits={credits} plan={plan} isAdmin={isAdmin} />
 
         {/* Área scrollável — pb-16 em mobile p/ não ficar atrás da nav */}
         <main style={{ flex: 1, overflowY: "scroll", scrollbarWidth: "none" }} className="pb-16 md:pb-0 [&::-webkit-scrollbar]:hidden">

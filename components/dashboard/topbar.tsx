@@ -15,6 +15,7 @@ interface TopbarProps {
   renewDays: number
   userName: string
   onLogout: () => void
+  isAdmin?: boolean
 }
 
 // ─── Items do dropdown ────────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ const DROPDOWN_LINKS = [
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function Topbar({ title, credits, total, renewDays, userName, onLogout }: TopbarProps) {
+export default function Topbar({ title, credits, total, renewDays, userName, onLogout, isAdmin }: TopbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -91,7 +92,7 @@ export default function Topbar({ title, credits, total, renewDays, userName, onL
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         {/* Barra de créditos — oculta em telas pequenas */}
         <div className="hidden sm:flex">
-          <CreditBar credits={credits} total={total} renewDays={renewDays} />
+          <CreditBar credits={credits} total={total} renewDays={renewDays} isAdmin={isAdmin} />
         </div>
 
         {/* Botão ⚡ Gerar → vai para o Studio */}

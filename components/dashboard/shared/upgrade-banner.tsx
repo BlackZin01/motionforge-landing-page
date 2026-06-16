@@ -9,6 +9,7 @@ import Link from "next/link"
 interface UpgradeBannerProps {
   credits: number
   plan: string
+  isAdmin?: boolean
 }
 
 // ─── Variantes do banner ──────────────────────────────────────────────────────
@@ -53,9 +54,10 @@ const VARIANT_CONFIG = {
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 
-export function UpgradeBanner({ credits, plan }: UpgradeBannerProps) {
+export function UpgradeBanner({ credits, plan, isAdmin }: UpgradeBannerProps) {
   const [dismissed, setDismissed] = useState(false)
 
+  if (isAdmin) return null
   const variant = getBannerVariant(credits, plan)
   if (!variant || dismissed) return null
 

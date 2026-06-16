@@ -9,19 +9,20 @@ interface CreditBarProps {
   credits: number
   total: number
   renewDays: number
+  isAdmin?: boolean
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export function CreditBar({ credits, total, renewDays }: CreditBarProps) {
+export function CreditBar({ credits, total, renewDays, isAdmin }: CreditBarProps) {
   const [isHovered, setIsHovered] = useState(false)
 
-  const pct = total > 0 ? (credits / total) * 100 : 0
+  const pct = isAdmin ? 100 : total > 0 ? (credits / total) * 100 : 0
   const percentStr = `${Math.min(100, Math.max(0, pct)).toFixed(1)}%`
 
   // Cor da barra conforme nível de créditos
   const barColor =
-    pct > 50 ? "#00E5FF" : pct > 10 ? "#FF4D00" : "#EF4444"
+    isAdmin ? "#00E5FF" : pct > 50 ? "#00E5FF" : pct > 10 ? "#FF4D00" : "#EF4444"
 
   return (
     <div
@@ -50,7 +51,7 @@ export function CreditBar({ credits, total, renewDays }: CreditBarProps) {
             color: "#00E5FF",
           }}
         >
-          ⚡ {credits.toLocaleString("pt-BR")}
+          ⚡ {isAdmin ? "∞" : credits.toLocaleString("pt-BR")}
         </span>
       </div>
 
@@ -98,7 +99,7 @@ export function CreditBar({ credits, total, renewDays }: CreditBarProps) {
             pointerEvents: "none",
           }}
         >
-          {credits.toLocaleString("pt-BR")} de {total.toLocaleString("pt-BR")} · Renova em {renewDays} dias
+          {isAdmin ? "Créditos ilimitados · Admin" : `${credits.toLocaleString("pt-BR")} de ${total.toLocaleString("pt-BR")} · Renova em ${renewDays} dias`}
         </div>
       )}
     </div>

@@ -19,6 +19,7 @@ interface GenerationPanelProps {
   onGenerate: (config: GenerationConfig) => void
   credits: number
   generating: boolean
+  isAdmin?: boolean
 }
 
 // ─── Spinner ──────────────────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ function SectionDivider() {
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 
-export function GenerationPanel({ onGenerate, credits, generating }: GenerationPanelProps) {
+export function GenerationPanel({ onGenerate, credits, generating, isAdmin }: GenerationPanelProps) {
   const [mode, setMode] = useState<"image" | "video">("image")
   const [selectedModel, setSelectedModel] = useState("nano-banana-2")
   const [prompt, setPrompt] = useState("")
@@ -333,8 +334,8 @@ export function GenerationPanel({ onGenerate, credits, generating }: GenerationP
             <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "10px", color: "rgba(245,245,245,.35)", margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "1px" }}>
               Saldo após
             </p>
-            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "15px", fontWeight: 700, color: credits - cost < 0 ? "#ef4444" : "rgba(245,245,245,.55)", margin: 0 }}>
-              {credits - cost}
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "15px", fontWeight: 700, color: isAdmin ? "#00E5FF" : credits - cost < 0 ? "#ef4444" : "rgba(245,245,245,.55)", margin: 0 }}>
+              {isAdmin ? "∞" : credits - cost}
             </p>
           </div>
         </div>

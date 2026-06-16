@@ -29,6 +29,7 @@ export default function StudioPage() {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const credits = user?.credits ?? 0
+  const isAdmin = user?.isAdmin ?? false
 
   // ── Responsividade ─────────────────────────────────────────────────────────
   const [isMobile, setIsMobile] = useState(false)
@@ -239,6 +240,7 @@ export default function StudioPage() {
               onGenerate={handleGenerate}
               credits={credits}
               generating={generationState === "generating"}
+              isAdmin={isAdmin}
             />
           ) : (
             <OutputArea
