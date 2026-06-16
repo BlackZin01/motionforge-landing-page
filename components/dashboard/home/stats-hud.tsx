@@ -12,6 +12,7 @@ interface StatsHUDProps {
   videos: number
   images: number
   workflows: number
+  isAdmin?: boolean
 }
 
 // ─── Hook: animação de número ─────────────────────────────────────────────────
@@ -117,14 +118,14 @@ function StatCard({
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
-export function StatsHUD({ credits, totalCredits = 5000, videos, images, workflows }: StatsHUDProps) {
+export function StatsHUD({ credits, totalCredits = 5000, videos, images, workflows, isAdmin }: StatsHUDProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: "-40px" })
 
   // Dados de créditos
   const TOTAL_CREDITS = totalCredits
   const USED = Math.max(0, TOTAL_CREDITS - credits)
-  const usedPercent = TOTAL_CREDITS > 0 ? (USED / TOTAL_CREDITS) * 100 : 0
+  const usedPercent = isAdmin ? 0 : TOTAL_CREDITS > 0 ? (USED / TOTAL_CREDITS) * 100 : 0
 
   return (
     <div
@@ -133,45 +134,55 @@ export function StatsHUD({ credits, totalCredits = 5000, videos, images, workflo
       className="grid grid-cols-2 lg:grid-cols-4"
     >
       {/* Card 1 — Créditos */}
-      <StatCard
-        value={credits}
-        label="créditos disponíveis"
-        icon={Zap}
-        color="#00E5FF"
-        inView={inView}
-        extra={
-          <div style={{ marginTop: "12px" }}>
-            <div
-              style={{
-                fontSize: "10px",
-                color: "rgba(245,245,245,0.4)",
-                marginBottom: "6px",
-              }}
-            >
-              {USED.toLocaleString("pt-BR")} usados · {credits.toLocaleString("pt-BR")} restantes
-            </div>
-            <div
-              style={{
-                height: "3px",
-                background: "rgba(255,255,255,0.06)",
-                borderRadius: "9999px",
-                overflow: "hidden",
-              }}
-            >
-              <motion.div
-                initial={{ width: 0 }}
-                animate={inView ? { width: `${usedPercent}%` } : { width: 0 }}
-                transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-                style={{
-                  height: "100%",
-                  background: "#FF4D00",
-                  borderRadius: "9999px",
-                }}
-              />
-            </div>
+      {isAdmin ? (
+        <div
+          style={{
+            background: "#111111",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: "12px",
+            padding: "16px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <Zap size={16} style={{ position: "absolute", top: "12px", right: "12px", color: "rgba(245,245,245,0.2)" }} />
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "36px", fontWeight: 700, color: "#00E5FF", lineHeight: 1 }}>
+            ∞
           </div>
-        }
-      />
+          <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px", color: "rgba(245,245,245,0.35)", marginTop: "4px" }}>
+            créditos disponíveis
+          </div>
+          <div style={{ marginTop: "12px" }}>
+            <div style={{ fontSize: "10px", color: "rgba(245,245,245,0.4)", marginBottom: "6px" }}>
+              Créditos ilimitados · Admin
+            </div>
+            <div style={{ height: "3px", background: "rgba(0,229,255,0.15)", borderRadius: "9999px" }} />
+          </div>
+        </div>
+      ) : (
+        <StatCard
+          value={credits}
+          label="créditos disponíveis"
+          icon={Zap}
+          color="#00E5FF"
+          inView={inView}
+          extra={
+            <div style={{ marginTop: "12px" }}>
+              <div style={{ fontSize: "10px", color: "rgba(245,245,245,0.4)", marginBottom: "6px" }}>
+                {USED.toLocaleString("pt-BR")} usados · {credits.toLocaleString("pt-BR")} restantes
+              </div>
+              <div style={{ height: "3px", background: "rgba(255,255,255,0.06)", borderRadius: "9999px", overflow: "hidden" }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={inView ? { width: `${usedPercent}%` } : { width: 0 }}
+                  transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+                  style={{ height: "100%", background: "#FF4D00", borderRadius: "9999px" }}
+                />
+              </div>
+            </div>
+          }
+        />
+      )}
 
       {/* Card 2 — Vídeos */}
       <StatCard

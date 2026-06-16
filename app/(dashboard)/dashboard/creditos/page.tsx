@@ -39,6 +39,7 @@ export default function CreditosPage() {
   const total      = user?.totalCredits ?? 5000
   const renewDays  = user?.renewDays   ?? 30
   const plan       = user?.plan        ?? "Starter"
+  const isAdmin    = user?.isAdmin     ?? false
   const used       = total - credits
 
   const [history, setHistory] = useState<HistoryRow[]>([])
@@ -117,7 +118,7 @@ export default function CreditosPage() {
             lineHeight: 1,
           }}
         >
-          {animatedCredits.toLocaleString("pt-BR")}
+          {isAdmin ? "∞" : animatedCredits.toLocaleString("pt-BR")}
         </span>
 
         <span
@@ -134,58 +135,32 @@ export default function CreditosPage() {
         </span>
 
         {/* Barra de progresso */}
-        <div style={{ marginBottom: "8px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "8px",
-            }}
-          >
-            <span
-              style={{ fontSize: "11px", color: "rgba(245,245,245,0.4)" }}
-            >
-              0
-            </span>
-            <span
-              style={{ fontSize: "11px", color: "rgba(245,245,245,0.4)" }}
-            >
-              {total.toLocaleString("pt-BR")}
-            </span>
+        {isAdmin ? (
+          <div style={{ marginBottom: "8px" }}>
+            <div style={{ background: "rgba(0,229,255,0.15)", borderRadius: "9999px", height: "12px" }} />
+            <p style={{ fontSize: "12px", color: "rgba(245,245,245,0.4)", marginTop: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+              Créditos ilimitados · Conta Admin
+            </p>
           </div>
-
-          <div
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              borderRadius: "9999px",
-              overflow: "hidden",
-              height: "12px",
-            }}
-          >
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${total > 0 ? (used / total) * 100 : 0}%` }}
-              transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-              style={{
-                height: "100%",
-                background: "linear-gradient(90deg, #FF4D00, #00E5FF)",
-                borderRadius: "9999px",
-              }}
-            />
+        ) : (
+          <div style={{ marginBottom: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+              <span style={{ fontSize: "11px", color: "rgba(245,245,245,0.4)" }}>0</span>
+              <span style={{ fontSize: "11px", color: "rgba(245,245,245,0.4)" }}>{total.toLocaleString("pt-BR")}</span>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: "9999px", overflow: "hidden", height: "12px" }}>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${total > 0 ? (used / total) * 100 : 0}%` }}
+                transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+                style={{ height: "100%", background: "linear-gradient(90deg, #FF4D00, #00E5FF)", borderRadius: "9999px" }}
+              />
+            </div>
+            <p style={{ fontSize: "12px", color: "rgba(245,245,245,0.4)", marginTop: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+              {used.toLocaleString("pt-BR")} usados de {total.toLocaleString("pt-BR")} · Renova em {renewDays} dias
+            </p>
           </div>
-        </div>
-
-        <p
-          style={{
-            fontSize: "12px",
-            color: "rgba(245,245,245,0.4)",
-            marginTop: "12px",
-            fontFamily: "'DM Sans', sans-serif",
-          }}
-        >
-          {used.toLocaleString("pt-BR")} usados de {total.toLocaleString("pt-BR")} · Renova em{" "}
-          {renewDays} dias
-        </p>
+        )}
       </div>
 
       {/* ─── PLANO ATUAL ─────────────────────────────────────────────────────── */}
@@ -312,7 +287,7 @@ export default function CreditosPage() {
       </div>
 
       {/* ─── TOP-UP ───────────────────────────────────────────────────────────── */}
-      <div id="upgrade">
+      {!isAdmin && <div id="upgrade">
         <p
           style={{
             fontSize: "10px",
@@ -434,7 +409,7 @@ export default function CreditosPage() {
             </motion.div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* ─── HISTÓRICO DE CONSUMO ─────────────────────────────────────────────── */}
       <div>

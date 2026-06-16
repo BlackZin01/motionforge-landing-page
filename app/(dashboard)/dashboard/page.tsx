@@ -107,6 +107,7 @@ export default function DashboardHomePage() {
   const firstName    = user?.name?.split(" ")[0] ?? "Usuário"
   const credits      = user?.credits ?? 0
   const totalCredits = user?.totalCredits ?? 5000
+  const isAdmin      = user?.isAdmin ?? false
 
   return (
     <div
@@ -143,7 +144,7 @@ export default function DashboardHomePage() {
             color: "rgba(245,245,245,0.4)",
           }}
         >
-          Você tem {credits.toLocaleString("pt-BR")} créditos. Pronto pra gerar?
+          {isAdmin ? "Créditos ilimitados. Pronto pra gerar?" : `Você tem ${credits.toLocaleString("pt-BR")} créditos. Pronto pra gerar?`}
         </p>
       </motion.div>
 
@@ -160,6 +161,7 @@ export default function DashboardHomePage() {
           videos={0}
           images={0}
           workflows={0}
+          isAdmin={isAdmin}
         />
       </motion.div>
 
