@@ -164,7 +164,7 @@ export default function CreditosPage() {
       </div>
 
       {/* ─── PLANO ATUAL ─────────────────────────────────────────────────────── */}
-      <div
+      {!isAdmin && <div
         style={{
           background: "#111111",
           border: "1px solid rgba(255,255,255,0.06)",
@@ -284,7 +284,7 @@ export default function CreditosPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* ─── TOP-UP ───────────────────────────────────────────────────────────── */}
       {!isAdmin && <div id="upgrade">
