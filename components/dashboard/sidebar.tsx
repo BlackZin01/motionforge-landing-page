@@ -89,7 +89,9 @@ export default function Sidebar({ userName, plan, credits, total, onLogout, isAd
           flex: 1,
           overflowY: "auto",
           padding: "8px",
+          scrollbarWidth: "none",
         }}
+        className="[&::-webkit-scrollbar]:hidden"
       >
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href)
@@ -258,8 +260,8 @@ export default function Sidebar({ userName, plan, credits, total, onLogout, isAd
               <span
                 style={{
                   display: "inline-block",
-                  background: planBadge.bg,
-                  color: planBadge.color,
+                  background: isAdmin ? "rgba(255,77,0,0.15)" : planBadge.bg,
+                  color: isAdmin ? "#FF4D00" : planBadge.color,
                   fontSize: "10px",
                   fontWeight: 700,
                   letterSpacing: "1px",
@@ -271,12 +273,12 @@ export default function Sidebar({ userName, plan, credits, total, onLogout, isAd
                   fontFamily: "'DM Sans', sans-serif",
                 }}
               >
-                {plan}
+                {isAdmin ? "ADMIN" : plan}
               </span>
             </div>
 
             {/* Link de upgrade — apenas para plano Starter */}
-            {plan === "Starter" && (
+            {plan === "Starter" && !isAdmin && (
               <Link
                 href="/dashboard/creditos"
                 style={{
