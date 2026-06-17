@@ -36,6 +36,7 @@ export default function ConfiguracoesPage() {
   const [name, setName] = useState(user?.name ?? "")
   const email = user?.email ?? ""
   const plan  = user?.plan  ?? "Starter"
+  const isAdmin = user?.isAdmin ?? false
   const [savingProfile, setSavingProfile] = useState(false)
 
   // Preferências (client-side)
@@ -222,18 +223,20 @@ export default function ConfiguracoesPage() {
             <input type="email" value={email} readOnly disabled style={{ ...inputStyle, opacity: 0.5, cursor: "not-allowed" }} />
           </div>
 
-          <div>
-            <label style={labelStyle}>Plano</label>
-            <span style={{
-              background: plan === "Agency" ? "rgba(74,222,128,.08)" : plan === "Pro" ? "rgba(0,229,255,.08)" : "rgba(245,245,245,.06)",
-              border: `1px solid ${plan === "Agency" ? "rgba(74,222,128,.2)" : plan === "Pro" ? "rgba(0,229,255,.2)" : "rgba(245,245,245,.1)"}`,
-              color: plan === "Agency" ? "#4ADE80" : plan === "Pro" ? "#00E5FF" : "rgba(245,245,245,.6)",
-              fontSize: "12px", fontWeight: 700, padding: "4px 12px", borderRadius: "9999px",
-              fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", display: "inline-block",
-            }}>
-              {plan}
-            </span>
-          </div>
+          {!isAdmin && (
+            <div>
+              <label style={labelStyle}>Plano</label>
+              <span style={{
+                background: plan === "Agency" ? "rgba(74,222,128,.08)" : plan === "Pro" ? "rgba(0,229,255,.08)" : "rgba(245,245,245,.06)",
+                border: `1px solid ${plan === "Agency" ? "rgba(74,222,128,.2)" : plan === "Pro" ? "rgba(0,229,255,.2)" : "rgba(245,245,245,.1)"}`,
+                color: plan === "Agency" ? "#4ADE80" : plan === "Pro" ? "#00E5FF" : "rgba(245,245,245,.6)",
+                fontSize: "12px", fontWeight: 700, padding: "4px 12px", borderRadius: "9999px",
+                fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", display: "inline-block",
+              }}>
+                {plan}
+              </span>
+            </div>
+          )}
 
           <button onClick={handleSaveProfile} disabled={savingProfile} style={btnPrimary(savingProfile)}>
             <Save size={14} />

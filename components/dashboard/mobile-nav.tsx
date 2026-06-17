@@ -2,17 +2,18 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Zap, Home, Clock, Gem, Settings, Shield } from "lucide-react"
+import { Zap, Home, Clock, Gem, Settings, Shield, GitBranch } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 // ─── Itens da navegação mobile ────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { href: "/dashboard/studio",        label: "Studio",    icon: Zap      },
-  { href: "/dashboard",               label: "Início",    icon: Home     },
-  { href: "/dashboard/historico",     label: "Histórico", icon: Clock    },
-  { href: "/dashboard/creditos",      label: "Créditos",  icon: Gem      },
-  { href: "/dashboard/configuracoes", label: "Config.",   icon: Settings },
+  { href: "/dashboard/studio",        label: "Studio",    icon: Zap       },
+  { href: "/dashboard",               label: "Início",    icon: Home      },
+  { href: "/dashboard/historico",     label: "Histórico", icon: Clock     },
+  { href: "/dashboard/workflows",     label: "Flows",     icon: GitBranch },
+  { href: "/dashboard/creditos",      label: "Créditos",  icon: Gem       },
+  { href: "/dashboard/configuracoes", label: "Config.",   icon: Settings  },
 ] as const
 
 const ADMIN_NAV_ITEM = { href: "/dashboard/admin/usuarios", label: "Admin", icon: Shield }
@@ -27,6 +28,7 @@ export function MobileNav() {
   function isActive(href: string): boolean {
     if (href === "/dashboard") return pathname === "/dashboard"
     if (href === "/dashboard/studio") return pathname.startsWith("/dashboard/studio")
+    if (href === "/dashboard/workflows") return pathname.startsWith("/dashboard/workflows")
     if (href === "/dashboard/admin/usuarios") return pathname.startsWith("/dashboard/admin")
     return pathname === href
   }
@@ -81,7 +83,7 @@ export function MobileNav() {
             }}
           >
             <Icon
-              size={isStudio ? 22 : 19}
+              size={isStudio ? 20 : 17}
               strokeWidth={1.8}
               style={{
                 color: active
@@ -96,7 +98,7 @@ export function MobileNav() {
             />
             <span
               style={{
-                fontSize: "9px",
+                fontSize: "8px",
                 fontFamily: "'DM Sans', sans-serif",
                 fontWeight: active ? 700 : 400,
                 color: active
