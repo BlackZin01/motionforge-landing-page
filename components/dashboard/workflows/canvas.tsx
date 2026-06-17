@@ -187,6 +187,7 @@ function EditorInner({
         .mf-flow .react-flow__node.selected > div {
           border-color: rgba(255,255,255,.25) !important;
         }
+        .mf-toolbar::-webkit-scrollbar { display: none; }
       `}</style>
 
       <div
@@ -316,11 +317,13 @@ function EditorInner({
 
           {/* ─── Toolbar inferior ──────────────────────────────────────────── */}
           <div
+            className="mf-toolbar"
             style={{
               position: "absolute",
               bottom: "24px",
               left: "50%",
               transform: "translateX(-50%)",
+              maxWidth: "calc(100vw - 32px)",
               background: "#141414",
               border: "1px solid rgba(255,255,255,.08)",
               borderRadius: "12px",
@@ -330,6 +333,8 @@ function EditorInner({
               gap: "6px",
               zIndex: 10,
               boxShadow: "0 8px 32px rgba(0,0,0,.6)",
+              overflowX: "auto",
+              scrollbarWidth: "none",
             }}
           >
             <ToolbarBtn
