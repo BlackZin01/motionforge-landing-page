@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Zap, Home, Clock, GitBranch, Gem, Settings, LogOut, Users, Film, DollarSign, Webhook, Cpu, Handshake, Shield } from "lucide-react"
+import { Home, Clock, Gem, Settings, LogOut, Users, Film, DollarSign, Webhook, Cpu, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -19,7 +19,8 @@ interface SidebarProps {
 
 const ADMIN_NAV_ITEMS = [
   { href: "/dashboard/admin/usuarios",   label: "Usuários",    icon: Users       },
-  { href: "/dashboard/admin/geracoes",   label: "Gerações",    icon: Film        },
+  { href: "/dashboard/admin/prompts",    label: "Prompts",     icon: LayoutList  },
+  { href: "/dashboard/admin/biblioteca", label: "Biblioteca",  icon: Package     },
   { href: "/dashboard/admin/financeiro", label: "Financeiro",  icon: DollarSign  },
   { href: "/dashboard/admin/webhooks",   label: "Webhooks",    icon: Webhook     },
   { href: "/dashboard/admin/modelos",    label: "Modelos",     icon: Cpu         },
@@ -30,12 +31,12 @@ const ADMIN_NAV_ITEMS = [
 // ─── Itens de navegação ───────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { href: "/dashboard/studio",        label: "Studio",      icon: Zap,       special: true  },
-  { href: "/dashboard",               label: "Início",      icon: Home,      special: false },
-  { href: "/dashboard/historico",     label: "Histórico",   icon: Clock,     special: false },
-  { href: "/dashboard/workflows",     label: "Workflows",   icon: GitBranch, special: false },
-  { href: "/dashboard/creditos",      label: "Créditos",    icon: Gem,       special: false },
-  { href: "/dashboard/configuracoes", label: "Config.",     icon: Settings,  special: false },
+  { href: "/dashboard",               label: "Início",      icon: Home,        special: false },
+  { href: "/dashboard/prompts",       label: "Prompts",     icon: BookOpen,    special: false },
+  { href: "/dashboard/biblioteca",    label: "Biblioteca",  icon: ShoppingBag, special: false },
+  { href: "/dashboard/historico",     label: "Histórico",   icon: Clock,       special: false },
+  { href: "/dashboard/creditos",      label: "Créditos",    icon: Gem,         special: false },
+  { href: "/dashboard/configuracoes", label: "Config.",     icon: Settings,    special: false },
 ] as const
 
 // ─── Badge de plano ───────────────────────────────────────────────────────────
@@ -54,8 +55,7 @@ export default function Sidebar({ userName, plan, credits, total, onLogout, isAd
   // Determina se o item está ativo
   function isActive(href: string): boolean {
     if (href === "/dashboard") return pathname === "/dashboard"
-    if (href === "/dashboard/studio") return pathname.startsWith("/dashboard/studio")
-    return pathname === href
+    return pathname.startsWith(href)
   }
 
   const planBadge = PLAN_BADGE[plan] ?? PLAN_BADGE["Starter"]

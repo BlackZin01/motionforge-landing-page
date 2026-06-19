@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { ChevronDown, Upload, X } from "lucide-react"
 import { ModelGrid, IMAGE_MODELS, VIDEO_MODELS } from "./model-grid"
 import { motion, AnimatePresence } from "framer-motion"
+import { uploadFileToR2 } from "@/lib/upload-to-r2"
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -66,6 +67,8 @@ export function GenerationPanel({ onGenerate, credits, generating, isAdmin }: Ge
   const [duration, setDuration] = useState("8s")
   const [aspect, setAspect] = useState<"9:16" | "16:9" | "1:1">("9:16")
   const [refImage, setRefImage] = useState<string | null>(null)
+  const [refImagePreview, setRefImagePreview] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const allModels = [...IMAGE_MODELS, ...VIDEO_MODELS]
@@ -77,14 +80,33 @@ export function GenerationPanel({ onGenerate, credits, generating, isAdmin }: Ge
     setSelectedModel(newMode === "image" ? "nano-banana-2" : "seedance-fast")
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => setRefImage(ev.target?.result as string)
-    reader.readAsDataURL(file)
-    // reset input para permitir selecionar o mesmo arquivo novamente
     e.target.value = ""
+
+    // Preview local imediato
+    const preview = URL.createObjectURL(file)
+    setRefImagePreview(preview)
+    setRefImage(null)
+    setUploadingImage(true)
+
+    try {
+      const token = localStorage.getItem("mf_token") ?? ""
+      const cdnUrl = await uploadFileToR2(file, token)
+      setRefImage(cdnUrl)
+    } catch {
+      setRefImagePreview(null)
+      setRefImage(null)
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  function handleRemoveRefImage() {
+    setRefImage(null)
+    setRefImagePreview(null)
+    setUploadingImage(false)
   }
 
   // ── Pill de opção ──────────────────────────────────────────────────────────
@@ -159,7 +181,7 @@ export function GenerationPanel({ onGenerate, credits, generating, isAdmin }: Ge
       {/* ── 2. Modelo ───────────────────────────────────────────────────────── */}
       <div style={{ padding: "14px 16px" }}>
         <p style={SECTION_LABEL}>Modelo</p>
-        <ModelGrid type={mode} selected={selectedModel} onSelect={setSelectedModel} plan="Pro" />
+        <ModelGrid type={mode} selected={selectedModel} onSelect={setSelectedModel} plan={isAdmin ? "Agency" : "Pro"} />
       </div>
 
       <SectionDivider />
@@ -207,39 +229,54 @@ export function GenerationPanel({ onGenerate, credits, generating, isAdmin }: Ge
             onChange={handleFileChange}
           />
 
-          {refImage ? (
+          {(refImagePreview || refImage) ? (
             <div style={{ position: "relative" }}>
               <img
-                src={refImage} alt="referência"
-                onClick={() => fileRef.current?.click()}
+                src={refImagePreview ?? refImage!} alt="referência"
+                onClick={() => !uploadingImage && fileRef.current?.click()}
                 style={{
                   width: "100%", display: "block", borderRadius: "8px",
-                  maxHeight: "110px", objectFit: "cover", cursor: "pointer",
+                  maxHeight: "110px", objectFit: "cover", cursor: uploadingImage ? "default" : "pointer",
                   border: "1px solid rgba(255,255,255,.08)",
+                  opacity: uploadingImage ? 0.5 : 1,
                 }}
               />
-              <button
-                onClick={() => setRefImage(null)}
-                style={{
-                  position: "absolute", top: 6, right: 6,
-                  width: 22, height: 22, borderRadius: "50%",
-                  background: "rgba(0,0,0,.75)", border: "none",
-                  cursor: "pointer", color: "#F5F5F5",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}
-              >
-                <X size={11} />
-              </button>
-              <span
-                style={{
-                  position: "absolute", bottom: 6, left: 8,
-                  fontSize: "9px", color: "rgba(245,245,245,.5)",
-                  background: "rgba(0,0,0,.6)", borderRadius: "4px", padding: "2px 6px",
-                  fontFamily: "'DM Sans',sans-serif",
-                }}
-              >
-                Clique para trocar
-              </span>
+              {uploadingImage && (
+                <div style={{
+                  position: "absolute", inset: 0, display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,.45)", borderRadius: "8px",
+                  fontSize: "11px", color: "#F5F5F5", fontFamily: "'DM Sans',sans-serif", gap: 6,
+                }}>
+                  <Spinner /> Enviando...
+                </div>
+              )}
+              {!uploadingImage && (
+                <>
+                  <button
+                    onClick={handleRemoveRefImage}
+                    style={{
+                      position: "absolute", top: 6, right: 6,
+                      width: 22, height: 22, borderRadius: "50%",
+                      background: "rgba(0,0,0,.75)", border: "none",
+                      cursor: "pointer", color: "#F5F5F5",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}
+                  >
+                    <X size={11} />
+                  </button>
+                  <span
+                    style={{
+                      position: "absolute", bottom: 6, left: 8,
+                      fontSize: "9px", color: "rgba(245,245,245,.5)",
+                      background: "rgba(0,0,0,.6)", borderRadius: "4px", padding: "2px 6px",
+                      fontFamily: "'DM Sans',sans-serif",
+                    }}
+                  >
+                    Clique para trocar
+                  </span>
+                </>
+              )}
             </div>
           ) : (
             <div
@@ -344,15 +381,15 @@ export function GenerationPanel({ onGenerate, credits, generating, isAdmin }: Ge
       {/* ── 7. Botão Gerar ──────────────────────────────────────────────────── */}
       <div style={{ padding: "12px 16px 18px" }}>
         <button
-          disabled={generating || !prompt.trim()}
+          disabled={generating || !prompt.trim() || uploadingImage}
           onClick={() => onGenerate({ type: mode, model: selectedModel, prompt, aspectRatio: aspect, referenceImageUrl: refImage })}
           style={{
             width: "100%", height: "50px",
             background: "#FF4D00",
             color: "white", border: "none", borderRadius: "10px",
             fontSize: "14px", fontWeight: 700, letterSpacing: "1.5px",
-            cursor: generating || !prompt.trim() ? "not-allowed" : "pointer",
-            opacity: generating || !prompt.trim() ? 0.38 : 1,
+            cursor: generating || !prompt.trim() || uploadingImage ? "not-allowed" : "pointer",
+            opacity: generating || !prompt.trim() || uploadingImage ? 0.38 : 1,
             display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
             transition: "opacity .2s",
             fontFamily: "'DM Sans',sans-serif",

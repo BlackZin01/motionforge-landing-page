@@ -1,8 +1,9 @@
 "use client"
 
-import { memo, useRef } from "react"
+import { memo, useRef, useState } from "react"
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from "@xyflow/react"
 import { X, Zap, Play, CheckCircle, Image as ImageIcon, AlignLeft, Mic } from "lucide-react"
+import { uploadFileToR2 } from "@/lib/upload-to-r2"
 
 // ─── Modelos de vídeo/imagem ─────────────────────────────────────────────────
 
@@ -125,20 +126,35 @@ type ImageNodeType = Node<ImageData, "image">
 export const ImageNode = memo(({ id, data, selected }: NodeProps<ImageNodeType>) => {
   const { setNodes, setEdges, updateNodeData } = useReactFlow()
   const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   function handleRemove() {
     setNodes((nds) => nds.filter((n) => n.id !== id))
     setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id))
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      updateNodeData(id, { imageUrl: ev.target?.result as string })
+    e.target.value = ""
+
+    // Preview local imediato
+    const preview = URL.createObjectURL(file)
+    setPreviewUrl(preview)
+    setUploading(true)
+
+    try {
+      const token = localStorage.getItem("mf_token") ?? ""
+      const cdnUrl = await uploadFileToR2(file, token)
+      updateNodeData(id, { imageUrl: cdnUrl })
+      setPreviewUrl(null)
+    } catch {
+      setPreviewUrl(null)
+      updateNodeData(id, { imageUrl: undefined })
+    } finally {
+      setUploading(false)
     }
-    reader.readAsDataURL(file)
   }
 
   return (
@@ -172,25 +188,35 @@ export const ImageNode = memo(({ id, data, selected }: NodeProps<ImageNodeType>)
       />
 
       {/* Preview or drop area */}
-      {data.imageUrl ? (
+      {(previewUrl || data.imageUrl) ? (
         <div style={{ position: "relative" }}>
           <img
-            src={data.imageUrl}
+            src={previewUrl ?? data.imageUrl}
             alt="preview"
-            style={{ width: "100%", borderRadius: "8px", display: "block", maxHeight: "120px", objectFit: "cover", cursor: "pointer" }}
-            onClick={() => inputRef.current?.click()}
+            style={{ width: "100%", borderRadius: "8px", display: "block", maxHeight: "120px", objectFit: "cover", cursor: uploading ? "default" : "pointer", opacity: uploading ? 0.5 : 1 }}
+            onClick={() => !uploading && inputRef.current?.click()}
           />
-          <div
-            onClick={() => inputRef.current?.click()}
-            style={{
-              position: "absolute", bottom: "6px", right: "6px",
-              background: "rgba(0,0,0,.6)", borderRadius: "4px",
-              padding: "2px 6px", fontSize: "9px", color: "#F5F5F5",
-              fontFamily: "'DM Sans',sans-serif", cursor: "pointer",
-            }}
-          >
-            Trocar
-          </div>
+          {uploading ? (
+            <div style={{
+              position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+              background: "rgba(0,0,0,.45)", borderRadius: "8px",
+              fontSize: "10px", color: "#F5F5F5", fontFamily: "'DM Sans',sans-serif",
+            }}>
+              Enviando...
+            </div>
+          ) : (
+            <div
+              onClick={() => inputRef.current?.click()}
+              style={{
+                position: "absolute", bottom: "6px", right: "6px",
+                background: "rgba(0,0,0,.6)", borderRadius: "4px",
+                padding: "2px 6px", fontSize: "9px", color: "#F5F5F5",
+                fontFamily: "'DM Sans',sans-serif", cursor: "pointer",
+              }}
+            >
+              Trocar
+            </div>
+          )}
         </div>
       ) : (
         <div
@@ -543,3 +569,23 @@ export const OutputNode = memo(({ id, data, selected }: NodeProps<OutputNodeType
   )
 })
 OutputNode.displayName = "OutputNode"
+
+// ─── Mapeamento nome-display → ID do backend ──────────────────────────────────
+
+export const MODEL_ID_MAP: Record<string, string> = {
+  "Seedance Fast": "seedance-fast",
+  "Seedance 2.0":  "seedance-20",
+  "Wan 2.7":       "wan-27",
+  "Kling Std":     "kling-std",
+  "Kling Pro":     "kling-pro",
+  "Kling O1":      "kling-o1",
+  "Hailuo 2.3":    "hailuo-23",
+  "Veo 3.1 Lite":  "veo-31-lite",
+  "GPT Image 2":   "gpt-image-2",
+  "Flux Pro":      "nano-banana-pro",
+  "Ideogram 2.0":  "ideogram-v3",
+  "DALL-E 3":      "gpt-image-2",
+}
+
+// I2V models que requerem imagem de referência
+export const I2V_MODEL_IDS = new Set(["wan-27", "hailuo-23"])

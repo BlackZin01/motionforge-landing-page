@@ -16,7 +16,7 @@ import {
   MarkerType,
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
-import { Zap, CheckCircle, Save, ArrowLeft, Image as ImageIcon, AlignLeft, Mic } from "lucide-react"
+import { Zap, CheckCircle, Save, ArrowLeft, Image as ImageIcon, AlignLeft, Mic, Play } from "lucide-react"
 import { TriggerNode, ModelNode, OutputNode, ImageNode, TextNode, VoiceNode, MODEL_COSTS, VOICE_MODELS } from "./node-card"
 
 // ─── Node types (definido fora do componente — obrigatório no React Flow) ─────
@@ -51,6 +51,7 @@ export interface WorkflowEditorProps {
   name: string
   onNameChange: (n: string) => void
   onSave: (nodes: Node[], edges: Edge[]) => void
+  onExecute?: (nodes: Node[], edges: Edge[]) => void
   onBack: () => void
   initialNodes?: Node[]
   initialEdges?: Edge[]
@@ -62,6 +63,7 @@ function EditorInner({
   name,
   onNameChange,
   onSave,
+  onExecute,
   onBack,
   initialNodes = INITIAL_NODES,
   initialEdges = [],
@@ -267,27 +269,44 @@ function EditorInner({
             </span>
           )}
 
-          <button
-            onClick={() => onSave(nodes, edges)}
-            style={{
-              background: "#FF4D00", border: "none", cursor: "pointer",
-              color: "white",
-              display: "flex", alignItems: "center", gap: "6px",
-              fontSize: "13px", fontFamily: "'DM Sans',sans-serif", fontWeight: 700,
-              padding: "7px 16px", borderRadius: "8px",
-              transition: "opacity .2s",
-              flexShrink: 0,
-            }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.opacity = "0.88"
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.opacity = "1"
-            }}
-          >
-            <Save size={14} />
-            Salvar
-          </button>
+          <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+            <button
+              onClick={() => onSave(nodes, edges)}
+              style={{
+                background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer",
+                color: "rgba(245,245,245,.7)",
+                display: "flex", alignItems: "center", gap: "6px",
+                fontSize: "13px", fontFamily: "'DM Sans',sans-serif", fontWeight: 600,
+                padding: "7px 14px", borderRadius: "8px",
+                transition: "opacity .2s",
+              }}
+              onMouseEnter={(e) => { ;(e.currentTarget as HTMLButtonElement).style.opacity = "0.88" }}
+              onMouseLeave={(e) => { ;(e.currentTarget as HTMLButtonElement).style.opacity = "1" }}
+            >
+              <Save size={14} />
+              Salvar
+            </button>
+
+            {onExecute && (
+              <button
+                onClick={() => onExecute(nodes, edges)}
+                style={{
+                  background: "#FF4D00", border: "none", cursor: "pointer",
+                  color: "white",
+                  display: "flex", alignItems: "center", gap: "6px",
+                  fontSize: "13px", fontFamily: "'DM Sans',sans-serif", fontWeight: 700,
+                  padding: "7px 16px", borderRadius: "8px",
+                  transition: "opacity .2s",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => { ;(e.currentTarget as HTMLButtonElement).style.opacity = "0.88" }}
+                onMouseLeave={(e) => { ;(e.currentTarget as HTMLButtonElement).style.opacity = "1" }}
+              >
+                <Play size={13} />
+                Salvar e Executar
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ─── Canvas ──────────────────────────────────────────────────────── */}
@@ -305,6 +324,9 @@ function EditorInner({
             fitViewOptions={{ padding: 0.35 }}
             style={{ background: "#0D0D0D" }}
             deleteKeyCode="Delete"
+            onlyRenderVisibleElements
+            elevateEdgesOnSelect={false}
+            elevateNodesOnSelect={false}
           >
             <Background
               variant={BackgroundVariant.Dots}

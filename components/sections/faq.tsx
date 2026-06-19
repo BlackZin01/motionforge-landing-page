@@ -20,28 +20,28 @@ const stagger: Variants = {
 /* ── Dados ──────────────────────────────────────────────────── */
 const FAQS = [
   {
-    q: "Preciso saber editar vídeo ou usar CapCut?",
-    a: "Não. Você só sobe o produto e monta o workflow uma vez. A MotionForge gera o vídeo completo — corte, transição, música e legenda inclusos. Sem timeline, sem camadas pra arrastar.",
+    q: "Como funciona a Biblioteca de Prompts?",
+    a: "Você acessa o painel, navega pelos prompts organizados por categoria (hook, CTA, descrição, legenda) e modelo de IA (ChatGPT, Gemini, Claude). Clica em copiar e cola direto no ChatGPT. Pronto. Novos prompts são adicionados toda semana pelo time.",
   },
   {
-    q: "Funciona para produto físico de TikTok Shop?",
-    a: "É exatamente pra isso que foi construída. Cole a URL do produto, sobe a foto ou a ficha técnica — a plataforma extrai os ângulos, cria o roteiro e gera o UGC pronto pra postar. Direto.",
+    q: "Os prompts funcionam com qualquer IA de texto?",
+    a: "Sim. Os prompts são escritos para funcionar com ChatGPT, Gemini e Claude. Cada um tem uma indicação de qual modelo performa melhor, mas você pode usar em qualquer um — eles são escritos em português e otimizados para copy de TikTok Shop.",
   },
   {
-    q: "Qual a diferença para CapCut, Canva ou outras ferramentas de IA?",
-    a: "Essas ferramentas exigem que você edite. A MotionForge gera do zero — você monta o workflow uma vez, executa em um clique e recebe o vídeo final. Sem template pra preencher, sem timeline pra montar.",
+    q: "Como funciona a Biblioteca de Anúncios (produtos)?",
+    a: "Nossa equipe pesquisa semanalmente os produtos com maior crescimento no TikTok Shop BR. Cada produto recebe um score de viralidade (0–100), nicho, status (Viral, Em Alta, Top Vendas, Promissor), preço médio e link direto. Você analisa e decide o que anunciar.",
   },
   {
-    q: "Quantos vídeos posso gerar por mês?",
-    a: "Depende do plano. O Starter entrega dezenas de vídeos mensais. Pro e Agency têm volume maior com top-up disponível se precisar escalar mais. Os créditos ficam visíveis no painel em tempo real.",
+    q: "Com que frequência a biblioteca é atualizada?",
+    a: "A Biblioteca de Anúncios é atualizada toda semana com produtos novos. A Biblioteca de Prompts recebe novos prompts conforme surgem novos formatos e tendências de copy no TikTok Shop.",
   },
   {
-    q: "Qual modelo de IA é melhor para o meu produto?",
-    a: "Dentro da plataforma você testa todos. Veo 3.1 é melhor para vídeos cinemáticos, Kling para motion de produto, Nano Banana Pro para imagem 4K. Você decide por produto — e muda quando quiser, sem trocar de plataforma.",
+    q: "Posso usar os prompts para nichos específicos?",
+    a: "Sim. A biblioteca tem prompts segmentados por nicho — moda, beleza, casa, suplementos, pet, entre outros. Além dos filtros por modelo de IA e formato de conteúdo (hook, descrição, CTA, legenda).",
   },
   {
     q: "Posso gerenciar múltiplos clientes como agência?",
-    a: "Sim — no plano Agency você cria workspaces separados por cliente, cada um com seus modelos, workflows e histórico de conteúdo. Uma plataforma, todos os clientes, dois na equipe.",
+    a: "Sim — no plano Agency você tem acesso completo às duas bibliotecas para usar com quantos clientes quiser. Uma assinatura, todos os clientes, copy pronta para cada nicho.",
   },
   {
     q: "Posso cancelar quando quiser?",

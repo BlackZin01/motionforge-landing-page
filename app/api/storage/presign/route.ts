@@ -1,0 +1,19 @@
+import { NextRequest, NextResponse } from "next/server"
+
+const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
+
+export async function POST(req: NextRequest) {
+  try {
+    const auth = req.headers.get("authorization") ?? ""
+    const body = await req.json()
+    const res = await fetch(`${API}/storage/presign`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: auth },
+      body: JSON.stringify(body),
+    })
+    const data = await res.json()
+    return NextResponse.json(data, { status: res.status })
+  } catch {
+    return NextResponse.json({ error: "Erro ao gerar URL de upload" }, { status: 503 })
+  }
+}

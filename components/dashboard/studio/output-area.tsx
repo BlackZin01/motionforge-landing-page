@@ -13,6 +13,7 @@ interface OutputAreaProps {
   prompt: string
   outputUrl: string | null
   creditsUsed: number
+  errorMessage?: string | null
   onRegenerate: () => void
 }
 
@@ -66,20 +67,27 @@ function ActionBtn({
 
 // ─── Download helper ──────────────────────────────────────────────────────────
 
-function downloadFile(url: string, filename: string) {
-  const a = document.createElement("a")
-  a.href = url
-  a.download = filename
-  a.target = "_blank"
-  a.rel = "noopener noreferrer"
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+async function downloadFile(url: string, filename: string) {
+  try {
+    const proxyUrl = `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`
+    const res = await fetch(proxyUrl)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = blobUrl
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl)
+  } catch {
+    window.open(url, "_blank")
+  }
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 
-export function OutputArea({ state, model, type, prompt, outputUrl, creditsUsed, onRegenerate }: OutputAreaProps) {
+export function OutputArea({ state, model, type, prompt, outputUrl, creditsUsed, errorMessage, onRegenerate }: OutputAreaProps) {
 
   // ── IDLE ────────────────────────────────────────────────────────────────────
 
@@ -166,12 +174,26 @@ export function OutputArea({ state, model, type, prompt, outputUrl, creditsUsed,
         >
           <span style={{ fontSize: "28px" }}>⚠️</span>
         </div>
-        <h3 style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "15px", fontWeight: 700, color: "#F5F5F5", margin: "0 0 6px" }}>
+        <h3 style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "15px", fontWeight: 700, color: "#F5F5F5", margin: "0 0 8px" }}>
           Geração falhou
         </h3>
-        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "13px", color: "rgba(245,245,245,.4)", margin: "0 0 20px", textAlign: "center" }}>
-          Seus créditos foram estornados automaticamente.
-        </p>
+        {errorMessage ? (
+          <div
+            style={{
+              background: "rgba(239,68,68,.06)", border: "1px solid rgba(239,68,68,.18)",
+              borderRadius: "8px", padding: "10px 16px", marginBottom: "20px",
+              maxWidth: "360px",
+            }}
+          >
+            <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "13px", color: "rgba(239,100,100,.9)", margin: 0, textAlign: "center", lineHeight: "1.5" }}>
+              {errorMessage}
+            </p>
+          </div>
+        ) : (
+          <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "13px", color: "rgba(245,245,245,.4)", margin: "0 0 20px", textAlign: "center" }}>
+            Seus créditos foram estornados automaticamente.
+          </p>
+        )}
         <ActionBtn icon={<RefreshCw size={13} />} label="Tentar novamente" onClick={onRegenerate} />
       </div>
     )

@@ -29,16 +29,16 @@ const slideRight: Variants = {
 /* ── Dados da comparação ────────────────────────────────────── */
 const COMPARISON = [
   {
-    outros: "Um modelo. Você se adapta a ele.",
-    motionforge: "Vários modelos. Você escolhe.",
+    outros: "Gasta horas tentando criar um prompt que funcione.",
+    motionforge: "Abre a biblioteca, copia o prompt certo, já usa.",
   },
   {
-    outros: "Quando o modelo fica obsoleto, você fica preso.",
-    motionforge: "Quando o mercado avança, você já estava lá.",
+    outros: "Anuncia produto sem saber se tem demanda real.",
+    motionforge: "Só anuncia produto com score validado e em alta.",
   },
   {
-    outros: "Ferramenta nova = aprender tudo de novo.",
-    motionforge: "Novo modelo disponível. Seu workflow continua o mesmo.",
+    outros: "Concorrência descobre o produto antes de você.",
+    motionforge: "Curadoria semanal: você sabe antes do mercado.",
   },
 ] as const
 
@@ -85,9 +85,9 @@ export function Objecao() {
               marginBottom: 20,
             }}
           >
-            A diferença não é o modelo.
+            A diferença não é a IA.
             <br />
-            É o workflow.
+            É o que você coloca nela.
           </motion.h2>
 
           <motion.p
@@ -99,8 +99,8 @@ export function Objecao() {
               color: "var(--color-forge-muted)",
             }}
           >
-            &ldquo;IA que gera vídeo em segundos&rdquo; — você já testou 4 ferramentas
-            com essa promessa. A diferença aqui não é o modelo. É o workflow.
+            ChatGPT não entrega resultado ruim — o problema é o prompt. Produto errado
+            não converte — o problema é a falta de validação. A MotionForge resolve os dois.
           </motion.p>
         </motion.div>
 

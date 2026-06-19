@@ -59,7 +59,7 @@ export function Problema() {
               marginBottom: 24,
             }}
           >
-            Seu stack de IA criou um gargalo novo.
+            Você está perdendo tempo (e dinheiro) do jeito errado.
           </motion.h2>
 
           {/* Corpo */}
@@ -73,11 +73,11 @@ export function Problema() {
               marginBottom: 32,
             }}
           >
-            Gemini pro roteiro. Veo pro vídeo. HeyGen pro avatar. Canva pra thumbnail.
+            Você abre o ChatGPT sem saber o que pedir. Digita um prompt genérico.
             <br />
-            4 abas, 4 exports, 4 logins — e no final, 3 vídeos por semana.
+            A copy sai ruim. Você tenta de novo. Perde 40 minutos por produto.
             <br />
-            A IA deveria acelerar. Virou trabalho.
+            Enquanto isso, não sabe se o produto que está anunciando sequer tem demanda.
           </motion.p>
 
           {/* Card destaque */}
@@ -99,13 +99,12 @@ export function Problema() {
                 margin: 0,
               }}
             >
-              TikTok Shop pede{" "}
+              O TikTok Shop recompensa quem publica{" "}
               <strong style={{ color: "var(--color-forge-orange)" }}>
-                20 variações por SKU.
+                rápido, com copy certa e produto validado.
               </strong>
               <br />
-              Você produz{" "}
-              <strong>3 por semana</strong> com o stack atual.
+              Você não pode improvisar e esperar resultado.
             </p>
           </motion.div>
 
@@ -129,9 +128,8 @@ export function Problema() {
                 margin: 0,
               }}
             >
-              &ldquo;E se cada produto que você sobe já saísse como vídeo pronto
-              pra publicar — com o modelo que você escolheu, no workflow que você
-              montou?&rdquo;
+              &ldquo;E se você já soubesse exatamente qual produto anunciar
+              — e qual prompt usar pra fazer a copy que converte?&rdquo;
             </p>
           </motion.blockquote>
 
@@ -146,7 +144,7 @@ export function Problema() {
               margin: 0,
             }}
           >
-            Não é mais uma ferramenta no seu stack. É o fim dele.
+            É exatamente isso que a MotionForge entrega.
           </motion.p>
         </motion.div>
       </div>

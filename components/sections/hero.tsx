@@ -25,248 +25,175 @@ const fadeUp: Variants = {
 }
 
 const metrics = [
-  { value: 4800, label: "vídeos gerados essa semana" },
-  { value: 1240, label: "lojas ativas" },
-  { value: 87,   label: "agências escalando" },
+  { value: 1200, label: "prompts prontos para usar" },
+  { value: 980,  label: "lojas ativas" },
+  { value: 340,  label: "produtos validados no TikTok Shop" },
 ] as const
 
-/* ── Mockup animado do Forge Engine ─────────────────────────── */
-const STAGES = [
-  { label: "Analisando produto...",        pct: 18,  done: false },
-  { label: "Gerando roteiro · GPT-4o",     pct: 44,  done: false },
-  { label: "Renderizando · Veo 3.1 Lite",  pct: 74,  done: false },
-  { label: "Aplicando áudio + legendas",   pct: 89,  done: false },
-  { label: "✓  Vídeo pronto — 52s",        pct: 100, done: true  },
+/* ── Mockup animado — Prompts + Biblioteca ───────────────────── */
+const PROMPTS = [
+  {
+    titulo: "Hook de abertura — Produto físico",
+    modelo: "ChatGPT",
+    preview: "Você não vai acreditar que isso existe. Eu comprei sem esperar nada e...",
+  },
+  {
+    titulo: "CTA para TikTok Shop",
+    modelo: "Gemini",
+    preview: "Clica no link da bio AGORA antes que esgote. Essa semana com frete grátis.",
+  },
+  {
+    titulo: "Descrição de produto viral",
+    modelo: "ChatGPT",
+    preview: "O produto que todo mundo está comprando esse mês no TikTok Shop BR...",
+  },
 ]
-const STAGE_DELAYS = [1100, 1500, 1900, 1300]
+
+const PRODUTO = { nome: "Massageador Facial LED", nicho: "Beleza", score: 94, status: "Viral" }
 
 function ForgeMockup() {
-  const [stage, setStage] = useState(0)
+  const [promptIdx, setPromptIdx] = useState(0)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const isDone = STAGES[stage].done
-    if (isDone) {
-      const t = setTimeout(() => setStage(0), 4000)
-      return () => clearTimeout(t)
-    }
-    const t = setTimeout(() => setStage((s) => s + 1), STAGE_DELAYS[stage] ?? 1500)
+    const t = setTimeout(() => {
+      setCopied(false)
+      setPromptIdx((i) => (i + 1) % PROMPTS.length)
+    }, copied ? 1200 : 3200)
     return () => clearTimeout(t)
-  }, [stage])
+  }, [promptIdx, copied])
 
-  const current = STAGES[stage]
-  const isDone  = current.done
+  const current = PROMPTS[promptIdx]
 
   return (
     <div
       style={{
         background: "var(--color-forge-graphite)",
         border: "1px solid var(--color-forge-border)",
-        padding: "22px 20px",
-        fontFamily: "var(--font-mono)",
+        padding: "20px",
+        fontFamily: "var(--font-sans)",
         position: "relative",
         overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
       }}
     >
-      {/* Scanline quando processando */}
-      {!isDone && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(transparent 0%, rgba(0,229,255,0.025) 50%, transparent 100%)",
-            animation: "scanline 2.2s linear infinite",
-            pointerEvents: "none",
-          }}
-        />
-      )}
-
       {/* Cabeçalho */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 14,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.18em",
-            color: "var(--color-forge-orange)",
-            textTransform: "uppercase",
-          }}
-        >
-          Forge Engine
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", color: "var(--color-forge-orange)", textTransform: "uppercase" }}>
+          Biblioteca de Prompts
         </span>
-        <span
-          style={{
-            fontSize: 10,
-            color: isDone ? "var(--color-forge-cyan)" : "rgba(255,255,255,0.4)",
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
+        <span style={{ fontSize: 10, color: "var(--color-forge-cyan)", display: "flex", alignItems: "center", gap: 5 }}>
           <motion.span
-            animate={isDone ? { opacity: 1 } : { opacity: [1, 0.3, 1] }}
-            transition={{ duration: 1.2, repeat: isDone ? 0 : Infinity }}
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: isDone
-                ? "var(--color-forge-cyan)"
-                : "var(--color-forge-orange)",
-              display: "inline-block",
-              boxShadow: isDone
-                ? "0 0 8px rgba(0,229,255,0.8)"
-                : "0 0 8px rgba(255,77,0,0.7)",
-            }}
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 1.4, repeat: Infinity }}
+            style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-forge-cyan)", display: "inline-block", boxShadow: "0 0 8px rgba(0,229,255,0.8)" }}
           />
-          {isDone ? "PRONTO" : "LIVE"}
+          LIVE
         </span>
       </div>
 
-      {/* Placeholder do produto */}
-      <div
-        style={{
-          height: 96,
-          background:
-            "linear-gradient(135deg, rgba(255,77,0,0.10) 0%, rgba(0,229,255,0.06) 100%)",
+      {/* Card do prompt */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={promptIdx}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            background: "#0D0D0D",
+            border: "1px solid var(--color-forge-border)",
+            borderRadius: 8,
+            padding: "14px",
+          }}
+        >
+          {/* Título + modelo */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, gap: 8 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-forge-white)", lineHeight: 1.3 }}>
+              {current.titulo}
+            </span>
+            <span style={{
+              fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px",
+              background: "rgba(0,229,255,0.10)", color: "var(--color-forge-cyan)",
+              border: "1px solid rgba(0,229,255,0.25)", borderRadius: 4,
+              padding: "2px 8px", flexShrink: 0,
+            }}>
+              {current.modelo}
+            </span>
+          </div>
+
+          {/* Preview do conteúdo */}
+          <p style={{ fontSize: 11, color: "var(--color-forge-muted)", lineHeight: 1.6, margin: 0, marginBottom: 12 }}>
+            {current.preview}
+          </p>
+
+          {/* Botão copiar */}
+          <button
+            onClick={() => setCopied(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: copied ? "rgba(0,229,255,0.12)" : "rgba(255,77,0,0.10)",
+              border: `1px solid ${copied ? "rgba(0,229,255,0.3)" : "rgba(255,77,0,0.3)"}`,
+              color: copied ? "var(--color-forge-cyan)" : "var(--color-forge-orange)",
+              borderRadius: 6, padding: "6px 12px",
+              fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px",
+              cursor: "pointer", transition: "all 200ms ease", width: "100%", justifyContent: "center",
+            }}
+          >
+            {copied ? "✓ Copiado!" : "Copiar prompt"}
+          </button>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Divisor */}
+      <div style={{ height: 1, background: "var(--color-forge-border)" }} />
+
+      {/* Card de produto em alta */}
+      <div>
+        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", color: "rgba(245,245,245,0.25)", textTransform: "uppercase", display: "block", marginBottom: 8 }}>
+          Produto em Alta · TikTok Shop
+        </span>
+        <div style={{
+          background: "#0D0D0D",
           border: "1px solid var(--color-forge-border)",
-          marginBottom: 14,
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-        }}
-      >
-        {/* grid interior */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-            backgroundSize: "18px 18px",
-          }}
-        />
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.18)", letterSpacing: "0.12em" }}>
-          PRODUTO · SKU #2847
-        </span>
-        <div
-          style={{
-            position: "absolute",
-            bottom: 6,
-            left: 8,
-            right: 8,
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <span style={{ fontSize: 9, color: "var(--color-forge-orange)", opacity: 0.65 }}>
-            TikTok Shop BR
-          </span>
-          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)" }}>.png · 1080px</span>
+          borderRadius: 8, padding: "12px",
+          display: "flex", alignItems: "center", gap: 12,
+        }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 6, flexShrink: 0,
+            background: "linear-gradient(135deg, rgba(255,77,0,0.15) 0%, rgba(0,229,255,0.08) 100%)",
+            border: "1px solid var(--color-forge-border)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ fontSize: 18 }}>🛍️</span>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--color-forge-white)", marginBottom: 3 }}>
+              {PRODUTO.nome}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 9, color: "rgba(245,245,245,0.3)", textTransform: "uppercase", letterSpacing: "1px" }}>
+                {PRODUTO.nicho}
+              </span>
+              <span style={{
+                fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+                background: "rgba(255,77,0,0.12)", color: "var(--color-forge-orange)",
+                border: "1px solid rgba(255,77,0,0.3)", borderRadius: 9999,
+                padding: "1px 7px",
+              }}>
+                {PRODUTO.status}
+              </span>
+            </div>
+          </div>
+          <div style={{ textAlign: "right", flexShrink: 0 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 700, color: "var(--color-forge-cyan)", lineHeight: 1 }}>
+              {PRODUTO.score}
+            </div>
+            <div style={{ fontSize: 8, color: "rgba(245,245,245,0.3)", textTransform: "uppercase", letterSpacing: "1px" }}>score</div>
+          </div>
         </div>
-      </div>
-
-      {/* Lista de estágios */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 7,
-          marginBottom: 14,
-          minHeight: 92,
-        }}
-      >
-        <AnimatePresence initial={false}>
-          {STAGES.slice(0, stage + 1).map((s, i) => {
-            const isActive  = i === stage
-            const isCompleted = i < stage || s.done
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1,  x: 0 }}
-                transition={{ duration: 0.28 }}
-                style={{ display: "flex", alignItems: "center", gap: 7 }}
-              >
-                <span
-                  style={{
-                    fontSize: 9,
-                    color: s.done
-                      ? "var(--color-forge-cyan)"
-                      : isCompleted
-                      ? "rgba(255,255,255,0.3)"
-                      : "var(--color-forge-orange)",
-                    lineHeight: 1,
-                  }}
-                >
-                  {s.done || isCompleted ? "✓" : "›"}
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: s.done
-                      ? "var(--color-forge-cyan)"
-                      : isActive
-                      ? "var(--color-forge-white)"
-                      : "rgba(255,255,255,0.28)",
-                    fontWeight: isActive ? 600 : 400,
-                  }}
-                >
-                  {s.label}
-                </span>
-                {isActive && !s.done && (
-                  <motion.span
-                    animate={{ opacity: [1, 0, 1] }}
-                    transition={{ duration: 0.75, repeat: Infinity }}
-                    style={{ fontSize: 11, color: "var(--color-forge-orange)", lineHeight: 1 }}
-                  >
-                    ▋
-                  </motion.span>
-                )}
-              </motion.div>
-            )
-          })}
-        </AnimatePresence>
-      </div>
-
-      {/* Barra de progresso */}
-      <div style={{ height: 2, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
-        <div
-          style={{
-            height: "100%",
-            width: `${current.pct}%`,
-            background: isDone
-              ? "var(--color-forge-cyan)"
-              : "var(--color-forge-orange)",
-            transition: "width 0.85s cubic-bezier(0.22,1,0.36,1)",
-            boxShadow: isDone
-              ? "0 0 10px rgba(0,229,255,0.55)"
-              : "0 0 10px rgba(255,77,0,0.45)",
-          }}
-        />
-      </div>
-
-      {/* Percentual */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 5 }}>
-        <span
-          style={{
-            fontSize: 10,
-            color: isDone ? "var(--color-forge-cyan)" : "var(--color-forge-muted)",
-          }}
-        >
-          {current.pct}%
-        </span>
       </div>
     </div>
   )
@@ -327,7 +254,7 @@ export function Hero() {
                 marginBottom: 20,
               }}
             >
-              Para TikTok Shop e Agências de Conteúdo
+              Para Lojas TikTok Shop e Criadores de Conteúdo
             </motion.p>
 
             {/* Logo hero */}
@@ -355,7 +282,7 @@ export function Hero() {
                 marginBottom: 24,
               }}
             >
-              Seu Produto.<br />Vídeo Pronto.<br />Em 60 Segundos.
+              Prompts Prontos.<br />Produtos Validados.<br />Anúncios que Vendem.
             </motion.h1>
 
             {/* Subtítulo */}
@@ -373,11 +300,11 @@ export function Hero() {
                 marginBottom: 12,
               }}
             >
-              Da imagem ao UGC publicável — sem briefing, sem stack, sem espera.{" "}
-              Você escolhe o modelo. A MotionForge monta o workflow.
+              Acesse prompts de copy curados para ChatGPT e Gemini — e descubra os produtos
+              em alta no TikTok Shopping antes da concorrência.
             </motion.p>
 
-            {/* Modelos disponíveis */}
+            {/* Ferramentas suportadas */}
             <motion.p
               initial="hidden"
               animate="visible"
@@ -390,7 +317,7 @@ export function Hero() {
                 marginBottom: 36,
               }}
             >
-              Nano Banana Pro. Veo 3.1. Seedance. Kling. GPT Image 2. Tudo no mesmo lugar.
+              Compatível com ChatGPT, Gemini, Claude e qualquer IA de texto. Produtos curados semanalmente.
             </motion.p>
 
             {/* CTAs */}
@@ -426,7 +353,7 @@ export function Hero() {
                 Ver planos
               </a>
               <a
-                href="#mecanismo"
+                href="#para-quem"
                 className="inline-flex items-center justify-center font-bold text-sm uppercase tracking-wide px-8 py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto w-full"
                 style={{
                   background: "transparent",
@@ -462,7 +389,7 @@ export function Hero() {
                 color: "var(--color-forge-muted)",
               }}
             >
-              Amado por 1.240 lojas e 87 agências de TikTok Shop.
+              Usado por 980 lojas e criadores que faturam no TikTok Shop todo mês.
             </motion.p>
           </div>
 

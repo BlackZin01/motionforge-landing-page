@@ -19,63 +19,63 @@ const stagger: Variants = {
 
 /* ── Dados ──────────────────────────────────────────────────── */
 const METRICS = [
-  { value: 4800, label: "vídeos gerados essa semana" },
-  { value: 1240, label: "lojas ativas" },
-  { value: 87,   label: "agências escalando" },
-  { value: 47,   label: "variações por SKU por sessão (média)" },
+  { value: 1200, label: "prompts prontos na biblioteca" },
+  { value: 980,  label: "lojas ativas essa semana" },
+  { value: 340,  label: "produtos validados no catálogo" },
+  { value: 12,   label: "nichos cobertos na biblioteca" },
   { value: 847,  label: "pedidos em 48h (maior resultado individual)", prefix: "+" },
-  { value: 23,   label: "vendas orgânicas no mês 1 (sem tráfego pago)", prefix: "R$ ", suffix: "k" },
+  { value: 23,   label: "faturamento orgânico no mês 1 (produto de R$49)", prefix: "R$ ", suffix: "k" },
 ]
 
 const PLATFORMS = [
   "TikTok Shop BR",
+  "ChatGPT",
+  "Gemini",
+  "Claude",
   "Meta Ads",
   "Instagram Shopping",
   "Shopee",
-  "Mercado Livre",
-  "Hotmart",
-  "Kiwify",
 ]
 
 const TESTIMONIALS = [
   {
     quote:
-      "Primeiro mês com a MotionForge: saímos de 8 para 61 vídeos por semana. Mesmo time, mesmo orçamento.",
+      "Antes eu ficava 1 hora tentando criar uma copy decente no ChatGPT. Agora abro a biblioteca, copio o prompt certo e estou postando em 5 minutos.",
     author: "Carla Mendes",
-    role: "Head de Conteúdo · Agência Konversa · Moda feminina",
+    role: "Criadora de conteúdo · Moda feminina · TikTok Shop BR",
     result: "",
   },
   {
     quote:
-      "Montei o workflow em 20 minutos. Agora rodo 50 variações por produto sem abrir outra ferramenta.",
+      "Descobri um produto na biblioteca da MotionForge com score 91. Anunciei antes de todo mundo no meu nicho. Esgotou em 3 dias.",
     author: "Bruno Tavares",
     role: "Dono de loja · NutriFit Shop · Suplementos · TikTok Shop BR",
-    result: "",
+    result: "esgotado em 3 dias",
   },
   {
     quote:
-      "Postei 30 variações do mesmo produto em uma tarde. Dois viralizaram no mesmo dia. 847 pedidos em 48h.",
+      "Peguei o prompt de hook da biblioteca, adaptei pro produto e postei. Dois vídeos viralizaram no mesmo dia. 847 pedidos em 48h.",
     author: "Felipe Andrade",
     role: "Loja Bella Skin · Skincare · TikTok Shop BR",
     result: "847 pedidos em 48h",
   },
   {
     quote:
-      "Minha conta foi de 12k pra 180k seguidores em 6 semanas. O segredo foi volume — 15 vídeos por dia com a MotionForge.",
+      "A curadoria semanal de produtos me economiza 6 horas por semana de pesquisa. Só anuncio produto com score acima de 80 agora.",
     author: "Juliana Costa",
-    role: "@julianafit.shop · Moda fitness · 180k seguidores",
-    result: "180k seguidores em 6 semanas",
+    role: "@julianafit.shop · Moda fitness · TikTok Shop BR",
+    result: "6h economizadas por semana",
   },
   {
     quote:
-      "Gerencio 8 clientes de TikTok Shop com 2 pessoas na equipe. Antes precisaria de 12. A margem da agência dobrou.",
+      "Gerencio 8 clientes com 2 pessoas na equipe. A biblioteca de prompts é o que nos deixa rápidos — copy pronta por nicho, sem reinventar.",
     author: "Rafael Souza",
     role: "Sócio · Agência Viral Content · São Paulo",
     result: "equipe de 2, resultado de 12",
   },
   {
     quote:
-      "R$ 23.000 em vendas no primeiro mês usando só os vídeos gerados pela MotionForge. Produto de R$ 49. Sem tráfego pago.",
+      "R$ 23.000 em vendas no primeiro mês. Produto validado pela MotionForge, copy dos prompts da plataforma. Sem tráfego pago.",
     author: "Mariana Lima",
     role: "Loja Casa & Estilo · Decoração · TikTok Shop BR",
     result: "R$ 23k orgânico no mês 1",

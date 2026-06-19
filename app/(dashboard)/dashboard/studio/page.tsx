@@ -25,6 +25,7 @@ export default function StudioPage() {
   const [currentPrompt, setCurrentPrompt] = useState("")
   const [currentCredits, setCurrentCredits] = useState(0)
   const [lastConfig, setLastConfig] = useState<GenerationConfig | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -97,7 +98,7 @@ export default function StudioPage() {
           fireNotification("MotionForge — Falhou", "A geração falhou. Seus créditos foram estornados.")
         }
       } catch {}
-    }, 3000)
+    }, 2000)
   }
 
   // ── Geração ────────────────────────────────────────────────────────────────
@@ -107,6 +108,7 @@ export default function StudioPage() {
     setCurrentType(config.type as "image" | "video")
     setCurrentPrompt(config.prompt)
     setOutputUrl(null)
+    setErrorMessage(null)
     setGenerationState("generating")
     document.title = "⚡ Gerando... | MotionForge"
     requestNotificationPermission()
@@ -138,8 +140,10 @@ export default function StudioPage() {
       }
 
       if (!res.ok) {
+        const msg = data.error ?? "Erro ao gerar. Tente novamente."
+        setErrorMessage(msg)
         setGenerationState("error")
-        toast({ message: data.error ?? "Erro ao gerar. Tente novamente.", type: "error" })
+        toast({ message: msg, type: "error" })
         return
       }
 
@@ -250,6 +254,7 @@ export default function StudioPage() {
               prompt={currentPrompt}
               outputUrl={outputUrl}
               creditsUsed={currentCredits}
+              errorMessage={errorMessage}
               onRegenerate={handleRegenerate}
             />
           )}
@@ -285,6 +290,7 @@ export default function StudioPage() {
           prompt={currentPrompt}
           outputUrl={outputUrl}
           creditsUsed={currentCredits}
+          errorMessage={errorMessage}
           onRegenerate={handleRegenerate}
         />
       </div>

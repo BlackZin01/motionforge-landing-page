@@ -14,15 +14,22 @@ interface GenerationCardProps {
   prompt?: string
 }
 
-function downloadFile(url: string, filename: string) {
-  const a = document.createElement("a")
-  a.href = url
-  a.download = filename
-  a.target = "_blank"
-  a.rel = "noopener noreferrer"
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+async function downloadFile(url: string, filename: string) {
+  try {
+    const proxyUrl = `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`
+    const res = await fetch(proxyUrl)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = blobUrl
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl)
+  } catch {
+    window.open(url, "_blank")
+  }
 }
 
 export function GenerationCard({

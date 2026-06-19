@@ -113,8 +113,8 @@ export function CTAFinal() {
               margin: "0 auto 40px",
             }}
           >
-            Você escolhe o modelo. Você monta o workflow. Você controla o volume.{" "}
-            Assinou, já gera.
+            Prompts prontos para copiar. Produtos validados para anunciar.{" "}
+            Assinou, já tem acesso.
           </motion.p>
 
           <motion.div
@@ -160,7 +160,7 @@ export function CTAFinal() {
                 Ver Planos
               </a>
               <a
-                href="#mecanismo"
+                href="#para-quem"
                 style={{
                   padding: "16px 44px",
                   background: "transparent",
@@ -188,7 +188,7 @@ export function CTAFinal() {
                   el.style.transform = "scale(1)"
                 }}
               >
-                Ver como funciona
+                O que está incluso
               </a>
             </div>
 
@@ -202,8 +202,8 @@ export function CTAFinal() {
                 lineHeight: 1.6,
               }}
             >
-              Para donos de loja: Assina o Starter, sobe o primeiro produto,
-              vê o resultado em 60 segundos.
+              Para donos de loja: acessa os prompts, copia o que precisa,
+              anuncia o produto certo hoje mesmo.
             </p>
             <p
               style={{
@@ -215,8 +215,8 @@ export function CTAFinal() {
                 lineHeight: 1.6,
               }}
             >
-              Para agências: Assina o Agency, cria os workspaces dos seus
-              clientes, entrega essa semana.
+              Para criadores: biblioteca completa de copy para TikTok Shop
+              atualizada toda semana.
             </p>
           </motion.div>
         </motion.div>

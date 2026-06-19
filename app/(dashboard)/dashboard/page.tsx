@@ -1,12 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Zap } from "lucide-react"
+import { BookOpen, ShoppingBag } from "lucide-react"
 import { StatsHUD } from "@/components/dashboard/home/stats-hud"
 import { UsageChart } from "@/components/dashboard/home/usage-chart"
-import { RecentGrid } from "@/components/dashboard/home/recent-grid"
 import { Skeleton } from "@/components/dashboard/shared/skeleton"
 import { useAuth } from "@/lib/auth-context"
 
@@ -109,6 +108,23 @@ export default function DashboardHomePage() {
   const totalCredits = user?.totalCredits ?? 5000
   const isAdmin      = user?.isAdmin ?? false
 
+  // Contadores de conteúdo (carregados do estado local após fetch)
+  const [totalPrompts,  setTotalPrompts]  = useState(0)
+  const [totalProdutos, setTotalProdutos] = useState(0)
+
+  useEffect(() => {
+    const token = localStorage.getItem("mf_token")
+    if (!token) return
+    // Busca contagens em paralelo
+    Promise.all([
+      fetch("/api/prompts", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+      fetch("/api/biblioteca", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+    ]).then(([p, b]) => {
+      if (p) setTotalPrompts(p.prompts?.length ?? 0)
+      if (b) setTotalProdutos(b.produtos?.length ?? 0)
+    }).catch(() => {})
+  }, [user])
+
   return (
     <div
       style={{
@@ -144,7 +160,7 @@ export default function DashboardHomePage() {
             color: "rgba(245,245,245,0.4)",
           }}
         >
-          {isAdmin ? "Créditos ilimitados. Pronto pra gerar?" : `Você tem ${credits.toLocaleString("pt-BR")} créditos. Pronto pra gerar?`}
+          {isAdmin ? "Modo admin ativo. Gerencie prompts e biblioteca." : `Você tem ${credits.toLocaleString("pt-BR")} créditos.`}
         </p>
       </motion.div>
 
@@ -158,9 +174,8 @@ export default function DashboardHomePage() {
         <StatsHUD
           credits={credits}
           totalCredits={totalCredits}
-          videos={0}
-          images={0}
-          workflows={0}
+          prompts={totalPrompts}
+          produtos={totalProdutos}
           isAdmin={isAdmin}
         />
       </motion.div>
@@ -175,77 +190,57 @@ export default function DashboardHomePage() {
         <UsageChart />
       </motion.div>
 
-      {/* Gerações recentes ou CTA vazio */}
+      {/* Acesso rápido */}
       <motion.div
         custom={3}
         variants={fadeUp}
         initial="hidden"
         animate="visible"
+        style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}
       >
-        {/* Mostra grid se usuário tem gerações, senão CTA vazio */}
-        {false ? (
-          <RecentGrid />
-        ) : (
-          /* CTA para primeiro uso */
-          <div
-            style={{
-              border: "1px dashed rgba(255,255,255,0.08)",
-              borderRadius: "12px",
-              padding: "48px",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ marginBottom: "16px" }}>
-              <Zap
-                size={40}
-                style={{ color: "rgba(255,77,0,0.5)", margin: "0 auto" }}
-              />
-            </div>
-
-            <h2
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "#F5F5F5",
-                marginBottom: "8px",
-              }}
-            >
-              Nenhuma geração ainda.
-            </h2>
-
-            <p
-              style={{
-                fontSize: "13px",
-                color: "rgba(245,245,245,0.4)",
-                marginBottom: "24px",
-              }}
-            >
-              Crie seu primeiro conteúdo com IA agora.
-            </p>
-
-            <Link
-              href="/dashboard/studio"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                background: "#FF4D00",
-                color: "white",
-                fontFamily: "'DM Sans', sans-serif",
-                fontWeight: 700,
-                fontSize: "14px",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                padding: "14px 28px",
-                borderRadius: "8px",
-                textDecoration: "none",
-              }}
-            >
-              ⚡ FAZER PRIMEIRA GERAÇÃO
-            </Link>
+        <Link
+          href="/dashboard/prompts"
+          style={{
+            display: "flex", alignItems: "center", gap: "16px",
+            background: "#111111", border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: "12px", padding: "20px", textDecoration: "none",
+            transition: "border-color 150ms ease",
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,77,0,0.3)" }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.06)" }}
+        >
+          <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "rgba(255,77,0,0.10)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <BookOpen size={20} style={{ color: "#FF4D00" }} />
           </div>
-        )}
+          <div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 700, color: "#F5F5F5", marginBottom: "2px" }}>Biblioteca de Prompts</div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.4)" }}>
+              {totalPrompts > 0 ? `${totalPrompts} prompts disponíveis` : "Prompts prontos para usar"}
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href="/dashboard/biblioteca"
+          style={{
+            display: "flex", alignItems: "center", gap: "16px",
+            background: "#111111", border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: "12px", padding: "20px", textDecoration: "none",
+            transition: "border-color 150ms ease",
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,229,255,0.3)" }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.06)" }}
+        >
+          <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "rgba(0,229,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ShoppingBag size={20} style={{ color: "#00E5FF" }} />
+          </div>
+          <div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 700, color: "#F5F5F5", marginBottom: "2px" }}>Biblioteca de Anúncios</div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.4)" }}>
+              {totalProdutos > 0 ? `${totalProdutos} produtos validados` : "Produtos em alta no TikTok Shop"}
+            </div>
+          </div>
+        </Link>
       </motion.div>
     </div>
   )

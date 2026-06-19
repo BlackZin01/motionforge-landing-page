@@ -18,15 +18,15 @@ const stagger: Variants = {
 
 /* ── Dados de conteúdo ──────────────────────────────────────── */
 const lojaItems = [
-  "50 variações de UGC por SKU",
-  "Do produto ao vídeo em menos de 60s",
-  "Sem editor. Sem briefing. Sem fila.",
+  "Prompts de copy prontos — só copiar e colar no ChatGPT",
+  "Produtos validados em alta antes da concorrência saber",
+  "Curadoria semanal: você foca em vender, não em pesquisar",
 ] as const
 
 const agenciaItems = [
-  "Workspaces separados por cliente",
-  "Workflows reutilizáveis por conta",
-  "Controle de modelo por projeto",
+  "Biblioteca de prompts organizados por nicho e formato",
+  "Espião de produtos: score, status e link do TikTok Shop",
+  "Atualizado toda semana com produtos novos validados",
 ] as const
 
 /* ── Sub-componente de coluna ───────────────────────────────── */
@@ -149,27 +149,27 @@ export function ParaQuem() {
             className="grid grid-cols-1 md:grid-cols-2"
             style={{ gap: 0 }}
           >
-            {/* Coluna 1 — Donos de loja */}
+            {/* Coluna 1 — Biblioteca de Prompts */}
             <div className="md:pr-12 md:border-r" style={{ borderColor: "var(--color-forge-border)" }}>
               <Col
-                label="Para Donos de Loja"
+                label="Biblioteca de Prompts"
                 labelColor="var(--color-forge-orange)"
                 borderColor="var(--color-forge-orange)"
-                headline="Você não precisa de equipe."
-                body="Sobe o produto, escolhe o modelo, define o workflow uma vez. A MotionForge produz o volume que sua loja precisa."
+                headline="Copy que converte. Pronta para usar."
+                body="Centenas de prompts testados para ChatGPT, Gemini e Claude. Hooks, CTAs, descrições de produto, legendas — um clique para copiar."
                 items={lojaItems}
                 bulletColor="var(--color-forge-orange)"
               />
             </div>
 
-            {/* Coluna 2 — Agências */}
+            {/* Coluna 2 — Biblioteca de Anúncios */}
             <div className="md:pl-12">
               <Col
-                label="Para Agências"
+                label="Biblioteca de Anúncios"
                 labelColor="var(--color-forge-cyan)"
                 borderColor="var(--color-forge-cyan)"
-                headline="Escale 20 clientes sem contratar."
-                body="Workflows customizáveis por conta. Cada cliente, cada nicho, cada modelo."
+                headline="Produtos em alta. Antes de todo mundo."
+                body="Curadoria semanal dos produtos que mais vendem no TikTok Shop BR. Score de viralidade, nicho, preço médio e link direto."
                 items={agenciaItems}
                 bulletColor="var(--color-forge-cyan)"
               />

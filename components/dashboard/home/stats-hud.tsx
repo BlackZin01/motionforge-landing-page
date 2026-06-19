@@ -2,16 +2,15 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef, useEffect, useState } from "react"
-import { Zap, Video, Image, GitBranch } from "lucide-react"
+import { Zap, BookOpen, ShoppingBag } from "lucide-react"
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
 interface StatsHUDProps {
   credits: number
   totalCredits?: number
-  videos: number
-  images: number
-  workflows: number
+  prompts: number
+  produtos: number
   isAdmin?: boolean
 }
 
@@ -118,7 +117,7 @@ function StatCard({
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
-export function StatsHUD({ credits, totalCredits = 5000, videos, images, workflows, isAdmin }: StatsHUDProps) {
+export function StatsHUD({ credits, totalCredits = 5000, prompts, produtos, isAdmin }: StatsHUDProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: "-40px" })
 
@@ -131,7 +130,7 @@ export function StatsHUD({ credits, totalCredits = 5000, videos, images, workflo
     <div
       ref={ref}
       style={{ gap: "8px" }}
-      className="grid grid-cols-2 lg:grid-cols-4"
+      className="grid grid-cols-1 sm:grid-cols-3"
     >
       {/* Card 1 — Créditos */}
       {isAdmin ? (
@@ -184,29 +183,20 @@ export function StatsHUD({ credits, totalCredits = 5000, videos, images, workflo
         />
       )}
 
-      {/* Card 2 — Vídeos */}
+      {/* Card 2 — Prompts */}
       <StatCard
-        value={videos}
-        label="vídeos gerados"
-        icon={Video}
+        value={prompts}
+        label="prompts disponíveis"
+        icon={BookOpen}
         color="#F5F5F5"
         inView={inView}
       />
 
-      {/* Card 3 — Imagens */}
+      {/* Card 3 — Produtos */}
       <StatCard
-        value={images}
-        label="imagens geradas"
-        icon={Image}
-        color="#F5F5F5"
-        inView={inView}
-      />
-
-      {/* Card 4 — Workflows */}
-      <StatCard
-        value={workflows}
-        label="workflows ativos"
-        icon={GitBranch}
+        value={produtos}
+        label="produtos na biblioteca"
+        icon={ShoppingBag}
         color="#F5F5F5"
         inView={inView}
       />
