@@ -37,7 +37,7 @@ function PromptModal({
   onSalvar: (dados: typeof CAMPOS_VAZIO) => Promise<void>
   onFechar: () => void
 }) {
-  const [form, setForm] = useState({ ...CAMPOS_VAZIO, ...inicial })
+  const [form, setForm] = useState({ ...CAMPOS_VAZIO, ...inicial, descricao: inicial?.descricao ?? "" })
   const [salvando, setSalvando] = useState(false)
   const isEdicao = Boolean(inicial?.id)
 
