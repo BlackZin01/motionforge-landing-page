@@ -30,13 +30,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://motionforge.com.br"
   ),
-  title: "MotionForge — Seu produto. Vídeo pronto. 60 segundos.",
+  title: "MotionForge — Prompts prontos. Produtos validados. TikTok Shop.",
   description:
-    "De produto a UGC publicável em 60 segundos. Nano Banana Pro, Veo 3.1, Seedance, Kling — os melhores modelos de IA em um único workflow. Planos a partir de R$ 97/mês.",
+    "Biblioteca de prompts de copy para ChatGPT e Gemini + curadoria semanal dos produtos em alta no TikTok Shop BR. Planos a partir de R$ 97/mês.",
   openGraph: {
-    title: "MotionForge — Conteúdo que vende.",
+    title: "MotionForge — Copy certa. Produto validado.",
     description:
-      "Gere UGC, imagens 4K e vídeos com os melhores modelos de IA. Um workflow. Escala real.",
+      "Prompts prontos para ChatGPT e Gemini + produtos validados no TikTok Shop. Tudo num lugar só.",
     images: ["/og-image.jpg"],
     type: "website",
   },

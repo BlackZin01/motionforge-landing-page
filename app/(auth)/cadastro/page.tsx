@@ -216,7 +216,7 @@ export default function CadastroPage() {
           marginBottom: 24,
         }}
       >
-        Comece a gerar UGC em menos de 60 segundos.
+        Acesse prompts e produtos validados em menos de 60 segundos.
       </p>
 
       {/* Social */}

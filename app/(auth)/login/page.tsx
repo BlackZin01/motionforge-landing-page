@@ -163,7 +163,7 @@ export default function LoginPage() {
           marginBottom: 24,
         }}
       >
-        Entre na sua conta para continuar gerando.
+        Entre na sua conta para acessar prompts e produtos.
       </p>
 
       {/* Social */}

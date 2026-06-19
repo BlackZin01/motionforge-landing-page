@@ -31,7 +31,7 @@ const VARIANT_CONFIG = {
     border: "rgba(239,68,68,.22)",
     icon:   <AlertTriangle size={14} style={{ color: "#ef4444", flexShrink: 0 }} />,
     pill:   { bg: "rgba(239,68,68,.12)", color: "#ef4444", label: "SEM CRÉDITOS" },
-    text:   "Seus créditos acabaram. Recarregue agora para continuar gerando.",
+    text:   "Seus créditos acabaram. Recarregue agora para continuar acessando.",
     cta:    { label: "Recarregar agora",   href: "/dashboard/creditos", color: "#ef4444" },
   },
   "low-credits": {
