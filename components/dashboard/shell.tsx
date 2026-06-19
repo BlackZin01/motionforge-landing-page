@@ -11,12 +11,20 @@ import { usePathname } from "next/navigation"
 // ─── Mapeamento pathname → título da página ───────────────────────────────────
 
 const ROUTE_TITLES: Record<string, string> = {
-  "/dashboard":               "Visão Geral",
-  "/dashboard/studio":        "Studio",
-  "/dashboard/historico":     "Histórico",
-  "/dashboard/workflows":     "Workflows",
-  "/dashboard/creditos":      "Créditos",
-  "/dashboard/configuracoes": "Configurações",
+  "/dashboard":                      "Visão Geral",
+  "/dashboard/prompts":              "Biblioteca de Prompts",
+  "/dashboard/biblioteca":           "Biblioteca de Anúncios",
+  "/dashboard/historico":            "Histórico",
+  "/dashboard/creditos":             "Créditos",
+  "/dashboard/configuracoes":        "Configurações",
+  "/dashboard/admin/prompts":        "Admin · Prompts",
+  "/dashboard/admin/biblioteca":     "Admin · Biblioteca",
+  "/dashboard/admin/usuarios":       "Admin · Usuários",
+  "/dashboard/admin/financeiro":     "Admin · Financeiro",
+  "/dashboard/admin/modelos":        "Admin · Modelos",
+  "/dashboard/admin/afiliados":      "Admin · Afiliados",
+  "/dashboard/admin/seguranca":      "Admin · Segurança",
+  "/dashboard/admin/webhooks":       "Admin · Webhooks",
 }
 
 function getPageTitle(pathname: string): string {

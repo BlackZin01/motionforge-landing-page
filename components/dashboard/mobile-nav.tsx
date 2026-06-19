@@ -2,18 +2,18 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Zap, Home, Clock, Gem, Settings, Shield, GitBranch } from "lucide-react"
+import { Home, Clock, Gem, Settings, Shield, BookOpen, ShoppingBag } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 // ─── Itens da navegação mobile ────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { href: "/dashboard/studio",        label: "Studio",    icon: Zap       },
-  { href: "/dashboard",               label: "Início",    icon: Home      },
-  { href: "/dashboard/historico",     label: "Histórico", icon: Clock     },
-  { href: "/dashboard/workflows",     label: "Flows",     icon: GitBranch },
-  { href: "/dashboard/creditos",      label: "Créditos",  icon: Gem       },
-  { href: "/dashboard/configuracoes", label: "Config.",   icon: Settings  },
+  { href: "/dashboard",               label: "Início",    icon: Home        },
+  { href: "/dashboard/prompts",       label: "Prompts",   icon: BookOpen    },
+  { href: "/dashboard/biblioteca",    label: "Biblioteca",icon: ShoppingBag },
+  { href: "/dashboard/historico",     label: "Histórico", icon: Clock       },
+  { href: "/dashboard/creditos",      label: "Créditos",  icon: Gem         },
+  { href: "/dashboard/configuracoes", label: "Config.",   icon: Settings    },
 ] as const
 
 const ADMIN_NAV_ITEM = { href: "/dashboard/admin/usuarios", label: "Admin", icon: Shield }
@@ -27,10 +27,8 @@ export function MobileNav() {
 
   function isActive(href: string): boolean {
     if (href === "/dashboard") return pathname === "/dashboard"
-    if (href === "/dashboard/studio") return pathname.startsWith("/dashboard/studio")
-    if (href === "/dashboard/workflows") return pathname.startsWith("/dashboard/workflows")
     if (href === "/dashboard/admin/usuarios") return pathname.startsWith("/dashboard/admin")
-    return pathname === href
+    return pathname.startsWith(href)
   }
 
   const allItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS
@@ -56,7 +54,6 @@ export function MobileNav() {
       {allItems.map((item) => {
         const active = isActive(item.href)
         const Icon = item.icon
-        const isStudio = item.href === "/dashboard/studio"
         const isAdminLink = item.href === "/dashboard/admin/usuarios"
 
         return (
@@ -72,24 +69,20 @@ export function MobileNav() {
               gap: "3px",
               textDecoration: "none",
               position: "relative",
-              background: isStudio ? "rgba(255,77,0,0.06)" : isAdminLink ? "rgba(0,229,255,0.04)" : "transparent",
+              background: isAdminLink ? "rgba(0,229,255,0.04)" : "transparent",
               borderTop: active
                 ? isAdminLink ? "2px solid #00E5FF" : "2px solid #FF4D00"
-                : isStudio
-                ? "2px solid rgba(255,77,0,0.3)"
                 : isAdminLink
                 ? "2px solid rgba(0,229,255,0.2)"
                 : "2px solid transparent",
             }}
           >
             <Icon
-              size={isStudio ? 20 : 17}
+              size={17}
               strokeWidth={1.8}
               style={{
                 color: active
                   ? isAdminLink ? "#00E5FF" : "#FF4D00"
-                  : isStudio
-                  ? "rgba(255,77,0,0.7)"
                   : isAdminLink
                   ? "rgba(0,229,255,0.45)"
                   : "rgba(245,245,245,0.35)",
@@ -103,8 +96,6 @@ export function MobileNav() {
                 fontWeight: active ? 700 : 400,
                 color: active
                   ? isAdminLink ? "#00E5FF" : "#FF4D00"
-                  : isStudio
-                  ? "rgba(255,77,0,0.7)"
                   : isAdminLink
                   ? "rgba(0,229,255,0.45)"
                   : "rgba(245,245,245,0.35)",
