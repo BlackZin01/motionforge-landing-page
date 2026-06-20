@@ -29,7 +29,7 @@ export default function StudioPage() {
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const credits = user?.credits ?? 0
+  const credits = 0
   const isAdmin = user?.isAdmin ?? false
 
   // ── Responsividade ─────────────────────────────────────────────────────────
