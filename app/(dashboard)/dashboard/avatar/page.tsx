@@ -300,45 +300,47 @@ const SKIN_TONES = [
   { label: "Negra", color: "#3B1F0A" },
 ]
 
-// Rosto — gradientes representativos (substitua imgUrl por foto real em /public/avatar/)
+const CDN = "https://cdn.motionforge.com.br"
+
+// Rosto — fotos reais do CDN
 const FACE_OPTIONS = [
-  { label: "Oval",    bg: "linear-gradient(135deg, #2a2a3e 0%, #1a1a2a 100%)" },
-  { label: "Fino",    bg: "linear-gradient(135deg, #1e2a3e 0%, #0d1a2a 100%)" },
-  { label: "Marcado", bg: "linear-gradient(135deg, #2e1e3e 0%, #1a0d2a 100%)" },
+  { label: "Oval",    bg: "#1a1a2a", imgUrl: `${CDN}/avatar/face/oval.jpg` },
+  { label: "Fino",    bg: "#1e2a3e", imgUrl: `${CDN}/avatar/face/fino.jpg` },
+  { label: "Marcado", bg: "#2e1e3e", imgUrl: `${CDN}/avatar/face/marcado.jpg` },
   { label: "Redondo", bg: "linear-gradient(135deg, #1a2e2a 0%, #0d1e1a 100%)" },
 ]
 
-// Olhos — gradiente de cores dos olhos
+// Olhos — fotos reais do CDN
 const EYE_OPTIONS = [
-  { label: "Castanho", bg: "radial-gradient(circle, #6B3A2A 30%, #3D1F10 100%)" },
-  { label: "Verde",    bg: "radial-gradient(circle, #3A6B40 30%, #1A3D20 100%)" },
-  { label: "Azul",     bg: "radial-gradient(circle, #2A4A7F 30%, #0D2050 100%)" },
+  { label: "Castanho", bg: "#3D1F10", imgUrl: `${CDN}/avatar/eyes/castanho.jpg` },
+  { label: "Verde",    bg: "#1A3D20", imgUrl: `${CDN}/avatar/eyes/verde.jpg` },
+  { label: "Azul",     bg: "#0D2050", imgUrl: `${CDN}/avatar/eyes/azul.jpg` },
   { label: "Mel",      bg: "radial-gradient(circle, #8B6914 30%, #5A4010 100%)" },
   { label: "Preto",    bg: "radial-gradient(circle, #1A1A1A 30%, #050505 100%)" },
 ]
 
-// Cabelo — cor real do cabelo
+// Cabelo — fotos reais do CDN
 const HAIR_COLOR_OPTIONS = [
-  { label: "Loiro",           bg: "linear-gradient(160deg, #D4A841 0%, #A07828 100%)" },
-  { label: "Castanho claro",  bg: "linear-gradient(160deg, #8B5E3C 0%, #6A3D22 100%)" },
-  { label: "Castanho escuro", bg: "linear-gradient(160deg, #4A2C1A 0%, #2A1505 100%)" },
-  { label: "Preto",           bg: "linear-gradient(160deg, #1A1010 0%, #050505 100%)" },
-  { label: "Ruivo",           bg: "linear-gradient(160deg, #C04B1E 0%, #8B2A08 100%)" },
+  { label: "Loiro",           bg: "#A07828", imgUrl: `${CDN}/avatar/hair/loiro.jpg` },
+  { label: "Castanho claro",  bg: "#6A3D22", imgUrl: `${CDN}/avatar/hair/castanho-claro.jpg` },
+  { label: "Castanho escuro", bg: "#2A1505", imgUrl: `${CDN}/avatar/hair/castanho-escuro.jpg` },
+  { label: "Preto",           bg: "#050505", imgUrl: `${CDN}/avatar/hair/preto.jpg` },
+  { label: "Ruivo",           bg: "#8B2A08", imgUrl: `${CDN}/avatar/hair/ruivo.jpg` },
 ]
 
-// Corpo — tons neutros com silhueta implícita
+// Corpo — fotos reais do CDN
 const BODY_OPTIONS = [
-  { label: "Magro",      bg: "linear-gradient(180deg, #1A1A2A 0%, #0D0D1A 100%)" },
-  { label: "Fitness",    bg: "linear-gradient(180deg, #1A2A1A 0%, #0D1A0D 100%)" },
-  { label: "Curvilíneo", bg: "linear-gradient(180deg, #2A1A2A 0%, #1A0D1A 100%)" },
+  { label: "Magro",      bg: "#0D0D1A", imgUrl: `${CDN}/avatar/body/magro.jpg` },
+  { label: "Fitness",    bg: "#0D1A0D", imgUrl: `${CDN}/avatar/body/fitness.jpg` },
+  { label: "Curvilíneo", bg: "#1A0D1A", imgUrl: `${CDN}/avatar/body/violao.jpg` },
   { label: "Plus size",  bg: "linear-gradient(180deg, #2A2A1A 0%, #1A1A0D 100%)" },
 ]
 
-// Óculos — representação visual
+// Óculos — fotos reais do CDN
 const GLASSES_OPTIONS = [
-  { label: "Nenhum",              bg: "linear-gradient(135deg, #1E1E2E 0%, #0D0D1A 100%)" },
-  { label: "Óculos de Sol",       bg: "linear-gradient(135deg, #0D0D0D 0%, #1A1010 100%)" },
-  { label: "Óculos Transparentes",bg: "linear-gradient(135deg, #1A2030 0%, #0D1020 100%)" },
+  { label: "Nenhum",              bg: "#0D0D1A", imgUrl: `${CDN}/avatar/glasses/nenhum.jpg` },
+  { label: "Óculos de Sol",       bg: "#1A1010", imgUrl: `${CDN}/avatar/glasses/sol.jpg` },
+  { label: "Óculos Transparentes",bg: "#0D1020", imgUrl: `${CDN}/avatar/glasses/transparente.jpg` },
 ]
 
 // ─── Etapas ───────────────────────────────────────────────────────────────────
