@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { motion } from "framer-motion"
-import { Wand2, Copy, Check, Loader2 } from "lucide-react"
+import { Wand2, Copy, Check, Loader2, ImagePlus, X } from "lucide-react"
 
 // ─── Animação ─────────────────────────────────────────────────────────────────
 
@@ -31,10 +31,15 @@ export default function GeradorPage() {
   const [nicho, setNicho]             = useState("")
   const [diferencial, setDiferencial] = useState("")
   const [tom, setTom]                 = useState("urgência e desejo")
-  const [loading, setLoading]         = useState(false)
-  const [result, setResult]           = useState<CopyResult | null>(null)
-  const [error, setError]             = useState("")
-  const [copiedKey, setCopiedKey]     = useState<string | null>(null)
+  const [imageBase64, setImageBase64]   = useState<string | null>(null)
+  const [imageMimeType, setImageMimeType] = useState<string>("image/jpeg")
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [dragOver, setDragOver]         = useState(false)
+  const [loading, setLoading]           = useState(false)
+  const [result, setResult]             = useState<CopyResult | null>(null)
+  const [error, setError]               = useState("")
+  const [copiedKey, setCopiedKey]       = useState<string | null>(null)
+  const fileInputRef                    = useRef<HTMLInputElement>(null)
 
   const TONS = ["urgência e desejo", "emocional", "direto e objetivo", "humor", "autoridade"]
 
@@ -51,6 +56,38 @@ export default function GeradorPage() {
     transition: "border-color 150ms ease",
   }
 
+  function processImage(file: File) {
+    if (!file.type.startsWith("image/")) return
+    if (file.size > 5 * 1024 * 1024) { setError("Imagem deve ter no máximo 5MB."); return }
+    setImageMimeType(file.type)
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string
+      setImagePreview(dataUrl)
+      // Extrai apenas o base64 (sem o prefixo data:...)
+      setImageBase64(dataUrl.split(",")[1])
+    }
+    reader.readAsDataURL(file)
+  }
+
+  function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) processImage(file)
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) processImage(file)
+  }
+
+  function removeImage() {
+    setImageBase64(null)
+    setImagePreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
   async function handleGenerate() {
     if (!produto.trim() || !nicho.trim()) {
       setError("Preencha pelo menos Produto e Nicho.")
@@ -63,7 +100,7 @@ export default function GeradorPage() {
       const res = await fetch("/api/generate-copy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ produto, nicho, diferencial, tom }),
+        body: JSON.stringify({ produto, nicho, diferencial, tom, imageBase64, imageMimeType }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? "Erro ao gerar."); return }
@@ -156,6 +193,66 @@ export default function GeradorPage() {
                 onChange={e => setDiferencial(e.target.value)}
                 onFocus={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(255,77,0,0.4)" }}
                 onBlur={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.08)" }}
+              />
+            </div>
+
+            {/* Foto do produto */}
+            <div className="sm:col-span-2">
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif" }}>
+                Foto do produto <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(opcional — ajuda a IA a criar copy mais precisa)</span>
+              </label>
+
+              {imagePreview ? (
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imagePreview}
+                    alt="Preview do produto"
+                    style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "10px", border: "1px solid rgba(255,77,0,0.3)", display: "block" }}
+                  />
+                  <button
+                    onClick={removeImage}
+                    style={{
+                      position: "absolute", top: "-8px", right: "-8px",
+                      width: "22px", height: "22px", borderRadius: "50%",
+                      background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.15)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer", color: "rgba(245,245,245,0.6)",
+                    }}
+                  >
+                    <X size={11} />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  style={{
+                    border: `1px dashed ${dragOver ? "rgba(255,77,0,0.6)" : "rgba(255,255,255,0.12)"}`,
+                    borderRadius: "10px",
+                    padding: "24px",
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px",
+                    cursor: "pointer",
+                    background: dragOver ? "rgba(255,77,0,0.05)" : "transparent",
+                    transition: "all 150ms ease",
+                  }}
+                >
+                  <ImagePlus size={24} style={{ color: dragOver ? "#FF4D00" : "rgba(245,245,245,0.2)" }} />
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.35)", textAlign: "center" }}>
+                    Arraste ou clique para anexar<br />
+                    <span style={{ fontSize: "11px", color: "rgba(245,245,245,0.2)" }}>JPG, PNG, WEBP · máx 5MB</span>
+                  </span>
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleFileInput}
+                style={{ display: "none" }}
               />
             </div>
 

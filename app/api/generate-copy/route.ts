@@ -7,7 +7,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 export async function POST(req: NextRequest) {
   try {
-    const { produto, nicho, diferencial, tom } = await req.json()
+    const { produto, nicho, diferencial, tom, imageBase64, imageMimeType } = await req.json()
 
     if (!produto || !nicho) {
       return NextResponse.json({ error: "produto e nicho são obrigatórios" }, { status: 400 })
@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = `Você é um especialista em copywriting para TikTok Shop e redes sociais.
 Gere copy de alta conversão em português brasileiro.
+${imageBase64 ? "O usuário enviou uma foto do produto — use as características visuais (embalagem, cor, apresentação, público-alvo aparente) para enriquecer a copy." : ""}
 Responda SEMPRE em JSON válido com a seguinte estrutura:
 {
   "hooks": ["hook 1", "hook 2", "hook 3", "hook 4", "hook 5"],
@@ -25,18 +26,35 @@ Os hooks devem ser frases de abertura de vídeo impactantes (máx 10 palavras ca
 Os CTAs devem ser chamadas para ação diretas e urgentes.
 O script deve ter entre 80-120 palavras, fluido e natural para falar em vídeo.`
 
-    const userPrompt = `Produto: ${produto}
+    const userText = `Produto: ${produto}
 Nicho: ${nicho}
 ${diferencial ? `Diferencial: ${diferencial}` : ""}
 Tom: ${tom || "urgência e desejo"}
 
 Gere os hooks, CTAs e script de vídeo.`
 
+    // Monta o conteúdo da mensagem do usuário — com ou sem imagem
+    type ContentBlock =
+      | { type: "text"; text: string }
+      | { type: "image_url"; image_url: { url: string; detail: "low" | "high" | "auto" } }
+
+    const userContent: ContentBlock[] = [{ type: "text", text: userText }]
+
+    if (imageBase64 && imageMimeType) {
+      userContent.push({
+        type: "image_url",
+        image_url: {
+          url: `data:${imageMimeType};base64,${imageBase64}`,
+          detail: "low", // economiza tokens
+        },
+      })
+    }
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "user", content: userContent },
       ],
       temperature: 0.85,
       max_tokens: 800,
