@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { BookOpen, ShoppingBag } from "lucide-react"
@@ -81,6 +81,8 @@ function LoadingSkeleton() {
 export default function DashboardHomePage() {
   const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
+  const [totalPrompts,  setTotalPrompts]  = useState(0)
+  const [totalProdutos, setTotalProdutos] = useState(0)
 
   useEffect(() => {
     if (!authLoading) {
@@ -88,6 +90,18 @@ export default function DashboardHomePage() {
       return () => clearTimeout(timer)
     }
   }, [authLoading])
+
+  useEffect(() => {
+    const token = localStorage.getItem("mf_token")
+    if (!token) return
+    Promise.all([
+      fetch("/api/prompts", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+      fetch("/api/biblioteca", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+    ]).then(([p, b]) => {
+      if (p) setTotalPrompts(p.prompts?.length ?? 0)
+      if (b) setTotalProdutos(b.produtos?.length ?? 0)
+    }).catch(() => {})
+  }, [user])
 
   if (loading || authLoading) {
     return (
@@ -107,23 +121,6 @@ export default function DashboardHomePage() {
   const credits      = user?.credits ?? 0
   const totalCredits = user?.totalCredits ?? 5000
   const isAdmin      = user?.isAdmin ?? false
-
-  // Contadores de conteúdo (carregados do estado local após fetch)
-  const [totalPrompts,  setTotalPrompts]  = useState(0)
-  const [totalProdutos, setTotalProdutos] = useState(0)
-
-  useEffect(() => {
-    const token = localStorage.getItem("mf_token")
-    if (!token) return
-    // Busca contagens em paralelo
-    Promise.all([
-      fetch("/api/prompts", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
-      fetch("/api/biblioteca", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
-    ]).then(([p, b]) => {
-      if (p) setTotalPrompts(p.prompts?.length ?? 0)
-      if (b) setTotalProdutos(b.produtos?.length ?? 0)
-    }).catch(() => {})
-  }, [user])
 
   return (
     <div
