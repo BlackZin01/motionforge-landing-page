@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, Clock, Settings, LogOut, Users, DollarSign, Webhook, Cpu, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package } from "lucide-react"
+import { Home, Clock, Settings, LogOut, Users, DollarSign, Webhook, Cpu, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package, Wand2 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -31,6 +31,7 @@ const ADMIN_NAV_ITEMS = [
 const NAV_ITEMS = [
   { href: "/dashboard",               label: "Início",      icon: Home,        special: false },
   { href: "/dashboard/prompts",       label: "Prompts",     icon: BookOpen,    special: false },
+  { href: "/dashboard/gerador",       label: "Gerador",     icon: Wand2,       special: false },
   { href: "/dashboard/biblioteca",    label: "Biblioteca",  icon: ShoppingBag, special: false },
   { href: "/dashboard/historico",     label: "Histórico",   icon: Clock,       special: false },
   { href: "/dashboard/configuracoes", label: "Config.",     icon: Settings,    special: false },

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Clock, Gem, Settings, Shield, BookOpen, ShoppingBag } from "lucide-react"
+import { Home, Clock, Settings, Shield, BookOpen, ShoppingBag, Wand2 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 // ─── Itens da navegação mobile ────────────────────────────────────────────────
@@ -10,9 +10,8 @@ import { useAuth } from "@/lib/auth-context"
 const NAV_ITEMS = [
   { href: "/dashboard",               label: "Início",    icon: Home        },
   { href: "/dashboard/prompts",       label: "Prompts",   icon: BookOpen    },
+  { href: "/dashboard/gerador",       label: "Gerador",   icon: Wand2       },
   { href: "/dashboard/biblioteca",    label: "Biblioteca",icon: ShoppingBag },
-  { href: "/dashboard/historico",     label: "Histórico", icon: Clock       },
-  { href: "/dashboard/creditos",      label: "Créditos",  icon: Gem         },
   { href: "/dashboard/configuracoes", label: "Config.",   icon: Settings    },
 ] as const
 
