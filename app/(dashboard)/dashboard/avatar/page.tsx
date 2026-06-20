@@ -464,6 +464,7 @@ export default function AvatarPage() {
                 <VisualCard
                   key={f.label}
                   bg={f.bg}
+                  imgUrl={(f as any).imgUrl}
                   label={f.label}
                   active={identidade.rosto === f.label}
                   onClick={() => updId("rosto", f.label)}
@@ -485,6 +486,7 @@ export default function AvatarPage() {
                 <VisualCard
                   key={e.label}
                   bg={e.bg}
+                  imgUrl={(e as any).imgUrl}
                   label={e.label}
                   active={aparencia.corOlhos === e.label}
                   onClick={() => updAp("corOlhos", e.label)}
@@ -514,6 +516,7 @@ export default function AvatarPage() {
                 <VisualCard
                   key={h.label}
                   bg={h.bg}
+                  imgUrl={(h as any).imgUrl}
                   label={h.label}
                   active={aparencia.corCabelo === h.label}
                   onClick={() => updAp("corCabelo", h.label)}
@@ -539,6 +542,7 @@ export default function AvatarPage() {
                 <VisualCard
                   key={b.label}
                   bg={b.bg}
+                  imgUrl={(b as any).imgUrl}
                   label={b.label}
                   active={aparencia.corpo === b.label}
                   onClick={() => updAp("corpo", b.label)}
@@ -579,6 +583,7 @@ export default function AvatarPage() {
                 <VisualCard
                   key={g.label}
                   bg={g.bg}
+                  imgUrl={(g as any).imgUrl}
                   label={g.label}
                   active={estilo.oculos === g.label}
                   onClick={() => updEs("oculos", g.label)}
