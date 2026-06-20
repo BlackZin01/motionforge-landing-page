@@ -88,6 +88,19 @@ export default function GeradorPage() {
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
+  function handleReset() {
+    setProduto("")
+    setNicho("")
+    setDiferencial("")
+    setTom("urgência e desejo")
+    setImageBase64(null)
+    setImagePreview(null)
+    setResult(null)
+    setError("")
+    if (fileInputRef.current) fileInputRef.current.value = ""
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   async function handleGenerate() {
     if (!produto.trim() || !nicho.trim()) {
       setError("Preencha pelo menos Produto e Nicho.")
@@ -289,30 +302,53 @@ export default function GeradorPage() {
             </p>
           )}
 
-          <button
-            onClick={handleGenerate}
-            disabled={loading}
-            style={{
-              marginTop: "20px",
-              display: "flex", alignItems: "center", gap: "8px",
-              background: loading ? "rgba(255,77,0,0.5)" : "#FF4D00",
-              color: "#fff", border: "none", borderRadius: "8px",
-              padding: "12px 24px", fontSize: "13px", fontWeight: 700,
-              letterSpacing: "0.5px",
-              fontFamily: "'DM Sans', sans-serif",
-              cursor: loading ? "not-allowed" : "pointer",
-              transition: "background 150ms ease, transform 150ms ease",
-              boxShadow: loading ? "none" : "0 0 20px rgba(255,77,0,0.25)",
-            }}
-            onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.02)" }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)" }}
-          >
-            {loading
-              ? <Loader2 size={15} style={{ animation: "spin 0.8s linear infinite" }} />
-              : <Wand2 size={15} />
-            }
-            {loading ? "Gerando copy..." : "Gerar Copy"}
-          </button>
+          <div style={{ marginTop: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                background: loading ? "rgba(255,77,0,0.5)" : "#FF4D00",
+                color: "#fff", border: "none", borderRadius: "8px",
+                padding: "12px 24px", fontSize: "13px", fontWeight: 700,
+                letterSpacing: "0.5px", fontFamily: "'DM Sans', sans-serif",
+                cursor: loading ? "not-allowed" : "pointer",
+                transition: "background 150ms ease, transform 150ms ease",
+                boxShadow: loading ? "none" : "0 0 20px rgba(255,77,0,0.25)",
+              }}
+              onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.02)" }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)" }}
+            >
+              {loading
+                ? <Loader2 size={15} style={{ animation: "spin 0.8s linear infinite" }} />
+                : <Wand2 size={15} />
+              }
+              {loading ? "Gerando copy..." : "Gerar Copy"}
+            </button>
+
+            {(produto || nicho || diferencial || imagePreview || result) && (
+              <button
+                onClick={handleReset}
+                disabled={loading}
+                style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(245,245,245,0.45)",
+                  borderRadius: "8px", padding: "12px 18px",
+                  fontSize: "13px", fontWeight: 600,
+                  fontFamily: "'DM Sans', sans-serif",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  transition: "all 150ms ease",
+                }}
+                onMouseEnter={e => { if (!loading) { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(239,68,68,0.4)"; el.style.color = "#ef4444" } }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,255,255,0.1)"; el.style.color = "rgba(245,245,245,0.45)" }}
+              >
+                <X size={13} />
+                Limpar tudo
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
 
@@ -404,20 +440,22 @@ export default function GeradorPage() {
             </div>
           </div>
 
-          {/* Gerar de novo */}
+          {/* Nova copy */}
           <button
-            onClick={() => { setResult(null); window.scrollTo({ top: 0, behavior: "smooth" }) }}
+            onClick={handleReset}
             style={{
               alignSelf: "flex-start",
+              display: "flex", alignItems: "center", gap: "6px",
               background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
               color: "rgba(245,245,245,0.5)", fontFamily: "'DM Sans', sans-serif",
-              fontSize: "12px", fontWeight: 600, padding: "8px 16px",
+              fontSize: "12px", fontWeight: 600, padding: "9px 16px",
               borderRadius: "8px", cursor: "pointer", transition: "all 150ms ease",
             }}
             onMouseEnter={e => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,77,0,0.4)"; el.style.color = "#FF4D00" }}
             onMouseLeave={e => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,255,255,0.1)"; el.style.color = "rgba(245,245,245,0.5)" }}
           >
-            ↑ Gerar novamente
+            <X size={12} />
+            Limpar e gerar nova copy
           </button>
         </motion.div>
       )}
