@@ -13,6 +13,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/dashboard":                      "Visão Geral",
   "/dashboard/prompts":              "Biblioteca de Prompts",
   "/dashboard/gerador":              "Gerador de Copy",
+  "/dashboard/avatar":               "Criador de Avatar IA",
   "/dashboard/biblioteca":           "Biblioteca de Anúncios",
   "/dashboard/historico":            "Histórico",
   "/dashboard/creditos":             "Créditos",
