@@ -17,9 +17,6 @@ export interface AuthUser {
   name: string
   email: string
   plan: "Starter" | "Pro" | "Agency"
-  credits: number
-  totalCredits: number
-  renewDays: number
   isAdmin: boolean
 }
 
@@ -78,9 +75,6 @@ function normalizeUser(data: Record<string, unknown>): AuthUser {
     name,
     email: String(data.email ?? ""),
     plan: normalizePlan(data.plan),
-    credits: Number(data.credits ?? 0),
-    totalCredits: Number(data.totalCredits ?? data.total_credits ?? 5000),
-    renewDays: Number(data.renewDays ?? data.renew_days ?? 30),
     isAdmin: Boolean(data.isAdmin ?? data.is_admin ?? false),
   }
 }

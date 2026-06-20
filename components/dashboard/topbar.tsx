@@ -2,17 +2,13 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Zap, ChevronDown, User, LogOut } from "lucide-react"
-import { CreditBar } from "./credit-bar"
+import { ChevronDown, User, LogOut } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface TopbarProps {
   title: string
-  credits: number
-  total: number
-  renewDays: number
   userName: string
   onLogout: () => void
   isAdmin?: boolean
@@ -26,7 +22,7 @@ const DROPDOWN_LINKS = [
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function Topbar({ title, credits, total, renewDays, userName, onLogout, isAdmin }: TopbarProps) {
+export default function Topbar({ title, userName, onLogout, isAdmin }: TopbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -88,38 +84,8 @@ export default function Topbar({ title, credits, total, renewDays, userName, onL
         </span>
       </div>
 
-      {/* ── Direita: credit bar + botão gerar + avatar ── */}
+      {/* ── Direita: avatar ── */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {/* Barra de créditos — oculta em telas pequenas */}
-        <div className="hidden sm:flex">
-          <CreditBar credits={credits} total={total} renewDays={renewDays} isAdmin={isAdmin} />
-        </div>
-
-        {/* Botão ⚡ Gerar → vai para o Studio */}
-        <Link
-          href="/dashboard/studio"
-          style={{
-            background: "#FF4D00",
-            color: "#FFFFFF",
-            borderRadius: "6px",
-            padding: "6px 12px",
-            fontSize: "12px",
-            fontWeight: 700,
-            letterSpacing: "1px",
-            textTransform: "uppercase",
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            fontFamily: "'DM Sans', sans-serif",
-            whiteSpace: "nowrap",
-            transition: "opacity 200ms ease",
-          }}
-        >
-          <Zap size={12} />
-          <span className="hidden xs:inline">Gerar</span>
-        </Link>
-
         {/* Avatar + dropdown */}
         <div ref={dropdownRef} style={{ position: "relative" }}>
           {/* Botão do avatar */}

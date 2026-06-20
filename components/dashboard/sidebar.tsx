@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, Clock, Gem, Settings, LogOut, Users, Film, DollarSign, Webhook, Cpu, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package } from "lucide-react"
+import { Home, Clock, Settings, LogOut, Users, DollarSign, Webhook, Cpu, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -11,8 +11,6 @@ import { Logo } from "@/components/ui/logo"
 interface SidebarProps {
   userName: string
   plan: "Starter" | "Pro" | "Agency"
-  credits: number
-  total: number
   onLogout: () => void
   isAdmin?: boolean
 }
@@ -35,7 +33,6 @@ const NAV_ITEMS = [
   { href: "/dashboard/prompts",       label: "Prompts",     icon: BookOpen,    special: false },
   { href: "/dashboard/biblioteca",    label: "Biblioteca",  icon: ShoppingBag, special: false },
   { href: "/dashboard/historico",     label: "Histórico",   icon: Clock,       special: false },
-  { href: "/dashboard/creditos",      label: "Créditos",    icon: Gem,         special: false },
   { href: "/dashboard/configuracoes", label: "Config.",     icon: Settings,    special: false },
 ] as const
 
@@ -49,7 +46,7 @@ const PLAN_BADGE: Record<"Starter" | "Pro" | "Agency", { bg: string; color: stri
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function Sidebar({ userName, plan, credits, total, onLogout, isAdmin }: SidebarProps) {
+export default function Sidebar({ userName, plan, onLogout, isAdmin }: SidebarProps) {
   const pathname = usePathname()
 
   // Determina se o item está ativo
@@ -277,23 +274,6 @@ export default function Sidebar({ userName, plan, credits, total, onLogout, isAd
               </span>
             </div>
 
-            {/* Link de upgrade — apenas para plano Starter */}
-            {plan === "Starter" && !isAdmin && (
-              <Link
-                href="/dashboard/creditos"
-                style={{
-                  display: "block",
-                  marginTop: "4px",
-                  fontSize: "10px",
-                  color: "#FF4D00",
-                  textDecoration: "none",
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: 600,
-                }}
-              >
-                Upgrade ↑
-              </Link>
-            )}
           </div>
 
           {/* Botão de logout */}

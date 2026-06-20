@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth-context"
 import Sidebar from "@/components/dashboard/sidebar"
 import Topbar from "@/components/dashboard/topbar"
 import { MobileNav } from "@/components/dashboard/mobile-nav"
-import { UpgradeBanner } from "@/components/dashboard/shared/upgrade-banner"
 import { usePathname } from "next/navigation"
 
 // ─── Mapeamento pathname → título da página ───────────────────────────────────
@@ -72,12 +71,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   if (loading && !user) return <AuthSkeleton />
 
-  const userName   = user?.name        ?? "Usuário"
-  const plan       = user?.plan        ?? "Starter"
-  const credits    = user?.credits     ?? 0
-  const total      = user?.totalCredits ?? 5000
-  const renewDays  = user?.renewDays   ?? 30
-  const isAdmin    = user?.isAdmin     ?? false
+  const userName = user?.name    ?? "Usuário"
+  const plan     = user?.plan    ?? "Starter"
+  const isAdmin  = user?.isAdmin ?? false
 
   return (
     <div
@@ -93,8 +89,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <Sidebar
           userName={userName}
           plan={plan}
-          credits={credits}
-          total={total}
           onLogout={logout}
           isAdmin={isAdmin}
         />
@@ -112,16 +106,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       >
         <Topbar
           title={title}
-          credits={credits}
-          total={total}
-          renewDays={renewDays}
           userName={userName}
           onLogout={logout}
           isAdmin={isAdmin}
         />
 
-        {/* Banner de upgrade / sem créditos */}
-        <UpgradeBanner credits={credits} plan={plan} isAdmin={isAdmin} />
 
         {/* Área scrollável — pb-16 em mobile p/ não ficar atrás da nav */}
         <main style={{ flex: 1, overflowY: "scroll", scrollbarWidth: "none" }} className="pb-16 md:pb-0 [&::-webkit-scrollbar]:hidden">

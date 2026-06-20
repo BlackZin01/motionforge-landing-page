@@ -117,10 +117,8 @@ export default function DashboardHomePage() {
     )
   }
 
-  const firstName    = user?.name?.split(" ")[0] ?? "Usuário"
-  const credits      = user?.credits ?? 0
-  const totalCredits = user?.totalCredits ?? 5000
-  const isAdmin      = user?.isAdmin ?? false
+  const firstName = user?.name?.split(" ")[0] ?? "Usuário"
+  const isAdmin   = user?.isAdmin ?? false
 
   return (
     <div
@@ -157,7 +155,7 @@ export default function DashboardHomePage() {
             color: "rgba(245,245,245,0.4)",
           }}
         >
-          {isAdmin ? "Modo admin ativo. Gerencie prompts e biblioteca." : `Você tem ${credits.toLocaleString("pt-BR")} créditos.`}
+          {isAdmin ? "Modo admin ativo. Gerencie prompts e biblioteca." : "Acesse seus prompts e produtos validados."}
         </p>
       </motion.div>
 
@@ -169,11 +167,8 @@ export default function DashboardHomePage() {
         animate="visible"
       >
         <StatsHUD
-          credits={credits}
-          totalCredits={totalCredits}
           prompts={totalPrompts}
           produtos={totalProdutos}
-          isAdmin={isAdmin}
         />
       </motion.div>
 

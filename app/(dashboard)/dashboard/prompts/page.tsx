@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Copy, Check, Search, ChevronDown } from "lucide-react"
+import { BookOpen, Copy, Check, Search, ChevronDown, Wand2, Loader2 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -181,6 +181,278 @@ function PromptCard({ prompt, index }: { prompt: Prompt; index: number }) {
   )
 }
 
+// ─── Copy Generator ───────────────────────────────────────────────────────────
+
+interface CopyResult {
+  hooks: string[]
+  ctas: string[]
+  script: string
+}
+
+function CopyGenerator() {
+  const [produto, setProduto]       = useState("")
+  const [nicho, setNicho]           = useState("")
+  const [diferencial, setDiferencial] = useState("")
+  const [tom, setTom]               = useState("urgência e desejo")
+  const [loading, setLoading]       = useState(false)
+  const [result, setResult]         = useState<CopyResult | null>(null)
+  const [error, setError]           = useState("")
+  const [copiedKey, setCopiedKey]   = useState<string | null>(null)
+  const [open, setOpen]             = useState(true)
+
+  async function handleGenerate() {
+    if (!produto.trim() || !nicho.trim()) {
+      setError("Preencha pelo menos produto e nicho.")
+      return
+    }
+    setError("")
+    setLoading(true)
+    setResult(null)
+    try {
+      const res = await fetch("/api/generate-copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ produto, nicho, diferencial, tom }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? "Erro ao gerar."); return }
+      setResult(data)
+    } catch {
+      setError("Erro de conexão. Tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleCopy(text: string, key: string) {
+    await navigator.clipboard.writeText(text)
+    setCopiedKey(key)
+    setTimeout(() => setCopiedKey(null), 2000)
+  }
+
+  const INPUT_STYLE: React.CSSProperties = {
+    background: "#0D0D0D",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    fontSize: "13px",
+    color: "#F5F5F5",
+    fontFamily: "'DM Sans', sans-serif",
+    width: "100%",
+    outline: "none",
+  }
+
+  const TONS = ["urgência e desejo", "emocional", "direto e objetivo", "humor", "autoridade"]
+
+  return (
+    <div style={{
+      background: "#111111",
+      border: "1px solid rgba(255,77,0,0.15)",
+      borderRadius: "16px",
+      marginBottom: "32px",
+      overflow: "hidden",
+    }}>
+      {/* Header */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", gap: "12px",
+          padding: "18px 20px", background: "transparent", border: "none",
+          cursor: "pointer", textAlign: "left",
+        }}
+      >
+        <div style={{
+          width: "36px", height: "36px", borderRadius: "10px",
+          background: "rgba(255,77,0,0.12)", display: "flex",
+          alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <Wand2 size={18} style={{ color: "#FF4D00" }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "15px", fontWeight: 700, color: "#F5F5F5" }}>
+            Gerador de Copy com IA
+          </div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.4)", marginTop: "2px" }}>
+            Descreva seu produto e a IA gera hooks, CTAs e script de vídeo prontos
+          </div>
+        </div>
+        <ChevronDown
+          size={16}
+          style={{ color: "rgba(245,245,245,0.4)", transform: open ? "rotate(180deg)" : "none", transition: "transform 200ms ease", flexShrink: 0 }}
+        />
+      </button>
+
+      {open && (
+        <div style={{ padding: "0 20px 20px" }}>
+          <div style={{ height: "1px", background: "rgba(255,255,255,0.05)", marginBottom: "20px" }} />
+
+          {/* Formulário */}
+          <div style={{ display: "grid", gap: "12px" }} className="grid-cols-1 sm:grid-cols-2">
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif" }}>
+                Produto *
+              </label>
+              <input
+                style={INPUT_STYLE}
+                placeholder="ex: Creme facial hidratante"
+                value={produto}
+                onChange={e => setProduto(e.target.value)}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif" }}>
+                Nicho *
+              </label>
+              <input
+                style={INPUT_STYLE}
+                placeholder="ex: Skincare, Beleza feminina"
+                value={nicho}
+                onChange={e => setNicho(e.target.value)}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif" }}>
+                Diferencial
+              </label>
+              <input
+                style={INPUT_STYLE}
+                placeholder="ex: Resultados em 7 dias, sem parabenos"
+                value={diferencial}
+                onChange={e => setDiferencial(e.target.value)}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif" }}>
+                Tom
+              </label>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                {TONS.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTom(t)}
+                    style={{
+                      padding: "6px 10px", borderRadius: "6px", cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600,
+                      border: "1px solid",
+                      background: tom === t ? "rgba(255,77,0,0.12)" : "transparent",
+                      borderColor: tom === t ? "rgba(255,77,0,0.4)" : "rgba(255,255,255,0.08)",
+                      color: tom === t ? "#FF4D00" : "rgba(245,245,245,0.4)",
+                      transition: "all 150ms ease",
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <p style={{ fontSize: "12px", color: "#ef4444", marginTop: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+              {error}
+            </p>
+          )}
+
+          <button
+            onClick={handleGenerate}
+            disabled={loading}
+            style={{
+              marginTop: "16px",
+              display: "flex", alignItems: "center", gap: "8px",
+              background: loading ? "rgba(255,77,0,0.4)" : "#FF4D00",
+              color: "#fff", border: "none", borderRadius: "8px",
+              padding: "11px 20px", fontSize: "13px", fontWeight: 700,
+              fontFamily: "'DM Sans', sans-serif", cursor: loading ? "not-allowed" : "pointer",
+              transition: "background 150ms ease",
+            }}
+          >
+            {loading ? <Loader2 size={14} style={{ animation: "spin 0.8s linear infinite" }} /> : <Wand2 size={14} />}
+            {loading ? "Gerando..." : "Gerar Copy"}
+          </button>
+
+          {/* Resultado */}
+          {result && (
+            <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              {/* Hooks */}
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif", marginBottom: "10px" }}>
+                  🎣 Hooks de abertura
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {result.hooks.map((hook, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px",
+                      background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.05)",
+                      borderRadius: "8px", padding: "12px 14px",
+                    }}>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#F5F5F5", flex: 1 }}>{hook}</span>
+                      <button
+                        onClick={() => handleCopy(hook, `hook-${i}`)}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: copiedKey === `hook-${i}` ? "#10A37F" : "rgba(245,245,245,0.35)", flexShrink: 0, padding: "4px" }}
+                      >
+                        {copiedKey === `hook-${i}` ? <Check size={14} /> : <Copy size={14} />}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif", marginBottom: "10px" }}>
+                  🎯 CTAs
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {result.ctas.map((cta, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px",
+                      background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.05)",
+                      borderRadius: "8px", padding: "12px 14px",
+                    }}>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#F5F5F5", flex: 1 }}>{cta}</span>
+                      <button
+                        onClick={() => handleCopy(cta, `cta-${i}`)}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: copiedKey === `cta-${i}` ? "#10A37F" : "rgba(245,245,245,0.35)", flexShrink: 0, padding: "4px" }}
+                      >
+                        {copiedKey === `cta-${i}` ? <Check size={14} /> : <Copy size={14} />}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Script */}
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.5)", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'DM Sans', sans-serif", marginBottom: "10px" }}>
+                  🎬 Script de vídeo (30s)
+                </div>
+                <div style={{
+                  background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.05)",
+                  borderRadius: "8px", padding: "16px", position: "relative",
+                }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.85)", lineHeight: "1.7", margin: 0 }}>
+                    {result.script}
+                  </p>
+                  <button
+                    onClick={() => handleCopy(result.script, "script")}
+                    style={{
+                      position: "absolute", top: "12px", right: "12px",
+                      background: "none", border: "none", cursor: "pointer",
+                      color: copiedKey === "script" ? "#10A37F" : "rgba(245,245,245,0.35)", padding: "4px",
+                    }}
+                  >
+                    {copiedKey === "script" ? <Check size={14} /> : <Copy size={14} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function PromptsPage() {
@@ -244,9 +516,16 @@ export default function PromptsPage() {
         </p>
       </motion.div>
 
-      {/* Filtros */}
+      {/* Copy Generator */}
       <motion.div
         variants={fadeUp} custom={1} initial="hidden" animate="visible"
+      >
+        <CopyGenerator />
+      </motion.div>
+
+      {/* Filtros */}
+      <motion.div
+        variants={fadeUp} custom={2} initial="hidden" animate="visible"
         style={{ display: "flex", gap: "10px", marginBottom: "24px", flexWrap: "wrap" }}
       >
         {/* Busca */}
@@ -291,7 +570,7 @@ export default function PromptsPage() {
       {/* Categorias */}
       {categorias.length > 0 && (
         <motion.div
-          variants={fadeUp} custom={2} initial="hidden" animate="visible"
+          variants={fadeUp} custom={3} initial="hidden" animate="visible"
           style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}
         >
           {["", ...categorias].map(cat => (
