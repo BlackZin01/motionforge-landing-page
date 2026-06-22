@@ -10,7 +10,7 @@ import { Logo } from "@/components/ui/logo"
 
 interface SidebarProps {
   userName: string
-  plan: "Starter" | "Pro" | "Agency"
+  plan: "Free" | "Starter" | "Pro" | "Agency"
   onLogout: () => void
   isAdmin?: boolean
 }
@@ -51,7 +51,8 @@ const NAV_ITEMS: NavItem[] = [
 
 // ─── Badge de plano ───────────────────────────────────────────────────────────
 
-const PLAN_BADGE: Record<"Starter" | "Pro" | "Agency", { bg: string; color: string }> = {
+const PLAN_BADGE: Record<"Free" | "Starter" | "Pro" | "Agency", { bg: string; color: string }> = {
+  Free:    { bg: "rgba(255,255,255,0.04)",  color: "rgba(245,245,245,0.25)" },
   Starter: { bg: "rgba(255,255,255,0.06)",  color: "rgba(245,245,245,0.4)" },
   Pro:     { bg: "rgba(0,229,255,0.08)",    color: "#00E5FF"               },
   Agency:  { bg: "rgba(74,222,128,0.08)",   color: "#4ADE80"               },
