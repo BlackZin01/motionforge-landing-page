@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
 // ─── POST /api/generate-avatar ────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   try {
     const auth = req.headers.get("authorization") ?? ""
     if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
