@@ -34,7 +34,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="md:hidden"
+      className="flex md:hidden"
       style={{
         position: "fixed",
         bottom: 0,
@@ -48,9 +48,7 @@ export function MobileNav() {
         zIndex: 50,
         overflowX: "auto",
         overflowY: "hidden",
-        display: "flex",
         alignItems: "stretch",
-        /* esconde scrollbar mas mantém funcionalidade */
         scrollbarWidth: "none",
         msOverflowStyle: "none",
       } as React.CSSProperties}

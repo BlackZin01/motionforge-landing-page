@@ -79,8 +79,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const isAdmin  = user?.isAdmin ?? false
 
   // Usuário autenticado mas sem plano pago — mostra gate de seleção
-  const needsPlan   = !!user && !isAdmin && (!user.plan || user.plan.toLowerCase() === "free")
-  const planStatus  = (user as { plan_status?: string } | null)?.plan_status ?? "active"
+  const needsPlan   = !!user && !isAdmin && user.plan === "Free"
+  const planStatus  = user?.plan_status ?? "active"
   const isSuspended = !!user && !isAdmin && planStatus === "suspended"
 
   return (

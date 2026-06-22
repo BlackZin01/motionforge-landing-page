@@ -71,8 +71,8 @@ export default function UpgradePage() {
 
   const [checkoutPlan, setCheckoutPlan] = useState<PlanId | null>(null)
 
-  const currentPlan  = (user?.plan ?? "free").toLowerCase()
-  const planStatus   = (user as { plan_status?: string })?.plan_status ?? "active"
+  const currentPlan  = (user?.plan ?? "Free").toLowerCase()
+  const planStatus   = user?.plan_status ?? "active"
   const isSuspended  = planStatus === "suspended"
 
   async function handleSuccess() {

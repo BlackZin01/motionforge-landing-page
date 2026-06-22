@@ -16,7 +16,8 @@ export interface AuthUser {
   id: string
   name: string
   email: string
-  plan: "Starter" | "Pro" | "Agency"
+  plan: "Free" | "Starter" | "Pro" | "Agency"
+  plan_status?: string
   isAdmin: boolean
   geracoes_usadas?: number
   active_profile_id?: string | null
@@ -55,14 +56,15 @@ function deleteCookie(name: string) {
 
 // ─── Normalizar user da API ───────────────────────────────────────────────────
 
-const VALID_PLANS: AuthUser["plan"][] = ["Starter", "Pro", "Agency"]
+const VALID_PLANS: AuthUser["plan"][] = ["Free", "Starter", "Pro", "Agency"]
 
 function normalizePlan(raw: unknown): AuthUser["plan"] {
-  if (typeof raw !== "string") return "Starter"
+  if (typeof raw !== "string") return "Free"
   const lower = raw.toLowerCase()
-  if (lower === "pro") return "Pro"
-  if (lower === "agency") return "Agency"
-  return "Starter" // free, starter, unknown → Starter
+  if (lower === "pro")     return "Pro"
+  if (lower === "agency")  return "Agency"
+  if (lower === "starter") return "Starter"
+  return "Free" // free, unknown → Free
 }
 
 function normalizeUser(data: Record<string, unknown>): AuthUser {
@@ -77,6 +79,7 @@ function normalizeUser(data: Record<string, unknown>): AuthUser {
     name,
     email: String(data.email ?? ""),
     plan: normalizePlan(data.plan),
+    plan_status: typeof data.plan_status === "string" ? data.plan_status : "active",
     isAdmin: Boolean(data.isAdmin ?? data.is_admin ?? false),
     geracoes_usadas: typeof data.geracoes_usadas === "number" ? data.geracoes_usadas : undefined,
     active_profile_id: (data.active_profile_id as string | null | undefined) ?? null,
