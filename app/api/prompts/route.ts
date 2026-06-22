@@ -6,7 +6,11 @@ export async function GET(req: NextRequest) {
   try {
     const auth = req.headers.get("authorization") ?? ""
     const { searchParams } = req.nextUrl
-    const qs = searchParams.toString()
+    // Não enviar ?plano= — o backend usa o plano real do JWT
+    const filtros = new URLSearchParams()
+    if (searchParams.get("categoria")) filtros.set("categoria", searchParams.get("categoria")!)
+    if (searchParams.get("modelo")) filtros.set("modelo", searchParams.get("modelo")!)
+    const qs = filtros.toString()
     const res = await fetch(`${API}/prompts${qs ? "?" + qs : ""}`, {
       headers: { Authorization: auth },
     })

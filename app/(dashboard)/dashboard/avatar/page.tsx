@@ -379,16 +379,8 @@ interface SavedAvatar {
   savedAt: string
 }
 
-const MF_AVATARES_KEY = "mf_avatares"
-
-function loadAvatares(): SavedAvatar[] {
-  try {
-    return JSON.parse(localStorage.getItem(MF_AVATARES_KEY) ?? "[]")
-  } catch { return [] }
-}
-
-function saveAvatares(list: SavedAvatar[]) {
-  localStorage.setItem(MF_AVATARES_KEY, JSON.stringify(list))
+function getToken(): string {
+  return typeof window !== "undefined" ? (localStorage.getItem("mf_token") ?? "") : ""
 }
 
 // ─── Etapas ───────────────────────────────────────────────────────────────────
@@ -410,39 +402,59 @@ export default function AvatarPage() {
   const isStarter = user?.plan === "Starter"
 
   useEffect(() => {
-    setSavedAvatares(loadAvatares())
+    const token = getToken()
+    if (!token) return
+    fetch("/api/avatares", { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then((data: Array<{ id: string; nome: string; prompt: string; negative: string; config: SavedAvatar["config"]; created_at: string }>) => {
+        if (Array.isArray(data)) {
+          setSavedAvatares(data.map(a => ({ ...a, savedAt: a.created_at })))
+        }
+      })
+      .catch(() => {})
   }, [])
 
-  function handleSaveAvatar() {
+  async function handleSaveAvatar() {
     if (!prompt) return
-    const current = loadAvatares()
+    const token = getToken()
+    if (!token) return
 
-    if (isStarter && current.length >= 1) {
-      setSaveMsg("limit")
-      setTimeout(() => setSaveMsg(null), 3000)
-      return
-    }
-
-    const novo: SavedAvatar = {
-      id: Date.now().toString(),
-      nome: identidade.nome || `Avatar ${current.length + 1}`,
+    const body = {
+      nome: identidade.nome || `Avatar ${savedAvatares.length + 1}`,
       prompt: prompt.prompt,
       negative: prompt.negative,
       config: { identidade, aparencia, estilo, ambiente },
-      savedAt: new Date().toISOString(),
     }
 
-    const updated = [...current, novo]
-    saveAvatares(updated)
-    setSavedAvatares(updated)
-    setSaveMsg("saved")
-    setTimeout(() => setSaveMsg(null), 2000)
+    try {
+      const res = await fetch("/api/avatares", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+      if (res.status === 429) {
+        setSaveMsg("limit")
+        setTimeout(() => setSaveMsg(null), 3000)
+        return
+      }
+      if (!res.ok) return
+      const novo = await res.json() as { id: string; nome: string; prompt: string; negative: string; config: SavedAvatar["config"]; created_at: string }
+      setSavedAvatares(prev => [...prev, { ...novo, savedAt: novo.created_at }])
+      setSaveMsg("saved")
+      setTimeout(() => setSaveMsg(null), 2000)
+    } catch { /* silently ignore */ }
   }
 
-  function handleDeleteAvatar(id: string) {
-    const updated = loadAvatares().filter(a => a.id !== id)
-    saveAvatares(updated)
-    setSavedAvatares(updated)
+  async function handleDeleteAvatar(id: string) {
+    const token = getToken()
+    if (!token) return
+    try {
+      await fetch(`/api/avatares/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    } catch { /* silently ignore */ }
+    setSavedAvatares(prev => prev.filter(a => a.id !== id))
   }
 
   function handleLoadAvatar(av: SavedAvatar) {

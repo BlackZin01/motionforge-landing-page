@@ -102,7 +102,7 @@ function PromptCard({ prompt, index, userPlan }: { prompt: Prompt; index: number
             </p>
           </div>
           <a
-            href="/dashboard/configuracoes"
+            href="/#planos"
             style={{
               padding: "8px 20px", borderRadius: "8px",
               background: "#FF4D00", color: "white", textDecoration: "none",
@@ -310,7 +310,6 @@ export default function PromptsPage() {
     setLoading(true)
     try {
       const qs = new URLSearchParams({
-        plano: user?.plan?.toLowerCase() ?? "starter",
         ...(categoriaAtiva ? { categoria: categoriaAtiva } : {}),
         ...(modeloAtivo    ? { modelo: modeloAtivo }       : {}),
       })

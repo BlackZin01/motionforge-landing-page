@@ -7,6 +7,13 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = req.headers.get("authorization") ?? ""
+    if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+
+    const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
+    const meRes = await fetch(`${API}/auth/me`, { headers: { Authorization: auth } }).catch(() => null)
+    if (!meRes || !meRes.ok) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+
     const { identidade, aparencia, estilo, ambiente } = await req.json()
 
     const system = `You are an expert at writing ultra-realistic, photographic AI image generation prompts.
