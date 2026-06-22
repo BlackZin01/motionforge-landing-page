@@ -155,7 +155,8 @@ export default function TendenciasPage() {
               {data.novosEssaSemana.length} produtos
             </span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px" }}>
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as const }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px", minWidth: "460px" }}>
             {data.novosEssaSemana.map((p, i) => (
               <motion.div
                 key={p.id}
@@ -188,6 +189,7 @@ export default function TendenciasPage() {
                 </div>
               </motion.div>
             ))}
+          </div>
           </div>
         </motion.section>
       )}
@@ -266,7 +268,8 @@ export default function TendenciasPage() {
             Top produto por nicho
           </h2>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "10px" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as const }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "10px", minWidth: "500px" }}>
           {data.topPorNicho.map((p, i) => (
             <motion.div
               key={p.id}
@@ -309,6 +312,7 @@ export default function TendenciasPage() {
               </div>
             </motion.div>
           ))}
+        </div>
         </div>
       </motion.section>
     </div>

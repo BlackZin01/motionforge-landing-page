@@ -165,21 +165,24 @@ export default function ViralPage() {
 
       {/* Grid */}
       {loading ? (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px" }}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} style={{ height: "180px", background: "#111", borderRadius: "12px", animation: "pulse 1.5s ease-in-out infinite" }} />
-          ))}
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as const }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px", minWidth: "540px" }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} style={{ height: "180px", background: "#111", borderRadius: "12px", animation: "pulse 1.5s ease-in-out infinite" }} />
+            ))}
+          </div>
         </div>
       ) : produtos.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", color: "rgba(245,245,245,0.3)", fontFamily: "'DM Sans', sans-serif", fontSize: "14px" }}>
           Nenhum produto viral encontrado{nichoAtivo ? ` em "${nichoAtivo}"` : ""}.
         </div>
       ) : (
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as const }}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
-          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px" }}
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px", minWidth: "540px" }}
         >
           {produtos.map((p, i) => (
             <motion.div
@@ -246,6 +249,7 @@ export default function ViralPage() {
             </motion.div>
           ))}
         </motion.div>
+        </div>
       )}
     </div>
   )
