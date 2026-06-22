@@ -183,6 +183,7 @@ export default function BibliotecaPage() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [nichos, setNichos] = useState<string[]>([])
   const [stats, setStats] = useState<{ status: string; count: string }[]>([])
+  const [limitePlano, setLimitePlano] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState("")
   const [nichoAtivo, setNichoAtivo] = useState("")
@@ -205,6 +206,7 @@ export default function BibliotecaPage() {
       setProdutos(data.produtos ?? [])
       setNichos(data.nichos ?? [])
       setStats(data.stats ?? [])
+      if (data.limite_plano) setLimitePlano(data.limite_plano)
     } finally {
       setLoading(false)
     }
@@ -237,9 +239,22 @@ export default function BibliotecaPage() {
             Biblioteca de Anúncios
           </h1>
         </div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
-          Produtos validados e em alta no TikTok Shopping. Curado semanalmente.
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
+            Produtos validados e em alta no TikTok Shopping. Curado semanalmente.
+          </p>
+          {limitePlano !== null && (
+            <span style={{
+              fontFamily: "'Space Grotesk', sans-serif", fontSize: "12px", fontWeight: 700,
+              color: user?.plan === "Starter" ? "#FF4D00" : "#00E5FF",
+              background: user?.plan === "Starter" ? "rgba(255,77,0,0.08)" : "rgba(0,229,255,0.06)",
+              border: `1px solid ${user?.plan === "Starter" ? "rgba(255,77,0,0.25)" : "rgba(0,229,255,0.2)"}`,
+              borderRadius: "9999px", padding: "3px 10px",
+            }}>
+              {produtos.length}/{limitePlano} produtos
+            </span>
+          )}
+        </div>
       </motion.div>
 
       {/* ── Alerta Viral (Pro+) ──────────────────────────────────────────────── */}

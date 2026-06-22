@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
       }).catch(() => null)
       if (meRes?.ok) {
         const userData = await meRes.json()
-        const plan = String(userData.plan ?? "starter").toLowerCase()
+        const rawPlan = userData.plan
+        const plan = typeof rawPlan === "string" ? rawPlan.toLowerCase() : "starter"
         limit = PLAN_LIMITS[plan] ?? PLAN_LIMITS.starter
       }
     }

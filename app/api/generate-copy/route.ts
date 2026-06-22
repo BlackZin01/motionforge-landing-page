@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
     }
 
     const userData = await meRes.json()
-    const plan = String(userData.plan ?? "starter").toLowerCase()
+    const rawPlan = userData.plan
+    const plan = typeof rawPlan === "string" ? rawPlan.toLowerCase() : "starter"
     const geracoesUsadas = Number(userData.geracoes_usadas ?? 0)
 
     // Bloqueia Starter ao atingir o limite

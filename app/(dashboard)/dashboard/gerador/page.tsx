@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Wand2, Copy, Check, Loader2, ImagePlus, X, Infinity as InfinityIcon, Lock } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
@@ -45,6 +45,14 @@ export default function GeradorPage() {
   const [geracoesUsadas, setGeracoesUsadas] = useState<number | null>(null)
   const [copiedKey, setCopiedKey]       = useState<string | null>(null)
   const fileInputRef                    = useRef<HTMLInputElement>(null)
+
+  // Inicializa contador e bloqueio a partir do contexto de auth (persiste entre navegações)
+  useEffect(() => {
+    if (user?.plan === "Starter" && user.geracoes_usadas !== undefined) {
+      setGeracoesUsadas(prev => prev ?? user.geracoes_usadas!)
+      if (user.geracoes_usadas >= 30) setLimitReached(true)
+    }
+  }, [user])
 
   const TONS = ["urgência e desejo", "emocional", "direto e objetivo", "humor", "autoridade"]
 
