@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import type { Variants } from "framer-motion"
 import { motion } from "framer-motion"
 import gsap from "gsap"
@@ -100,8 +100,33 @@ const PLANS: Plan[] = [
 /* ── Card ───────────────────────────────────────────────────── */
 function PlanCard({ plan }: { plan: Plan }) {
   const { id, price, tagline, desc, features, featured, ctaLabel, variant, accentColor } = plan
-  const cardRef = useRef<HTMLDivElement>(null)
+  const cardRef  = useRef<HTMLDivElement>(null)
   const glareRef = useRef<HTMLDivElement>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleCTA() {
+    trackEvent("InitiateCheckout", { value: price, currency: "BRL", content_name: id })
+    const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") : null
+    const planId = id.toLowerCase()
+
+    if (token) {
+      // Usuário já logado — cria checkout direto
+      setLoading(true)
+      try {
+        const res = await fetch("/api/payment/checkout", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: planId }),
+        })
+        const data = await res.json()
+        if (data.url) { window.location.href = data.url; return }
+      } catch { /* fallback para cadastro */ }
+      setLoading(false)
+    }
+
+    // Sem token ou erro — vai para cadastro com plano pré-selecionado
+    window.location.href = `/cadastro?plan=${planId}`
+  }
 
   useEffect(() => {
     const card = cardRef.current
@@ -231,18 +256,22 @@ function PlanCard({ plan }: { plan: Plan }) {
       {/* CTA */}
       <div style={{ padding: "0 28px 32px", position: "relative" }}>
         <button
-          onClick={() => trackEvent("InitiateCheckout", { value: price, currency: "BRL", content_name: id })}
+          onClick={handleCTA}
+          disabled={loading}
           style={{
             width: "100%", padding: "14px 0",
             fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 700,
-            letterSpacing: "0.2em", textTransform: "uppercase", cursor: "pointer",
+            letterSpacing: "0.2em", textTransform: "uppercase",
+            cursor: loading ? "not-allowed" : "pointer",
             border: variant === "primary" ? "none" : "1px solid rgba(255,255,255,0.22)",
             background: variant === "primary" ? "var(--color-forge-orange)" : "transparent",
             color: "var(--color-forge-white)",
+            opacity: loading ? 0.7 : 1,
             boxShadow: variant === "primary" ? "0 0 24px rgba(255,77,0,0.35)" : "none",
-            transition: "box-shadow 220ms ease, border-color 220ms ease, transform 220ms ease",
+            transition: "box-shadow 220ms ease, border-color 220ms ease, transform 220ms ease, opacity 150ms ease",
           }}
           onMouseEnter={(e) => {
+            if (loading) return
             const el = e.currentTarget as HTMLButtonElement
             if (variant === "primary") { el.style.boxShadow = "0 0 44px rgba(255,77,0,0.6)"; el.style.transform = "scale(1.02)" }
             else { el.style.borderColor = "rgba(255,255,255,0.5)"; el.style.transform = "scale(1.01)" }
@@ -253,7 +282,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             else { el.style.borderColor = "rgba(255,255,255,0.22)"; el.style.transform = "scale(1)" }
           }}
         >
-          {ctaLabel}
+          {loading ? "Aguarde..." : ctaLabel}
         </button>
       </div>
     </motion.div>
