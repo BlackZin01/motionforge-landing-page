@@ -16,7 +16,7 @@ interface PlanDef {
   period: string
   description: string
   color: string
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; color?: string }>
   features: string[]
   highlight?: boolean
 }
