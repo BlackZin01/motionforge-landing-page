@@ -119,7 +119,7 @@ export default function ViralPage() {
           </span>
         </div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
-          Produtos com <strong style={{ color: "#FF4D00" }}>status em_alta</strong> ordenados pelo maior score de engajamento.
+          Produtos <strong style={{ color: "#FF4D00" }}>em alta</strong> ordenados pelo maior score de engajamento.
         </p>
       </motion.div>
 
