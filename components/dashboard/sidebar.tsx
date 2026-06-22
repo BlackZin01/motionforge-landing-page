@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, Settings, LogOut, Users, DollarSign, Webhook, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package, Wand2, UserCircle2, Flame, BarChart3 } from "lucide-react"
+import { Home, Settings, LogOut, Users, DollarSign, Webhook, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package, Wand2, UserCircle2, Flame, BarChart3, Layers } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -44,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard/biblioteca",    label: "Biblioteca",  icon: ShoppingBag,  special: false },
   { href: "/dashboard/viral",         label: "Viral",       icon: Flame,        special: false, minPlan: "Pro",    planBadge: "PRO" },
   { href: "/dashboard/tendencias",    label: "Tendências",  icon: BarChart3,    special: false, minPlan: "Agency", planBadge: "AGENCY" },
+  { href: "/dashboard/perfis",        label: "Perfis",      icon: Layers,       special: false, minPlan: "Agency", planBadge: "AGENCY" },
   { href: "/dashboard/configuracoes", label: "Config.",     icon: Settings,    special: false },
 ]
 
