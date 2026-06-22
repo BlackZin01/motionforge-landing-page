@@ -106,26 +106,36 @@ function PlanCard({ plan }: { plan: Plan }) {
 
   async function handleCTA() {
     trackEvent("InitiateCheckout", { value: price, currency: "BRL", content_name: id })
-    const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") : null
+    const token  = typeof window !== "undefined" ? localStorage.getItem("mf_token") : null
     const planId = id.toLowerCase()
 
-    if (token) {
-      // Usuário já logado — cria checkout direto
-      setLoading(true)
-      try {
-        const res = await fetch("/api/payment/checkout", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ plan: planId }),
-        })
-        const data = await res.json()
-        if (data.url) { window.location.href = data.url; return }
-      } catch { /* fallback para cadastro */ }
-      setLoading(false)
+    if (!token) {
+      // Sem conta — vai para cadastro com plano pré-selecionado
+      window.location.href = `/cadastro?plan=${planId}`
+      return
     }
 
-    // Sem token ou erro — vai para cadastro com plano pré-selecionado
-    window.location.href = `/cadastro?plan=${planId}`
+    // Usuário logado — cria checkout direto
+    setLoading(true)
+    try {
+      const res  = await fetch("/api/payment/checkout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planId }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
+      // API retornou erro — manda para a página de planos no dashboard
+      window.location.href = "/dashboard/planos"
+    } catch {
+      // Erro de rede — manda para o dashboard
+      window.location.href = "/dashboard/planos"
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
