@@ -27,10 +27,11 @@ export async function POST(req: NextRequest) {
     const userData = await meRes.json()
     const rawPlan = userData.plan
     const plan = typeof rawPlan === "string" ? rawPlan.toLowerCase() : "starter"
+    const isAdmin = Boolean(userData.is_admin ?? userData.isAdmin ?? false)
     const geracoesUsadas = Number(userData.geracoes_usadas ?? 0)
 
-    // Bloqueia Starter ao atingir o limite
-    if (plan === "starter" && geracoesUsadas >= STARTER_LIMIT) {
+    // Bloqueia Starter ao atingir o limite (admin nunca é bloqueado)
+    if (plan === "starter" && !isAdmin && geracoesUsadas >= STARTER_LIMIT) {
       return NextResponse.json({
         error: "Você atingiu o limite de 30 gerações mensais do plano Starter.",
         limitReached: true,

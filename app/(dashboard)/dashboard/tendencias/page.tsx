@@ -42,7 +42,7 @@ export default function TendenciasPage() {
   const [loading, setLoading] = useState(true)
   const [locked, setLocked] = useState(false)
 
-  const isAgency = user?.plan === "Agency"
+  const isAgency = user?.plan === "Agency" || user?.isAdmin
 
   useEffect(() => {
     const token = getToken()

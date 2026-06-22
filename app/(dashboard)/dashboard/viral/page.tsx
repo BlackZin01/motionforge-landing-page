@@ -33,7 +33,7 @@ export default function ViralPage() {
   const [loading, setLoading] = useState(true)
   const [locked, setLocked] = useState(false)
 
-  const isStarter = user?.plan === "Starter"
+  const isStarter = user?.plan === "Starter" && !user?.isAdmin
 
   const fetchViral = useCallback(async () => {
     const token = getToken()

@@ -33,7 +33,7 @@ export default function PerfisPage() {
   const [editNicho, setEditNicho] = useState("")
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null)
 
-  const isAgency = user?.plan === "Agency"
+  const isAgency = user?.plan === "Agency" || user?.isAdmin
 
   useEffect(() => {
     if (!isAgency) { setLoading(false); return }
