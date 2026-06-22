@@ -80,20 +80,12 @@ export default function AdminFinanceiroPage() {
       {/* Gráfico */}
       <div style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "20px 24px", marginBottom: "20px" }}>
         <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.35)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "16px" }}>Novos Pagantes — Últimos 30 Dias</div>
-        <ResponsiveContainer width="100%" height={160}>
-          <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="fillOrange" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#FF4D00" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#FF4D00" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="day" tick={{ fill: "rgba(245,245,245,0.2)", fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "rgba(245,245,245,0.2)", fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
-            <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", fontFamily: "'DM Sans', sans-serif", fontSize: "12px" }} />
-            <Area type="monotone" dataKey="pagantes" stroke="#FF4D00" strokeWidth={2} fill="url(#fillOrange)" />
-          </AreaChart>
-        </ResponsiveContainer>
+        <div style={{ height: "160px", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "8px" }}>
+          <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(255,77,0,0.08)", border: "1px solid rgba(255,77,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4D00" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.25)" }}>Histórico de pagamentos em breve</span>
+        </div>
       </div>
 
       {/* Tabela top-ups */}
