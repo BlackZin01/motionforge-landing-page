@@ -27,51 +27,57 @@ const PLANS: PlanDef[] = [
   {
     id: "starter",
     name: "Starter",
-    price: "Grátis",
-    period: "",
-    description: "Para começar a testar o poder do TikTok Shop.",
+    price: "R$97",
+    period: "/mês",
+    description: "Para quem está começando no TikTok Shop.",
     color: "rgba(245,245,245,0.35)",
     icon: Star,
     features: [
-      "30 gerações de copy por mês",
-      "1 avatar salvo",
-      "Biblioteca básica de produtos",
-      "Prompts de copywriting (básicos)",
-      "Gerador de hooks e CTAs",
+      "Biblioteca completa de prompts (ChatGPT + Gemini)",
+      "30 gerações de copy/mês com o Gerador",
+      "Biblioteca de produtos — top 50 da semana",
+      "Atualização semanal da biblioteca",
+      "Avatar IA — 1 avatar salvo",
+      "Histórico dos últimos 30 dias",
+      "Suporte WhatsApp",
     ],
   },
   {
     id: "pro",
     name: "Pro",
-    price: "R$297",
+    price: "R$197",
     period: "/mês",
-    description: "Para criadores sérios que querem escalar suas vendas.",
+    description: "Para afiliados ativos que publicam todo dia com copy certa.",
     color: "#FF4D00",
     icon: Zap,
     highlight: true,
     features: [
-      "Gerações de copy ilimitadas",
-      "Avatares ilimitados",
-      "Viral Alerts — produtos em alta",
-      "Todos os prompts desbloqueados",
-      "Biblioteca completa",
+      "Tudo do Starter",
+      "Gerador de copy ilimitado",
+      "Biblioteca — top 200 + acesso completo",
+      "Atualização diária da biblioteca",
+      "Alertas de produto viral em tempo real",
+      "Avatares IA ilimitados",
+      "Prompts exclusivos PRO (VSL, roteiros, scripts longos)",
       "Histórico completo",
+      "Suporte WhatsApp prioritário",
     ],
   },
   {
     id: "agency",
     name: "Agency",
-    price: "R$797",
+    price: "R$397",
     period: "/mês",
-    description: "Para agências e profissionais que gerenciam múltiplas lojas.",
+    description: "Para agências e múltiplas lojas com dados antecipados.",
     color: "#4ADE80",
     icon: Building2,
     features: [
       "Tudo do Pro",
-      "Tendências por nicho",
-      "Multi-perfis (até 5 lojas)",
-      "Acesso antecipado a produtos",
-      "Suporte prioritário",
+      "Até 5 perfis/lojas na mesma conta",
+      "Relatório semanal de tendências por nicho",
+      "Acesso antecipado a produtos novos",
+      "Onboarding 1:1 personalizado",
+      "Gerente de conta no WhatsApp",
     ],
   },
 ]
@@ -324,7 +330,6 @@ export default function PlanosPage() {
         {PLANS.map((plan) => {
           const isCurrent = currentPlan === plan.id
           const canUpgrade = !isAdmin && PLAN_ORDER[plan.id] > PLAN_ORDER[currentPlan]
-          const canDowngrade = !isAdmin && plan.id === "starter" && currentPlan !== "starter"
           const isLoading = loadingPlan === plan.id
 
           return (
@@ -497,7 +502,7 @@ export default function PlanosPage() {
                       fontFamily: "'DM Sans', sans-serif",
                       textAlign: "center",
                     }}>
-                      Plano gratuito
+                      Plano atual
                     </div>
                   )}
                 </>
