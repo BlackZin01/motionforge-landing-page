@@ -58,7 +58,7 @@ export function StickyCta() {
             opacity: 0.75,
           }}
         >
-          · a partir de R$ 197/mês
+          · a partir de R$ 97/mês
         </span>
       </a>
     </div>
