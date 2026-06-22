@@ -78,7 +78,7 @@ export default function UpgradePage() {
   async function handleSuccess() {
     setCheckoutPlan(null)
     await refreshUser()
-    toast("Plano ativado com sucesso!", "success")
+    toast({ message: "Plano ativado com sucesso!", type: "success" })
     router.push("/dashboard")
   }
 
