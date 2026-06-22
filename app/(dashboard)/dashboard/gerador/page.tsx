@@ -48,7 +48,7 @@ export default function GeradorPage() {
 
   // Inicializa contador e bloqueio a partir do contexto de auth (persiste entre navegações)
   useEffect(() => {
-    if (user?.plan === "Starter" && user.geracoes_usadas !== undefined) {
+    if (user?.plan === "Starter" && !user?.isAdmin && user.geracoes_usadas !== undefined) {
       setGeracoesUsadas(prev => prev ?? user.geracoes_usadas!)
       if (user.geracoes_usadas >= 30) setLimitReached(true)
     }
@@ -174,7 +174,7 @@ export default function GeradorPage() {
           </div>
 
           {/* Contador de uso por plano */}
-          {user?.plan === "Starter" ? (
+          {user?.plan === "Starter" && !user?.isAdmin ? (
             <div style={{
               display: "flex", alignItems: "center", gap: "8px",
               padding: "6px 14px", borderRadius: "9999px",

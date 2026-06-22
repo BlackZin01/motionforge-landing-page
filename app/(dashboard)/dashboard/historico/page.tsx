@@ -44,7 +44,7 @@ export default function HistoricoPage() {
   const [hasMore, setHasMore] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
 
-  const isStarter = user?.plan === "Starter"
+  const isStarter = user?.plan === "Starter" && !user?.isAdmin
 
   const fetchGenerations = useCallback(async (reset = false) => {
     const token = localStorage.getItem("mf_token") ?? ""

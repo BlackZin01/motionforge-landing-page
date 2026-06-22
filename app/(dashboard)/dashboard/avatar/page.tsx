@@ -399,7 +399,7 @@ export default function AvatarPage() {
   const [saveMsg, setSaveMsg] = useState<"saved" | "limit" | null>(null)
   const [showSaved, setShowSaved] = useState(false)
 
-  const isStarter = user?.plan === "Starter"
+  const isStarter = user?.plan === "Starter" && !user?.isAdmin
 
   useEffect(() => {
     const token = getToken()

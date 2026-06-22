@@ -264,9 +264,9 @@ export default function BibliotecaPage() {
           {limitePlano !== null && (
             <span style={{
               fontFamily: "'Space Grotesk', sans-serif", fontSize: "12px", fontWeight: 700,
-              color: user?.plan === "Starter" ? "#FF4D00" : "#00E5FF",
-              background: user?.plan === "Starter" ? "rgba(255,77,0,0.08)" : "rgba(0,229,255,0.06)",
-              border: `1px solid ${user?.plan === "Starter" ? "rgba(255,77,0,0.25)" : "rgba(0,229,255,0.2)"}`,
+              color: user?.plan === "Starter" && !user?.isAdmin ? "#FF4D00" : "#00E5FF",
+              background: user?.plan === "Starter" && !user?.isAdmin ? "rgba(255,77,0,0.08)" : "rgba(0,229,255,0.06)",
+              border: `1px solid ${user?.plan === "Starter" && !user?.isAdmin ? "rgba(255,77,0,0.25)" : "rgba(0,229,255,0.2)"}`,
               borderRadius: "9999px", padding: "3px 10px",
             }}>
               {produtos.length}/{limitePlano} produtos
@@ -276,7 +276,7 @@ export default function BibliotecaPage() {
       </motion.div>
 
       {/* ── Alerta Viral (Pro+) ──────────────────────────────────────────────── */}
-      {user?.plan === "Starter" ? (
+      {user?.plan === "Starter" && !user?.isAdmin ? (
         <motion.div
           variants={fadeUp} custom={1} initial="hidden" animate="visible"
           style={{

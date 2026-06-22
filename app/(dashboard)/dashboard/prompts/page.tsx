@@ -442,7 +442,7 @@ export default function PromptsPage() {
       ) : (
         <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
           {promptsFiltrados.map((p, i) => (
-            <PromptCard key={p.id} prompt={p} index={i} userPlan={user?.plan} />
+            <PromptCard key={p.id} prompt={p} index={i} userPlan={user?.isAdmin ? "Agency" : user?.plan} />
           ))}
         </div>
       )}
