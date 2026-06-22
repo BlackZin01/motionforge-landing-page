@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, Settings, LogOut, Users, DollarSign, Webhook, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package, Wand2, UserCircle2 } from "lucide-react"
+import { Home, Settings, LogOut, Users, DollarSign, Webhook, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package, Wand2, UserCircle2, Flame, BarChart3 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -13,6 +13,15 @@ interface SidebarProps {
   plan: "Starter" | "Pro" | "Agency"
   onLogout: () => void
   isAdmin?: boolean
+}
+
+type NavItem = {
+  href: string
+  label: string
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>
+  special: boolean
+  minPlan?: "Pro" | "Agency"
+  planBadge?: string
 }
 
 const ADMIN_NAV_ITEMS = [
@@ -27,14 +36,16 @@ const ADMIN_NAV_ITEMS = [
 
 // ─── Itens de navegação ───────────────────────────────────────────────────────
 
-const NAV_ITEMS = [
+const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard",               label: "Início",      icon: Home,        special: false },
   { href: "/dashboard/prompts",       label: "Prompts",     icon: BookOpen,    special: false },
   { href: "/dashboard/gerador",       label: "Gerador",     icon: Wand2,        special: false },
   { href: "/dashboard/avatar",        label: "Avatar IA",   icon: UserCircle2,  special: false },
   { href: "/dashboard/biblioteca",    label: "Biblioteca",  icon: ShoppingBag,  special: false },
+  { href: "/dashboard/viral",         label: "Viral",       icon: Flame,        special: false, minPlan: "Pro",    planBadge: "PRO" },
+  { href: "/dashboard/tendencias",    label: "Tendências",  icon: BarChart3,    special: false, minPlan: "Agency", planBadge: "AGENCY" },
   { href: "/dashboard/configuracoes", label: "Config.",     icon: Settings,    special: false },
-] as const
+]
 
 // ─── Badge de plano ───────────────────────────────────────────────────────────
 
@@ -93,6 +104,9 @@ export default function Sidebar({ userName, plan, onLogout, isAdmin }: SidebarPr
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href)
           const Icon = item.icon
+          const PLAN_ORDER = { Starter: 0, Pro: 1, Agency: 2 }
+          const planOk = !item.minPlan || PLAN_ORDER[plan] >= PLAN_ORDER[item.minPlan]
+          const badgeColor = item.minPlan === "Agency" ? "#4ADE80" : "#FF4D00"
 
           return (
             <Link
@@ -115,7 +129,9 @@ export default function Sidebar({ userName, plan, onLogout, isAdmin }: SidebarPr
                   ? "#FF4D00"
                   : item.special
                   ? "rgba(255,77,0,0.7)"
-                  : "rgba(245,245,245,0.45)",
+                  : planOk
+                  ? "rgba(245,245,245,0.45)"
+                  : "rgba(245,245,245,0.25)",
                 background: active || item.special
                   ? "rgba(255,77,0,0.08)"
                   : "transparent",
@@ -145,6 +161,19 @@ export default function Sidebar({ userName, plan, onLogout, isAdmin }: SidebarPr
               <Icon size={15} strokeWidth={1.8} style={{ flexShrink: 0 }} />
 
               <span style={{ flex: 1 }}>{item.label}</span>
+
+              {item.planBadge && !planOk && (
+                <span style={{
+                  fontSize: "9px", fontWeight: 700, letterSpacing: "0.5px",
+                  fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase",
+                  background: `${badgeColor}15`,
+                  color: badgeColor,
+                  border: `1px solid ${badgeColor}30`,
+                  padding: "1px 5px", borderRadius: "9999px", flexShrink: 0,
+                }}>
+                  {item.planBadge}
+                </span>
+              )}
 
               {item.special && (
                 <motion.div

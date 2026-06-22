@@ -18,6 +18,7 @@ interface Produto {
   preco_medio: string | null
   score: number
   plano_minimo: string
+  early_access_at: string | null
   created_at: string
 }
 
@@ -44,6 +45,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 
 function ProdutoCard({ produto, index }: { produto: Produto; index: number }) {
   const st = STATUS_CONFIG[produto.status] ?? STATUS_CONFIG["em_alta"]
+  const isEarlyAccess = produto.early_access_at != null && new Date(produto.early_access_at) > new Date()
 
   return (
     <motion.div
@@ -98,6 +100,22 @@ function ProdutoCard({ produto, index }: { produto: Produto; index: number }) {
           {st.icon}
           {st.label}
         </div>
+
+        {/* Badge acesso antecipado (Agency) */}
+        {isEarlyAccess && (
+          <div style={{
+            position: "absolute", bottom: "10px", left: "10px",
+            display: "flex", alignItems: "center", gap: "4px",
+            background: "rgba(74,222,128,0.15)", color: "#4ADE80",
+            border: "1px solid rgba(74,222,128,0.3)",
+            borderRadius: "9999px", padding: "3px 8px",
+            fontSize: "9px", fontWeight: 700,
+            textTransform: "uppercase", letterSpacing: "1px",
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            <Sparkles size={9} /> Acesso antecipado
+          </div>
+        )}
 
         {/* Score */}
         {produto.score > 0 && (
