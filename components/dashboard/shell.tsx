@@ -79,7 +79,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const isAdmin  = user?.isAdmin ?? false
 
   // Usuário autenticado mas sem plano pago — mostra gate de seleção
-  const needsPlan = !!user && !isAdmin && (!user.plan || user.plan.toLowerCase() === "free")
+  const needsPlan   = !!user && !isAdmin && (!user.plan || user.plan.toLowerCase() === "free")
+  const planStatus  = (user as { plan_status?: string } | null)?.plan_status ?? "active"
+  const isSuspended = !!user && !isAdmin && planStatus === "suspended"
 
   return (
     <div
@@ -117,6 +119,31 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           isAdmin={isAdmin}
         />
 
+        {/* Banner plano suspenso */}
+        {isSuspended && (
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 12, background: "rgba(255,77,0,0.08)",
+            borderBottom: "1px solid rgba(255,77,0,0.25)",
+            padding: "10px 20px", flexShrink: 0,
+          }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#F5F5F5", margin: 0 }}>
+              ⚠️ Seu acesso está limitado. Faça upgrade para continuar usando o MotionForge.
+            </p>
+            <a
+              href="/dashboard/upgrade"
+              style={{
+                flexShrink: 0, padding: "6px 16px",
+                background: "#FF4D00", color: "#fff",
+                fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 700,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                textDecoration: "none", borderRadius: 4,
+              }}
+            >
+              Ver planos
+            </a>
+          </div>
+        )}
 
         {/* Área scrollável — pb-16 em mobile p/ não ficar atrás da nav */}
         <main style={{ flex: 1, overflowY: "scroll", scrollbarWidth: "none" }} className="pb-16 md:pb-0 [&::-webkit-scrollbar]:hidden">
