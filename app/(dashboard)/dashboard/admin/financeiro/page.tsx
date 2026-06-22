@@ -39,11 +39,8 @@ export default function AdminFinanceiroPage() {
       .catch(e => setErro(e.message ?? "Erro ao carregar dados financeiros"))
   }, [])
 
-  // Dummy chart data (últimos 30 dias) - em produção viria da API
-  const chartData = Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    pagantes: Math.floor(Math.random() * 3),
-  }))
+  // Dados históricos zerados — endpoint de séries temporais a implementar
+  const chartData = Array.from({ length: 30 }, (_, i) => ({ day: i + 1, pagantes: 0 }))
 
   if (erro) return (
     <div style={{ padding: "24px", color: "#ef4444", fontFamily: "'DM Sans', sans-serif", fontSize: "14px" }}>

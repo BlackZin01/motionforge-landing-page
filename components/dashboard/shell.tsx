@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context"
 import Sidebar from "@/components/dashboard/sidebar"
 import Topbar from "@/components/dashboard/topbar"
 import { MobileNav } from "@/components/dashboard/mobile-nav"
+import { PlanGate } from "@/components/dashboard/plan-gate"
 import { usePathname } from "next/navigation"
 
 // ─── Mapeamento pathname → título da página ───────────────────────────────────
@@ -77,6 +78,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const plan     = user?.plan    ?? "Starter"
   const isAdmin  = user?.isAdmin ?? false
 
+  // Usuário autenticado mas sem plano pago — mostra gate de seleção
+  const needsPlan = !!user && !isAdmin && (!user.plan || user.plan.toLowerCase() === "free")
+
   return (
     <div
       style={{
@@ -122,6 +126,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
       {/* Bottom nav — mobile */}
       <MobileNav />
+
+      {/* Gate de plano — bloqueia acesso para usuários sem plano */}
+      {needsPlan && <PlanGate />}
     </div>
   )
 }
