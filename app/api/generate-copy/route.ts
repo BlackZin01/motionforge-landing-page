@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 const STARTER_LIMIT = 30
 
 // ─── POST /api/generate-copy ──────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   try {
     const auth = req.headers.get("authorization") ?? ""
 
