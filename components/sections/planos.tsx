@@ -190,6 +190,7 @@ function PlanCard({ plan }: { plan: Plan }) {
           <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--color-forge-muted)", alignSelf: "flex-start", marginTop: 6 }}>R$</span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 52, fontWeight: 700, lineHeight: 1, color: "var(--color-forge-white)" }}>
             {price}
+            <span style={{ fontSize: 20, fontWeight: 500, color: "var(--color-forge-muted)" }}>,00</span>
           </span>
           <span style={{ fontFamily: "var(--font-sans)", fontSize: 16, color: "var(--color-forge-muted)", alignSelf: "flex-end", marginBottom: 4 }}>/mês</span>
         </div>
@@ -300,7 +301,7 @@ export function Planos() {
             border: "1px solid rgba(37,211,102,0.2)",
             borderRadius: 12,
             maxWidth: 520,
-            margin: "40px auto 0",
+            margin: "64px auto 0",
           }}
         >
           <MessageCircle size={16} style={{ color: "#25D366", flexShrink: 0 }} />
