@@ -5,6 +5,7 @@ import type { Variants } from "framer-motion"
 import { motion } from "framer-motion"
 import gsap from "gsap"
 import { trackEvent } from "@/lib/pixels"
+import { Check, MessageCircle } from "lucide-react"
 
 /* ── Variantes ──────────────────────────────────────────────── */
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -20,152 +21,85 @@ const stagger: Variants = {
 }
 
 /* ── Dados ──────────────────────────────────────────────────── */
+interface Feature {
+  label: string
+  highlight?: boolean
+}
+
 interface Plan {
   id: "Starter" | "Pro" | "Agency"
   price: number
-  credits: string
-  estimate: string
   desc: string
-  pills: string[]
-  extras?: { label: string; color: "orange" | "cyan" }[]
+  tagline: string
+  features: Feature[]
   featured?: boolean
   ctaLabel: string
   variant: "primary" | "secondary"
+  accentColor: string
 }
 
 const PLANS: Plan[] = [
   {
     id: "Starter",
-    price: 197,
-    credits: "1.000 créditos/mês · rollover até 2×",
-    estimate: "~500 imagens ou ~40 vídeos de 5s por mês",
-    desc: "Para criadores solo testando UGC com IA",
-    pills: ["Nano Banana 2", "FLUX 2 Dev", "Ideogram v3", "Seedance 2.0 Fast", "Wan 2.7"],
-    ctaLabel: "ASSINAR STARTER",
+    price: 97,
+    tagline: "Para quem está começando",
+    desc: "Acesse prompts prontos, descubra produtos em alta e crie seu avatar de criador.",
+    features: [
+      { label: "Biblioteca completa de prompts (ChatGPT + Gemini)" },
+      { label: "30 gerações de copy/mês com o Gerador" },
+      { label: "Biblioteca de produtos — top 50 da semana" },
+      { label: "Atualização semanal da biblioteca" },
+      { label: "Avatar IA — 1 avatar salvo" },
+      { label: "Histórico dos últimos 30 dias" },
+      { label: "Suporte WhatsApp" },
+    ],
+    ctaLabel: "COMEÇAR AGORA",
     variant: "secondary",
+    accentColor: "rgba(245,245,245,0.5)",
   },
   {
     id: "Pro",
-    price: 497,
-    credits: "4.000 créditos/mês · rollover até 2×",
-    estimate: "~2.000 imagens ou ~110 vídeos de 5s por mês",
-    desc: "Para afiliados e marcas que precisam de qualidade e volume",
-    pills: [
-      "Nano Banana Pro 4K",
-      "FLUX 2 Pro",
-      "Seedance 2.0",
-      "Kling v3.0 Std",
-      "Hailuo 2.3",
-      "Wan 2.7",
-      "e mais",
-    ],
-    extras: [
-      { label: "First-frame / last-frame control", color: "orange" },
-      { label: "Download em lote", color: "orange" },
+    price: 197,
+    tagline: "Para afiliados ativos",
+    desc: "Publique todo dia com copy certa, produtos validados e alertas de viral antes da concorrência.",
+    features: [
+      { label: "Tudo do Starter" },
+      { label: "Gerador de copy ilimitado", highlight: true },
+      { label: "Biblioteca — top 200 + acesso completo", highlight: true },
+      { label: "Atualização diária da biblioteca", highlight: true },
+      { label: "Alertas de produto viral em tempo real", highlight: true },
+      { label: "Avatares IA ilimitados", highlight: true },
+      { label: "Prompts exclusivos PRO (roteiros, VSL, scripts longos)" },
+      { label: "Histórico completo" },
+      { label: "Suporte WhatsApp prioritário" },
     ],
     featured: true,
     ctaLabel: "ASSINAR PRO",
     variant: "primary",
+    accentColor: "#FF4D00",
   },
   {
     id: "Agency",
-    price: 997,
-    credits: "14.000 créditos/mês · rollover até 3×",
-    estimate: "~7.000 imagens ou ~400 vídeos de 5s por mês",
-    desc: "Para agências e operações de UGC em escala",
-    pills: [
-      "Todos do Pro",
-      "Imagen 4 Fast",
-      "Kling O1",
-      "Kling v3.0 Pro",
-      "Veo 3.1 Lite",
-      "e mais",
-    ],
-    extras: [
-      { label: "Batch paralelo", color: "cyan" },
-      { label: "Veo 3.1 + Kling O1 desbloqueados", color: "cyan" },
-      { label: "Suporte prioritário", color: "cyan" },
+    price: 397,
+    tagline: "Para agências e múltiplas lojas",
+    desc: "Gerencie várias operações, acesse dados antecipados e tenha um gerente de conta dedicado.",
+    features: [
+      { label: "Tudo do Pro" },
+      { label: "Até 5 perfis/lojas na mesma conta", highlight: true },
+      { label: "Relatório semanal de tendências por nicho", highlight: true },
+      { label: "Acesso antecipado a produtos novos", highlight: true },
+      { label: "Onboarding 1:1 personalizado" },
+      { label: "Gerente de conta no WhatsApp", highlight: true },
     ],
     ctaLabel: "ASSINAR AGENCY",
     variant: "secondary",
+    accentColor: "#4ADE80",
   },
 ]
 
-interface TopUp {
-  price: number
-  credits: string
-  badge?: { label: string; color: "orange" | "cyan" }
-}
-
-const TOPUPS: TopUp[] = [
-  { price: 19, credits: "200 créditos" },
-  { price: 47, credits: "600 créditos" },
-  { price: 97, credits: "1.400 créditos" },
-  { price: 197, credits: "3.200 créditos", badge: { label: "★ Popular", color: "orange" } },
-  { price: 397, credits: "7.500 créditos", badge: { label: "Melhor valor", color: "cyan" } },
-]
-
-/* ── Sub-componentes ─────────────────────────────────────────── */
-function Pill({ label }: { label: string }) {
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "3px 10px",
-        border: "1px solid rgba(255,255,255,0.1)",
-        fontFamily: "var(--font-sans)",
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: "0.05em",
-        color: "var(--color-forge-muted)",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {label}
-    </span>
-  )
-}
-
-function CheckItem({
-  label,
-  color,
-}: {
-  label: string
-  color: "orange" | "cyan"
-}) {
-  return (
-    <li style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-      <span
-        aria-hidden="true"
-        style={{
-          flexShrink: 0,
-          fontSize: 13,
-          fontWeight: 700,
-          lineHeight: 1.5,
-          color:
-            color === "orange"
-              ? "var(--color-forge-orange)"
-              : "var(--color-forge-cyan)",
-        }}
-      >
-        ✓
-      </span>
-      <span
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: 13,
-          lineHeight: 1.5,
-          color: "var(--color-forge-white)",
-        }}
-      >
-        {label}
-      </span>
-    </li>
-  )
-}
-
+/* ── Card ───────────────────────────────────────────────────── */
 function PlanCard({ plan }: { plan: Plan }) {
-  const { id, price, credits, estimate, desc, pills, extras, featured, ctaLabel, variant } = plan
+  const { id, price, tagline, desc, features, featured, ctaLabel, variant, accentColor } = plan
   const cardRef = useRef<HTMLDivElement>(null)
   const glareRef = useRef<HTMLDivElement>(null)
 
@@ -177,72 +111,36 @@ function PlanCard({ plan }: { plan: Plan }) {
     gsap.set(card, { transformPerspective: 900 })
 
     const applyTilt = (x: number, y: number) => {
-      gsap.to(card, {
-        rotateX: (y - 0.5) * -10,
-        rotateY: (x - 0.5) * 10,
-        duration: 0.3,
-        ease: "power2.out",
-        overwrite: "auto",
-      })
+      gsap.to(card, { rotateX: (y - 0.5) * -10, rotateY: (x - 0.5) * 10, duration: 0.3, ease: "power2.out", overwrite: "auto" })
       glare.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.08) 0%, transparent 55%)`
     }
 
     const resetTilt = () => {
-      gsap.to(card, {
-        rotateX: 0, rotateY: 0, scale: 1,
-        duration: 0.7, ease: "elastic.out(1, 0.5)",
-        overwrite: "auto",
-      })
+      gsap.to(card, { rotateX: 0, rotateY: 0, scale: 1, duration: 0.7, ease: "elastic.out(1, 0.5)", overwrite: "auto" })
       gsap.to(glare, { opacity: 0, duration: 0.4 })
     }
 
-    /* ── Mouse (desktop) ── */
-    const onEnter = () => {
-      gsap.to(card, { scale: 1.025, duration: 0.3, ease: "power2.out", overwrite: "auto" })
-      gsap.to(glare, { opacity: 1, duration: 0.25 })
-    }
-    const onMove = (e: MouseEvent) => {
-      const r = card.getBoundingClientRect()
-      applyTilt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height)
-    }
-    const onLeave = () => resetTilt()
-
-    /* ── Touch (mobile) ── */
-    const onTouchStart = () => {
-      gsap.to(card, { scale: 1.025, duration: 0.25, ease: "power2.out", overwrite: "auto" })
-      gsap.to(glare, { opacity: 1, duration: 0.2 })
-    }
-    const onTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0]
-      const r = card.getBoundingClientRect()
-      applyTilt((touch.clientX - r.left) / r.width, (touch.clientY - r.top) / r.height)
-    }
-    const onTouchEnd = () => resetTilt()
+    const onEnter = () => { gsap.to(card, { scale: 1.025, duration: 0.3, ease: "power2.out", overwrite: "auto" }); gsap.to(glare, { opacity: 1, duration: 0.25 }) }
+    const onMove  = (e: MouseEvent) => { const r = card.getBoundingClientRect(); applyTilt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height) }
+    const onTouchStart = () => { gsap.to(card, { scale: 1.025, duration: 0.25, ease: "power2.out", overwrite: "auto" }); gsap.to(glare, { opacity: 1, duration: 0.2 }) }
+    const onTouchMove  = (e: TouchEvent) => { const t = e.touches[0]; const r = card.getBoundingClientRect(); applyTilt((t.clientX - r.left) / r.width, (t.clientY - r.top) / r.height) }
 
     card.addEventListener("mouseenter", onEnter)
     card.addEventListener("mousemove", onMove)
-    card.addEventListener("mouseleave", onLeave)
+    card.addEventListener("mouseleave", resetTilt)
     card.addEventListener("touchstart", onTouchStart, { passive: true })
     card.addEventListener("touchmove", onTouchMove, { passive: true })
-    card.addEventListener("touchend", onTouchEnd)
+    card.addEventListener("touchend", resetTilt)
 
     return () => {
       card.removeEventListener("mouseenter", onEnter)
       card.removeEventListener("mousemove", onMove)
-      card.removeEventListener("mouseleave", onLeave)
+      card.removeEventListener("mouseleave", resetTilt)
       card.removeEventListener("touchstart", onTouchStart)
       card.removeEventListener("touchmove", onTouchMove)
-      card.removeEventListener("touchend", onTouchEnd)
+      card.removeEventListener("touchend", resetTilt)
     }
   }, [])
-
-  function handleCTA() {
-    trackEvent("InitiateCheckout", {
-      value: price,
-      currency: "BRL",
-      content_name: id,
-    })
-  }
 
   return (
     <motion.div
@@ -254,235 +152,89 @@ function PlanCard({ plan }: { plan: Plan }) {
         display: "flex",
         flexDirection: "column",
         background: featured ? "var(--color-forge-graphite)" : "rgba(255,255,255,0.02)",
-        border: featured
-          ? "2px solid var(--color-forge-orange)"
-          : "1px solid var(--color-forge-border)",
+        border: featured ? "2px solid var(--color-forge-orange)" : "1px solid var(--color-forge-border)",
       }}
     >
-      {/* Glare overlay — segue o cursor */}
-      <div
-        ref={glareRef}
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0,
-          pointerEvents: "none",
-          zIndex: 15,
-        }}
-      />
-      {/* Spotlight no featured */}
+      {/* Glare */}
+      <div ref={glareRef} aria-hidden style={{ position: "absolute", inset: 0, opacity: 0, pointerEvents: "none", zIndex: 15 }} />
+
+      {/* Spotlight */}
       {featured && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse 80% 45% at 50% 0%, rgba(255,77,0,0.12) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
+        <div aria-hidden style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "radial-gradient(ellipse 80% 45% at 50% 0%, rgba(255,77,0,0.12) 0%, transparent 70%)",
+        }} />
       )}
 
-      {/* Badge "★ Mais popular" */}
+      {/* Badge mais popular */}
       {featured && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            background: "var(--color-forge-orange)",
-            padding: "5px 14px",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--color-forge-white)",
-            }}
-          >
+        <div style={{ position: "absolute", top: 0, right: 0, background: "var(--color-forge-orange)", padding: "5px 14px" }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "white" }}>
             ★ Mais popular
           </span>
         </div>
       )}
 
       {/* Header */}
-      <div
-        style={{
-          padding: "32px 28px 24px",
-          borderBottom: "1px solid var(--color-forge-border)",
-          position: "relative",
-        }}
-      >
-        {/* Título */}
-        <h3
-          style={{
-            fontFamily: "var(--font-bebas)",
-            fontSize: 28,
-            lineHeight: 1,
-            letterSpacing: "2px",
-            color: featured ? "var(--color-forge-orange)" : "var(--color-forge-white)",
-            marginBottom: 16,
-          }}
-        >
+      <div style={{ padding: "32px 28px 24px", borderBottom: "1px solid var(--color-forge-border)", position: "relative" }}>
+        {/* Nome + tagline */}
+        <h3 style={{ fontFamily: "var(--font-bebas)", fontSize: 28, lineHeight: 1, letterSpacing: "2px", color: accentColor, marginBottom: 6 }}>
           {id}
         </h3>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(245,245,245,0.35)", marginBottom: 20 }}>
+          {tagline}
+        </p>
 
         {/* Preço */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 12 }}>
-          <span
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 14,
-              color: "var(--color-forge-muted)",
-              alignSelf: "flex-start",
-              marginTop: 6,
-            }}
-          >
-            R$
+        <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 16 }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--color-forge-muted)", alignSelf: "flex-start", marginTop: 6 }}>R$</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 52, fontWeight: 700, lineHeight: 1, color: "var(--color-forge-white)" }}>
+            {price}
           </span>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 48,
-              fontWeight: 700,
-              lineHeight: 1,
-              color: "var(--color-forge-white)",
-            }}
-          >
-            {price.toLocaleString("pt-BR")}
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 20,
-              fontWeight: 700,
-              lineHeight: 1,
-              color: "rgba(245,245,245,0.35)",
-              alignSelf: "flex-end",
-              marginBottom: 3,
-            }}
-          >
-            ,00
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 16,
-              color: "var(--color-forge-muted)",
-              alignSelf: "flex-end",
-              marginBottom: 4,
-            }}
-          >
-            /mês
-          </span>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: 16, color: "var(--color-forge-muted)", alignSelf: "flex-end", marginBottom: 4 }}>/mês</span>
         </div>
 
-        {/* Créditos destaque */}
-        <p
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            fontWeight: 500,
-            color: featured ? "var(--color-forge-orange)" : "var(--color-forge-white)",
-            marginBottom: 4,
-          }}
-        >
-          {credits}
-        </p>
-
-        {/* Estimativa */}
-        <p
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: 12,
-            color: "var(--color-forge-muted)",
-            marginBottom: 14,
-          }}
-        >
-          {estimate}
-        </p>
-
-        {/* Descrição */}
-        <p
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: 14,
-            lineHeight: 1.55,
-            color: "var(--color-forge-muted)",
-            margin: 0,
-          }}
-        >
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, lineHeight: 1.55, color: "var(--color-forge-muted)", margin: 0 }}>
           {desc}
         </p>
       </div>
 
-      {/* Corpo */}
+      {/* Features */}
       <div style={{ padding: "24px 28px", flex: 1, position: "relative" }}>
-        {/* Pills de modelos */}
-        <p
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "var(--color-forge-muted)",
-            marginBottom: 10,
-          }}
-        >
-          Modelos incluídos
-        </p>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 6,
-            marginBottom: extras && extras.length > 0 ? 20 : 0,
-          }}
-        >
-          {pills.map((p) => (
-            <Pill key={p} label={p} />
+        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+          {features.map((f) => (
+            <li key={f.label} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <Check
+                size={14}
+                strokeWidth={2.5}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 1,
+                  color: f.highlight ? accentColor : "rgba(245,245,245,0.3)",
+                }}
+              />
+              <span style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 13,
+                lineHeight: 1.5,
+                color: f.highlight ? "var(--color-forge-white)" : "rgba(245,245,245,0.55)",
+                fontWeight: f.highlight ? 700 : 400,
+              }}>
+                {f.label}
+              </span>
+            </li>
           ))}
-        </div>
-
-        {/* Extras (checks) */}
-        {extras && extras.length > 0 && (
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              margin: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: 8,
-            }}
-          >
-            {extras.map((ex) => (
-              <CheckItem key={ex.label} label={ex.label} color={ex.color} />
-            ))}
-          </ul>
-        )}
+        </ul>
       </div>
 
       {/* CTA */}
       <div style={{ padding: "0 28px 32px", position: "relative" }}>
         <button
-          onClick={handleCTA}
+          onClick={() => trackEvent("InitiateCheckout", { value: price, currency: "BRL", content_name: id })}
           style={{
-            width: "100%",
-            padding: "14px 0",
-            fontFamily: "var(--font-sans)",
-            fontSize: 13,
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            cursor: "pointer",
+            width: "100%", padding: "14px 0",
+            fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 700,
+            letterSpacing: "0.2em", textTransform: "uppercase", cursor: "pointer",
             border: variant === "primary" ? "none" : "1px solid rgba(255,255,255,0.22)",
             background: variant === "primary" ? "var(--color-forge-orange)" : "transparent",
             color: "var(--color-forge-white)",
@@ -491,23 +243,13 @@ function PlanCard({ plan }: { plan: Plan }) {
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLButtonElement
-            if (variant === "primary") {
-              el.style.boxShadow = "0 0 44px rgba(255,77,0,0.6)"
-              el.style.transform = "scale(1.02)"
-            } else {
-              el.style.borderColor = "rgba(255,255,255,0.5)"
-              el.style.transform = "scale(1.01)"
-            }
+            if (variant === "primary") { el.style.boxShadow = "0 0 44px rgba(255,77,0,0.6)"; el.style.transform = "scale(1.02)" }
+            else { el.style.borderColor = "rgba(255,255,255,0.5)"; el.style.transform = "scale(1.01)" }
           }}
           onMouseLeave={(e) => {
             const el = e.currentTarget as HTMLButtonElement
-            if (variant === "primary") {
-              el.style.boxShadow = "0 0 24px rgba(255,77,0,0.35)"
-              el.style.transform = "scale(1)"
-            } else {
-              el.style.borderColor = "rgba(255,255,255,0.22)"
-              el.style.transform = "scale(1)"
-            }
+            if (variant === "primary") { el.style.boxShadow = "0 0 24px rgba(255,77,0,0.35)"; el.style.transform = "scale(1)" }
+            else { el.style.borderColor = "rgba(255,255,255,0.22)"; el.style.transform = "scale(1)" }
           }}
         >
           {ctaLabel}
@@ -517,226 +259,57 @@ function PlanCard({ plan }: { plan: Plan }) {
   )
 }
 
-/* ── Tabela Top-Up ──────────────────────────────────────────── */
-function TopUpTable() {
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={fadeUp}
-      style={{
-        background: "var(--color-forge-graphite)",
-        border: "1px solid var(--color-forge-border)",
-        borderRadius: 12,
-        padding: "32px 28px",
-        marginTop: 40,
-      }}
-    >
-      {/* Header */}
-      <p
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "var(--color-forge-orange)",
-          marginBottom: 6,
-        }}
-      >
-        Top-up de créditos
-      </p>
-      <p
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: 13,
-          color: "var(--color-forge-muted)",
-          marginBottom: 24,
-        }}
-      >
-        Compra avulsa · disponível em todos os planos · top-up nunca expira
-      </p>
-
-      {/* Linhas */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {TOPUPS.map((row, i) => (
-          <div
-            key={row.price}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
-              padding: "14px 0",
-              borderTop: i === 0 ? "none" : "1px solid var(--color-forge-border)",
-              flexWrap: "wrap",
-            }}
-          >
-            {/* Preço */}
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 18,
-                fontWeight: 700,
-                color: "var(--color-forge-white)",
-                minWidth: 72,
-              }}
-            >
-              R$ {row.price}
-            </span>
-
-            {/* Créditos + badge */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
-              <span
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 14,
-                  color: "var(--color-forge-white)",
-                }}
-              >
-                {row.credits}
-              </span>
-              {row.badge && (
-                <span
-                  style={{
-                    padding: "2px 8px",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: "0.1em",
-                    color:
-                      row.badge.color === "orange"
-                        ? "var(--color-forge-orange)"
-                        : "var(--color-forge-cyan)",
-                    border: `1px solid ${row.badge.color === "orange" ? "rgba(255,77,0,0.35)" : "rgba(0,229,255,0.35)"}`,
-                  }}
-                >
-                  {row.badge.label}
-                </span>
-              )}
-            </div>
-
-          </div>
-        ))}
-      </div>
-
-      {/* Nota final */}
-      <p
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: 12,
-          color: "var(--color-forge-muted)",
-          marginTop: 20,
-          marginBottom: 0,
-          borderTop: "1px solid var(--color-forge-border)",
-          paddingTop: 16,
-        }}
-      >
-        Acabou no meio da campanha? Compra avulsa e continua gerando. Sem esperar virar o mês.
-      </p>
-    </motion.div>
-  )
-}
-
-/* ── Seção principal ────────────────────────────────────────── */
+/* ── Seção ──────────────────────────────────────────────────── */
 export function Planos() {
   return (
-    <section
-      id="planos"
-      style={{ background: "var(--color-forge-black)" }}
-    >
+    <section id="planos" style={{ background: "var(--color-forge-black)" }}>
       <div className="mx-auto max-w-7xl px-6 py-24 lg:py-32">
 
         {/* Header */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={stagger}
-          className="mb-14 max-w-2xl"
-        >
-          <motion.p
-            variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--color-forge-orange)",
-              marginBottom: 16,
-            }}
-          >
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={stagger} className="mb-14 max-w-2xl">
+          <motion.p variants={fadeUp} style={{ fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-forge-orange)", marginBottom: 16 }}>
             Planos
           </motion.p>
-
-          <motion.h2
-            variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-bebas)",
-              fontSize: "clamp(36px, 5.5vw, 56px)",
-              lineHeight: 1,
-              letterSpacing: "3px",
-              color: "var(--color-forge-white)",
-              marginBottom: 16,
-            }}
-          >
-            Escale no ritmo
-            <br />
-            do seu negócio.
+          <motion.h2 variants={fadeUp} style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(36px, 5.5vw, 56px)", lineHeight: 1, letterSpacing: "3px", color: "var(--color-forge-white)", marginBottom: 16 }}>
+            Escale no ritmo<br />do seu negócio.
           </motion.h2>
-
-          <motion.p
-            variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 16,
-              lineHeight: 1.65,
-              color: "var(--color-forge-muted)",
-            }}
-          >
-            Sem contrato anual obrigatório. Cancele quando quiser.
-            Todos os planos incluem acesso imediato à plataforma.
+          <motion.p variants={fadeUp} style={{ fontFamily: "var(--font-sans)", fontSize: 16, lineHeight: 1.65, color: "var(--color-forge-muted)" }}>
+            Sem contrato anual. Cancele quando quiser. Todos os planos incluem acesso imediato à plataforma.
           </motion.p>
         </motion.div>
 
         {/* Cards */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
-          variants={stagger}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-4"
-        >
-          {PLANS.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} />
-          ))}
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {PLANS.map((plan) => <PlanCard key={plan.id} plan={plan} />)}
         </motion.div>
 
-        {/* Nota abaixo dos cards */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+        {/* Nota WhatsApp */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: [...EASE], delay: 0.2 }}
           style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: 13,
-            lineHeight: 1.7,
-            color: "var(--color-forge-muted)",
-            textAlign: "center",
-            maxWidth: 600,
-            margin: "32px auto 0",
+            marginTop: 40,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            padding: "16px 24px",
+            background: "rgba(37,211,102,0.06)",
+            border: "1px solid rgba(37,211,102,0.2)",
+            borderRadius: 12,
+            maxWidth: 520,
+            margin: "40px auto 0",
           }}
         >
-          Sem trial. Sem promessa vaga. Você entra, escolhe o modelo, monta o workflow e começa a
-          produzir no mesmo dia. Créditos não expiram enquanto a assinatura estiver ativa.
-          O que não usar esse mês, acumula pro próximo.
-        </motion.p>
+          <MessageCircle size={16} style={{ color: "#25D366", flexShrink: 0 }} />
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "rgba(245,245,245,0.7)", margin: 0, lineHeight: 1.5 }}>
+            <strong style={{ color: "#F5F5F5" }}>Todos os planos incluem suporte pelo WhatsApp.</strong>{" "}
+            Pro e Agency têm atendimento prioritário.
+          </p>
+        </motion.div>
 
-        {/* Top-up */}
-        <TopUpTable />
       </div>
     </section>
   )

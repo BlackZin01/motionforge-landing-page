@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Search, Film, RefreshCw } from "lucide-react"
+import { Search, Film, RefreshCw, Lock } from "lucide-react"
 import { GenerationCard } from "@/components/dashboard/shared/generation-card"
+import { useAuth } from "@/lib/auth-context"
+import Link from "next/link"
 
 const ITEMS_PER_PAGE = 18
 
@@ -24,7 +26,15 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
 }
 
+// Retorna true se a geração está dentro dos últimos N dias
+function isDentroDosPeriodo(iso: string, dias: number): boolean {
+  const limite = new Date()
+  limite.setDate(limite.getDate() - dias)
+  return new Date(iso) >= limite
+}
+
 export default function HistoricoPage() {
+  const { user } = useAuth()
   const [filter, setFilter] = useState<FilterType>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [items, setItems] = useState<Generation[]>([])
@@ -33,6 +43,8 @@ export default function HistoricoPage() {
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
+
+  const isStarter = user?.plan === "Starter"
 
   const fetchGenerations = useCallback(async (reset = false) => {
     const token = localStorage.getItem("mf_token") ?? ""
@@ -65,8 +77,9 @@ export default function HistoricoPage() {
 
   useEffect(() => { fetchGenerations(true) }, [fetchGenerations])
 
-  // Filtragem client-side
+  // Filtragem: Starter vê só os últimos 30 dias, Pro/Agency vê tudo
   const filtered = items.filter((g) => {
+    if (isStarter && !isDentroDosPeriodo(g.created_at, 30)) return false
     const passFilter = filter === "all" || g.type === filter
     const passSearch = !searchQuery || g.model_id.toLowerCase().includes(searchQuery.toLowerCase()) || g.prompt.toLowerCase().includes(searchQuery.toLowerCase())
     return passFilter && passSearch && g.status === "completed"
@@ -74,6 +87,44 @@ export default function HistoricoPage() {
 
   return (
     <div style={{ padding: "24px", maxWidth: "1400px", margin: "0 auto" }}>
+
+      {/* Banner Starter — aviso de limite de 30 dias */}
+      {isStarter && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: "14px",
+          padding: "14px 18px", marginBottom: "20px",
+          background: "rgba(255,77,0,0.04)", border: "1px solid rgba(255,77,0,0.15)",
+          borderRadius: "12px",
+        }}>
+          <div style={{
+            width: "32px", height: "32px", borderRadius: "8px", flexShrink: 0,
+            background: "rgba(255,77,0,0.08)", border: "1px solid rgba(255,77,0,0.2)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Lock size={14} style={{ color: "#FF4D00" }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 700, color: "#F5F5F5", margin: "0 0 2px" }}>
+              Exibindo os últimos 30 dias — plano Starter
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
+              Faça upgrade para Pro e acesse seu histórico completo sem limite de tempo.
+            </p>
+          </div>
+          <Link
+            href="/#planos"
+            style={{
+              flexShrink: 0, padding: "7px 14px", borderRadius: "8px",
+              background: "#FF4D00", color: "white", textDecoration: "none",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Fazer upgrade
+          </Link>
+        </div>
+      )}
+
       {/* Barra de filtros */}
       <div
         style={{
@@ -219,7 +270,7 @@ export default function HistoricoPage() {
             ))}
           </div>
 
-          {hasMore && (
+          {hasMore && !isStarter && (
             <div style={{ marginTop: "24px", textAlign: "center" }}>
               <button
                 onClick={() => fetchGenerations(false)}

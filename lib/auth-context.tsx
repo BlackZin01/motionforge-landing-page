@@ -18,6 +18,7 @@ export interface AuthUser {
   email: string
   plan: "Starter" | "Pro" | "Agency"
   isAdmin: boolean
+  geracoes_usadas?: number
 }
 
 interface AuthContextValue {
@@ -76,6 +77,7 @@ function normalizeUser(data: Record<string, unknown>): AuthUser {
     email: String(data.email ?? ""),
     plan: normalizePlan(data.plan),
     isAdmin: Boolean(data.isAdmin ?? data.is_admin ?? false),
+    geracoes_usadas: typeof data.geracoes_usadas === "number" ? data.geracoes_usadas : undefined,
   }
 }
 

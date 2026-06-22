@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Copy, Check, Search, ChevronDown } from "lucide-react"
+import { BookOpen, Copy, Check, Search, ExternalLink, ChevronDown, Lock } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -15,6 +15,8 @@ interface Prompt {
   categoria: string
   modelo_alvo: string
   plano_minimo: string
+  midia_url: string | null
+  tiktok_url: string | null
   created_at: string
 }
 
@@ -38,16 +40,80 @@ const MODELO_COLORS: Record<string, { bg: string; color: string }> = {
 
 // ─── Card de Prompt ───────────────────────────────────────────────────────────
 
-function PromptCard({ prompt, index }: { prompt: Prompt; index: number }) {
+function PromptCard({ prompt, index, userPlan }: { prompt: Prompt; index: number; userPlan?: string }) {
+  const planOrder: Record<string, number> = { starter: 0, pro: 1, agency: 2 }
+  const userLevel  = planOrder[userPlan?.toLowerCase() ?? "starter"] ?? 0
+  const needsLevel = planOrder[prompt.plano_minimo?.toLowerCase() ?? "starter"] ?? 0
+  const locked = needsLevel > userLevel
   const [copied, setCopied] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
   const cor = MODELO_COLORS[prompt.modelo_alvo] ?? { bg: "rgba(255,255,255,0.06)", color: "rgba(245,245,245,0.5)" }
+  const isVideo = Boolean(prompt.midia_url && /\.(mp4|mov|webm)(\?.*)?$/i.test(prompt.midia_url))
 
   async function handleCopy() {
     await navigator.clipboard.writeText(prompt.conteudo)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (locked) {
+    return (
+      <motion.div
+        custom={index} variants={fadeUp} initial="hidden" animate="visible"
+        style={{
+          background: "#111111", border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: "12px", overflow: "hidden", display: "flex",
+          flexDirection: "column", position: "relative",
+        }}
+      >
+        {/* Conteúdo borrado */}
+        <div style={{ filter: "blur(4px)", opacity: 0.35, pointerEvents: "none", userSelect: "none" }}>
+          {prompt.midia_url && (
+            <div style={{ width: "100%", aspectRatio: "9/16", background: "#0D0D0D" }} />
+          )}
+          <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ height: "12px", background: "rgba(255,255,255,0.1)", borderRadius: "4px", width: "60%" }} />
+            <div style={{ height: "10px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", width: "40%" }} />
+            <div style={{ height: "80px", background: "rgba(255,255,255,0.04)", borderRadius: "8px" }} />
+          </div>
+        </div>
+        {/* Overlay de lock */}
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          gap: "10px", padding: "24px", textAlign: "center",
+          background: "rgba(10,10,10,0.6)",
+        }}>
+          <div style={{
+            width: "44px", height: "44px", borderRadius: "12px",
+            background: "rgba(255,77,0,0.1)", border: "1px solid rgba(255,77,0,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Lock size={20} style={{ color: "#FF4D00" }} />
+          </div>
+          <div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 700, color: "#F5F5F5", margin: "0 0 4px" }}>
+              Prompt exclusivo {prompt.plano_minimo?.toUpperCase()}
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
+              Faça upgrade para desbloquear
+            </p>
+          </div>
+          <a
+            href="/dashboard/configuracoes"
+            style={{
+              padding: "8px 20px", borderRadius: "8px",
+              background: "#FF4D00", color: "white", textDecoration: "none",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
+            }}
+          >
+            Ver planos
+          </a>
+        </div>
+      </motion.div>
+    )
   }
 
   return (
@@ -60,16 +126,38 @@ function PromptCard({ prompt, index }: { prompt: Prompt; index: number }) {
         background: "#111111",
         border: "1px solid rgba(255,255,255,0.06)",
         borderRadius: "12px",
-        padding: "20px",
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        gap: "12px",
       }}
     >
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Badges */}
+      {/* ── Mídia (vídeo ou foto) ───────────────────────────────────────────── */}
+      {prompt.midia_url && (
+        <div style={{ width: "100%", aspectRatio: "9/16", background: "#0D0D0D", overflow: "hidden", flexShrink: 0 }}>
+          {isVideo ? (
+            <video
+              src={prompt.midia_url}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              controls
+              playsInline
+              muted
+              loop
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={prompt.midia_url}
+              alt={prompt.titulo}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          )}
+        </div>
+      )}
+
+      {/* ── Conteúdo ────────────────────────────────────────────────────────── */}
+      <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
+        {/* Badges + título + descrição */}
+        <div>
           <div style={{ display: "flex", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
             <span style={{
               display: "inline-block", fontSize: "10px", fontWeight: 700,
@@ -88,95 +176,119 @@ function PromptCard({ prompt, index }: { prompt: Prompt; index: number }) {
               {prompt.categoria}
             </span>
           </div>
-
-          {/* Título */}
-          <h3 style={{
-            fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 700,
-            color: "#F5F5F5", margin: 0,
-          }}>
+          <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 700, color: "#F5F5F5", margin: 0 }}>
             {prompt.titulo}
           </h3>
-
-          {/* Descrição */}
           {prompt.descricao && (
-            <p style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: "12px",
-              color: "rgba(245,245,245,0.4)", marginTop: "4px",
-            }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.4)", marginTop: "4px", marginBottom: 0 }}>
               {prompt.descricao}
             </p>
           )}
         </div>
 
-        {/* Botão copiar */}
-        <button
-          onClick={handleCopy}
-          title="Copiar prompt"
-          style={{
-            flexShrink: 0, display: "flex", alignItems: "center", gap: "6px",
-            background: copied ? "rgba(16,163,127,0.12)" : "rgba(255,77,0,0.10)",
-            border: "1px solid " + (copied ? "rgba(16,163,127,0.3)" : "rgba(255,77,0,0.3)"),
-            color: copied ? "#10A37F" : "#FF4D00",
-            fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
-            padding: "8px 14px", borderRadius: "8px", cursor: "pointer",
-            transition: "all 200ms ease",
-          }}
-        >
-          {copied ? <Check size={13} /> : <Copy size={13} />}
-          {copied ? "Copiado!" : "Copiar"}
-        </button>
-      </div>
-
-      {/* Conteúdo do prompt */}
-      <div
-        style={{
+        {/* Conteúdo do prompt */}
+        <div style={{
           background: "#0D0D0D",
           border: "1px solid rgba(255,255,255,0.05)",
           borderRadius: "8px",
           padding: "14px",
           position: "relative",
           overflow: "hidden",
-          maxHeight: expanded ? "none" : "100px",
+          maxHeight: expanded ? "none" : "96px",
           transition: "max-height 300ms ease",
-        }}
-      >
-        <pre style={{
-          fontFamily: "'DM Sans', sans-serif", fontSize: "12px",
-          color: "rgba(245,245,245,0.7)", whiteSpace: "pre-wrap",
-          wordBreak: "break-word", margin: 0,
         }}>
-          {prompt.conteudo}
-        </pre>
+          <pre style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: "12px",
+            color: "rgba(245,245,245,0.7)", whiteSpace: "pre-wrap",
+            wordBreak: "break-word", margin: 0, lineHeight: 1.6,
+          }}>
+            {prompt.conteudo}
+          </pre>
+          {!expanded && (
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "40px",
+              background: "linear-gradient(to bottom, transparent, #0D0D0D)",
+            }} />
+          )}
+        </div>
 
-        {/* Gradiente de fade quando colapsado */}
-        {!expanded && (
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: "40px",
-            background: "linear-gradient(to bottom, transparent, #0D0D0D)",
-          }} />
-        )}
+        {/* Toggle expandir */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            display: "flex", alignItems: "center", gap: "4px",
+            background: "transparent", border: "none", cursor: "pointer",
+            color: "rgba(245,245,245,0.35)", fontSize: "11px",
+            fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
+            padding: 0, alignSelf: "flex-start",
+            transition: "color 150ms ease",
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "#FF4D00" }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(245,245,245,0.35)" }}
+        >
+          <ChevronDown size={13} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 200ms ease" }} />
+          {expanded ? "Ver menos" : "Ver prompt completo"}
+        </button>
+
+        {/* ── Botões de ação ─────────────────────────────────────────────────── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "auto", paddingTop: "4px" }}>
+          <button
+            onClick={handleCopy}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+              background: copied ? "rgba(16,163,127,0.12)" : "rgba(255,77,0,0.10)",
+              border: "1px solid " + (copied ? "rgba(16,163,127,0.3)" : "rgba(255,77,0,0.3)"),
+              color: copied ? "#10A37F" : "#FF4D00",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
+              padding: "10px 14px", borderRadius: "8px", cursor: "pointer",
+              transition: "all 200ms ease",
+            }}
+          >
+            {copied ? <Check size={13} /> : <Copy size={13} />}
+            {copied ? "Copiado!" : "Copiar prompt"}
+          </button>
+
+          {prompt.tiktok_url && (
+            <a
+              href={prompt.tiktok_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                background: "#111827",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "rgba(245,245,245,0.75)",
+                fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
+                padding: "10px 14px", borderRadius: "8px", cursor: "pointer",
+                textDecoration: "none", transition: "all 200ms ease",
+                boxSizing: "border-box",
+              }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLAnchorElement
+                el.style.background = "#000000"
+                el.style.borderColor = "rgba(255,255,255,0.18)"
+                el.style.color = "#ffffff"
+                el.style.transform = "translateY(-1px)"
+                el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.4)"
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLAnchorElement
+                el.style.background = "#111827"
+                el.style.borderColor = "rgba(255,255,255,0.08)"
+                el.style.color = "rgba(245,245,245,0.75)"
+                el.style.transform = "translateY(0)"
+                el.style.boxShadow = "none"
+              }}
+            >
+              {/* Ícone TikTok SVG */}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.82a8.18 8.18 0 0 0 4.78 1.52V6.9a4.85 4.85 0 0 1-1.01-.21z"/>
+              </svg>
+              Ver no TikTok
+            </a>
+          )}
+        </div>
       </div>
-
-      {/* Toggle expandir */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        style={{
-          display: "flex", alignItems: "center", gap: "4px",
-          background: "transparent", border: "none", cursor: "pointer",
-          color: "rgba(245,245,245,0.35)", fontSize: "11px",
-          fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
-          padding: 0, alignSelf: "flex-start",
-          transition: "color 150ms ease",
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "#FF4D00" }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(245,245,245,0.35)" }}
-      >
-        <ChevronDown
-          size={13}
-          style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 200ms ease" }}
-        />
-        {expanded ? "Ver menos" : "Ver prompt completo"}
-      </button>
     </motion.div>
   )
 }
@@ -316,7 +428,7 @@ export default function PromptsPage() {
 
       {/* Grid de prompts */}
       {loading ? (
-        <div style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))" }}>
+        <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
           {[0, 1, 2, 3, 4, 5].map(i => (
             <div key={i} style={{ height: "180px", background: "#111111", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.06)", animation: "pulse 1.5s ease infinite" }} />
           ))}
@@ -329,9 +441,9 @@ export default function PromptsPage() {
           </p>
         </div>
       ) : (
-        <div style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))" }}>
+        <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
           {promptsFiltrados.map((p, i) => (
-            <PromptCard key={p.id} prompt={p} index={i} />
+            <PromptCard key={p.id} prompt={p} index={i} userPlan={user?.plan} />
           ))}
         </div>
       )}

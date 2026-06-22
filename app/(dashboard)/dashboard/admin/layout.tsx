@@ -4,15 +4,15 @@ import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
-import { Users, Film, DollarSign, Webhook, Cpu, Handshake, Shield } from "lucide-react"
+import { Users, LayoutList, Package, DollarSign, Webhook, Handshake, Shield } from "lucide-react"
 import type { ReactNode } from "react"
 
 const ADMIN_TABS = [
   { href: "/dashboard/admin/usuarios",   label: "Usuários",   icon: Users      },
-  { href: "/dashboard/admin/geracoes",   label: "Gerações",   icon: Film       },
+  { href: "/dashboard/admin/prompts",    label: "Prompts",    icon: LayoutList },
+  { href: "/dashboard/admin/biblioteca", label: "Biblioteca", icon: Package    },
   { href: "/dashboard/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { href: "/dashboard/admin/webhooks",   label: "Webhooks",   icon: Webhook    },
-  { href: "/dashboard/admin/modelos",    label: "Modelos",    icon: Cpu        },
   { href: "/dashboard/admin/afiliados",  label: "Afiliados",  icon: Handshake  },
   { href: "/dashboard/admin/seguranca",  label: "Segurança",  icon: Shield     },
 ] as const

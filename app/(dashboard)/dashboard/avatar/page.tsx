@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { UserCircle2, ChevronRight, ChevronLeft, Wand2, Copy, Check, RotateCcw, ExternalLink } from "lucide-react"
+import { UserCircle2, ChevronRight, ChevronLeft, Wand2, Copy, Check, RotateCcw, ExternalLink, Save, Trash2, FolderOpen } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 // ─── Animação ─────────────────────────────────────────────────────────────────
 
@@ -206,22 +207,32 @@ function SkinCard({ color, label, active, onClick }: {
   )
 }
 
-// Card visual genérico (gradiente + label) — pronto para substituir por foto real
+// Card visual genérico com foto real
 function VisualCard({ bg, label, active, onClick, imgUrl }: {
   bg: string; label: string; active: boolean; onClick: () => void; imgUrl?: string
 }) {
+  const imgStyle: React.CSSProperties = imgUrl ? {
+    backgroundImage: `url(${imgUrl})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center top",
+    backgroundRepeat: "no-repeat",
+    backgroundColor: "#0D0D0D",
+  } : { background: bg }
+
   return (
     <button onClick={onClick} style={{
       display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
       background: "transparent", border: "none", cursor: "pointer", padding: "4px",
+      flexShrink: 0,
     }}>
       <div style={{
         width: "80px", height: "80px", borderRadius: "12px",
-        background: imgUrl ? `url(${imgUrl}) center/cover` : bg,
+        ...imgStyle,
         border: `2px solid ${active ? "#FF4D00" : "rgba(255,255,255,0.06)"}`,
         boxShadow: active ? "0 0 16px rgba(255,77,0,0.35)" : "none",
-        transition: "all 150ms ease",
+        transition: "border-color 150ms ease, box-shadow 150ms ease",
         overflow: "hidden",
+        flexShrink: 0,
       }} />
       <span style={{
         fontSize: "10px", fontFamily: "'DM Sans', sans-serif", fontWeight: active ? 700 : 500,
@@ -291,57 +302,94 @@ function SectionDivider({ label }: { label: string }) {
 
 // ─── Dados visuais ────────────────────────────────────────────────────────────
 
-// Tom de pele — cores CSS reais
+const CDN = "https://cdn.motionforge.com.br"
+
+// Tom de pele — swatches de cor (consistente para todos os tons)
 const SKIN_TONES = [
-  { label: "Clara", color: "#FDDBB4" },
+  { label: "Clara",                 color: "#FDDBB4" },
   { label: "Clara com bronze leve", color: "#E8B88A" },
-  { label: "Morena", color: "#C68642" },
-  { label: "Morena escura", color: "#8D5524" },
-  { label: "Negra", color: "#3B1F0A" },
+  { label: "Morena",                color: "#C68642" },
+  { label: "Morena escura",         color: "#8D5524" },
+  { label: "Negra",                 color: "#3B1F0A" },
 ]
 
-const CDN = "https://cdn.motionforge.com.br"
+// Cílios — apenas opções com foto
+const LASH_OPTIONS = [
+  { label: "Natural",             imgUrl: `${CDN}/avatar/lash/natural.jpg` },
+  { label: "Longos e levantados", imgUrl: `${CDN}/avatar/lash/longos.jpg` },
+]
+
+// Sobrancelhas — apenas opções com foto
+const BROW_OPTIONS = [
+  { label: "Natural",            imgUrl: `${CDN}/avatar/brow/natural.jpg` },
+  { label: "Cheias e definidas", imgUrl: `${CDN}/avatar/brow/cheias.jpg` },
+]
+
+// Estilo do cabelo — apenas opções com foto
+const HAIR_STYLE_OPTIONS = [
+  { label: "Liso",     imgUrl: `${CDN}/avatar/hair-style/liso.jpg` },
+  { label: "Ondulado", imgUrl: `${CDN}/avatar/hair-style/ondulado.jpg` },
+]
 
 // Rosto — fotos reais do CDN
 const FACE_OPTIONS = [
   { label: "Oval",    bg: "#1a1a2a", imgUrl: `${CDN}/avatar/face/oval.jpg` },
   { label: "Fino",    bg: "#1e2a3e", imgUrl: `${CDN}/avatar/face/fino.jpg` },
   { label: "Marcado", bg: "#2e1e3e", imgUrl: `${CDN}/avatar/face/marcado.jpg` },
-  { label: "Redondo", bg: "linear-gradient(135deg, #1a2e2a 0%, #0d1e1a 100%)" },
 ]
 
-// Olhos — fotos reais do CDN
+// Olhos — apenas opções com foto
 const EYE_OPTIONS = [
-  { label: "Castanho", bg: "#3D1F10", imgUrl: `${CDN}/avatar/eyes/castanho.jpg` },
-  { label: "Verde",    bg: "#1A3D20", imgUrl: `${CDN}/avatar/eyes/verde.jpg` },
-  { label: "Azul",     bg: "#0D2050", imgUrl: `${CDN}/avatar/eyes/azul.jpg` },
-  { label: "Mel",      bg: "radial-gradient(circle, #8B6914 30%, #5A4010 100%)" },
-  { label: "Preto",    bg: "radial-gradient(circle, #1A1A1A 30%, #050505 100%)" },
+  { label: "Castanho", imgUrl: `${CDN}/avatar/eyes/castanho.jpg` },
+  { label: "Verde",    imgUrl: `${CDN}/avatar/eyes/verde.jpg` },
+  { label: "Azul",     imgUrl: `${CDN}/avatar/eyes/azul.jpg` },
 ]
 
-// Cabelo — fotos reais do CDN
+// Cabelo cor — apenas opções com foto
 const HAIR_COLOR_OPTIONS = [
-  { label: "Loiro",           bg: "#A07828", imgUrl: `${CDN}/avatar/hair/loiro.jpg` },
-  { label: "Castanho claro",  bg: "#6A3D22", imgUrl: `${CDN}/avatar/hair/castanho-claro.jpg` },
-  { label: "Castanho escuro", bg: "#2A1505", imgUrl: `${CDN}/avatar/hair/castanho-escuro.jpg` },
-  { label: "Preto",           bg: "#050505", imgUrl: `${CDN}/avatar/hair/preto.jpg` },
-  { label: "Ruivo",           bg: "#8B2A08", imgUrl: `${CDN}/avatar/hair/ruivo.jpg` },
+  { label: "Loiro",           imgUrl: `${CDN}/avatar/hair/loiro.jpg` },
+  { label: "Castanho claro",  imgUrl: `${CDN}/avatar/hair/castanho-claro.jpg` },
+  { label: "Castanho escuro", imgUrl: `${CDN}/avatar/hair/castanho-escuro.jpg` },
+  { label: "Preto",           imgUrl: `${CDN}/avatar/hair/preto.jpg` },
+  { label: "Ruivo",           imgUrl: `${CDN}/avatar/hair/ruivo.jpg` },
 ]
 
-// Corpo — fotos reais do CDN
+// Corpo — apenas opções com foto
 const BODY_OPTIONS = [
-  { label: "Magro",      bg: "#0D0D1A", imgUrl: `${CDN}/avatar/body/magro.jpg` },
-  { label: "Fitness",    bg: "#0D1A0D", imgUrl: `${CDN}/avatar/body/fitness.jpg` },
-  { label: "Curvilíneo", bg: "#1A0D1A", imgUrl: `${CDN}/avatar/body/violao.jpg` },
-  { label: "Plus size",  bg: "linear-gradient(180deg, #2A2A1A 0%, #1A1A0D 100%)" },
+  { label: "Magro",      imgUrl: `${CDN}/avatar/body/magro.jpg` },
+  { label: "Fitness",    imgUrl: `${CDN}/avatar/body/fitness.jpg` },
+  { label: "Curvilíneo", imgUrl: `${CDN}/avatar/body/violao.jpg` },
 ]
 
-// Óculos — fotos reais do CDN
+// Óculos — apenas opções com foto
 const GLASSES_OPTIONS = [
-  { label: "Nenhum",              bg: "#0D0D1A", imgUrl: `${CDN}/avatar/glasses/nenhum.jpg` },
-  { label: "Óculos de Sol",       bg: "#1A1010", imgUrl: `${CDN}/avatar/glasses/sol.jpg` },
-  { label: "Óculos Transparentes",bg: "#0D1020", imgUrl: `${CDN}/avatar/glasses/transparente.jpg` },
+  { label: "Nenhum",               imgUrl: `${CDN}/avatar/glasses/nenhum.jpg` },
+  { label: "Óculos de Sol",        imgUrl: `${CDN}/avatar/glasses/sol.jpg` },
+  { label: "Óculos Transparentes", imgUrl: `${CDN}/avatar/glasses/transparente.jpg` },
 ]
+
+// ─── Tipos de avatar salvo ────────────────────────────────────────────────────
+
+interface SavedAvatar {
+  id: string
+  nome: string
+  prompt: string
+  negative: string
+  config: { identidade: Identidade; aparencia: Aparencia; estilo: Estilo; ambiente: Ambiente }
+  savedAt: string
+}
+
+const MF_AVATARES_KEY = "mf_avatares"
+
+function loadAvatares(): SavedAvatar[] {
+  try {
+    return JSON.parse(localStorage.getItem(MF_AVATARES_KEY) ?? "[]")
+  } catch { return [] }
+}
+
+function saveAvatares(list: SavedAvatar[]) {
+  localStorage.setItem(MF_AVATARES_KEY, JSON.stringify(list))
+}
 
 // ─── Etapas ───────────────────────────────────────────────────────────────────
 
@@ -350,20 +398,73 @@ const STEPS = ["Identidade", "Aparência", "Estilo", "Ambiente", "Gerar"]
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function AvatarPage() {
+  const { user } = useAuth()
   const [step, setStep] = useState(0)
+  const [stepError, setStepError] = useState("")
   const [prompt, setPrompt] = useState<{ prompt: string; negative: string } | null>(null)
   const [copied, setCopied] = useState<"main" | "neg" | null>(null)
+  const [savedAvatares, setSavedAvatares] = useState<SavedAvatar[]>([])
+  const [saveMsg, setSaveMsg] = useState<"saved" | "limit" | null>(null)
+  const [showSaved, setShowSaved] = useState(false)
+
+  const isStarter = user?.plan === "Starter"
+
+  useEffect(() => {
+    setSavedAvatares(loadAvatares())
+  }, [])
+
+  function handleSaveAvatar() {
+    if (!prompt) return
+    const current = loadAvatares()
+
+    if (isStarter && current.length >= 1) {
+      setSaveMsg("limit")
+      setTimeout(() => setSaveMsg(null), 3000)
+      return
+    }
+
+    const novo: SavedAvatar = {
+      id: Date.now().toString(),
+      nome: identidade.nome || `Avatar ${current.length + 1}`,
+      prompt: prompt.prompt,
+      negative: prompt.negative,
+      config: { identidade, aparencia, estilo, ambiente },
+      savedAt: new Date().toISOString(),
+    }
+
+    const updated = [...current, novo]
+    saveAvatares(updated)
+    setSavedAvatares(updated)
+    setSaveMsg("saved")
+    setTimeout(() => setSaveMsg(null), 2000)
+  }
+
+  function handleDeleteAvatar(id: string) {
+    const updated = loadAvatares().filter(a => a.id !== id)
+    saveAvatares(updated)
+    setSavedAvatares(updated)
+  }
+
+  function handleLoadAvatar(av: SavedAvatar) {
+    setId(av.config.identidade)
+    setAp(av.config.aparencia)
+    setEs(av.config.estilo)
+    setAmb(av.config.ambiente)
+    setPrompt({ prompt: av.prompt, negative: av.negative })
+    setStep(4)
+    setShowSaved(false)
+  }
 
   const [identidade, setId] = useState<Identidade>({
-    nome: "", genero: "Feminino", idade: 22,
-    tomPele: "Clara com bronze leve", rosto: "Oval",
+    nome: "", genero: "", idade: 22,
+    tomPele: "", rosto: "",
   })
 
   const [aparencia, setAp] = useState<Aparencia>({
-    corOlhos: "Castanho", cilios: "Natural", sobrancelhas: "Natural",
-    expressao: "Leve sorriso", corCabelo: "Castanho escuro",
+    corOlhos: "", cilios: "Natural", sobrancelhas: "Natural",
+    expressao: "Leve sorriso", corCabelo: "",
     tipoCabelo: "Liso", comprimentoCabelo: "Médio",
-    corpo: "Fitness", beleza: "Bonita padrão", detalhes: [],
+    corpo: "", beleza: "Bonita padrão", detalhes: [],
   })
 
   const [estilo, setEs] = useState<Estilo>({
@@ -377,16 +478,37 @@ export default function AvatarPage() {
     posicao: "De pé",
   })
 
-  function updId(k: keyof Identidade, v: string | number) { setId(p => ({ ...p, [k]: v })) }
-  function updAp(k: keyof Aparencia, v: string | string[]) { setAp(p => ({ ...p, [k]: v })) }
+  function updId(k: keyof Identidade, v: string | number) { setId(p => ({ ...p, [k]: v })); setStepError("") }
+  function updAp(k: keyof Aparencia, v: string | string[]) { setAp(p => ({ ...p, [k]: v })); setStepError("") }
   function toggleDetalhe(d: string) {
     setAp(p => ({
       ...p,
       detalhes: p.detalhes.includes(d) ? p.detalhes.filter(x => x !== d) : [...p.detalhes, d],
     }))
   }
-  function updEs(k: keyof Estilo, v: string | boolean) { setEs(p => ({ ...p, [k]: v })) }
-  function updAmb(k: keyof Ambiente, v: string) { setAmb(p => ({ ...p, [k]: v })) }
+  function updEs(k: keyof Estilo, v: string | boolean) { setEs(p => ({ ...p, [k]: v })); setStepError("") }
+  function updAmb(k: keyof Ambiente, v: string) { setAmb(p => ({ ...p, [k]: v })); setStepError("") }
+
+  function validateStep(): string {
+    if (step === 0) {
+      if (!identidade.genero) return "Selecione o gênero"
+      if (!identidade.tomPele) return "Selecione o tom de pele"
+      if (!identidade.rosto) return "Selecione o formato do rosto"
+    }
+    if (step === 1) {
+      if (!aparencia.corOlhos) return "Selecione a cor dos olhos"
+      if (!aparencia.corCabelo) return "Selecione a cor do cabelo"
+      if (!aparencia.corpo) return "Selecione o tipo de corpo"
+    }
+    return ""
+  }
+
+  function handleNext() {
+    const err = validateStep()
+    if (err) { setStepError(err); return }
+    setStepError("")
+    setStep(s => Math.min(4, s + 1))
+  }
 
   // Geração do prompt é 100% client-side — sem API call
   function handleGenerate() {
@@ -403,9 +525,10 @@ export default function AvatarPage() {
 
   function handleReset() {
     setStep(0)
+    setStepError("")
     setPrompt(null)
-    setId({ nome: "", genero: "Feminino", idade: 22, tomPele: "Clara com bronze leve", rosto: "Oval" })
-    setAp({ corOlhos: "Castanho", cilios: "Natural", sobrancelhas: "Natural", expressao: "Leve sorriso", corCabelo: "Castanho escuro", tipoCabelo: "Liso", comprimentoCabelo: "Médio", corpo: "Fitness", beleza: "Bonita padrão", detalhes: [] })
+    setId({ nome: "", genero: "", idade: 22, tomPele: "", rosto: "" })
+    setAp({ corOlhos: "", cilios: "Natural", sobrancelhas: "Natural", expressao: "Leve sorriso", corCabelo: "", tipoCabelo: "Liso", comprimentoCabelo: "Médio", corpo: "", beleza: "Bonita padrão", detalhes: [] })
     setEs({ roupa: "", oculos: "Nenhum", manchas: "Nenhum", sardas: "Nenhum", maquiagem: true })
     setAmb({ ambiente: "Quarto", periodo: "Dia", tipoConteudo: "Lifestyle", estilofoto: "Natural (Corpo Inteiro)", posicao: "De pé" })
   }
@@ -464,7 +587,7 @@ export default function AvatarPage() {
                 <VisualCard
                   key={f.label}
                   bg={f.bg}
-                  imgUrl={(f as any).imgUrl}
+                  imgUrl={f.imgUrl}
                   label={f.label}
                   active={identidade.rosto === f.label}
                   onClick={() => updId("rosto", f.label)}
@@ -483,24 +606,31 @@ export default function AvatarPage() {
           <Field label="Cor dos olhos">
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {EYE_OPTIONS.map(e => (
-                <VisualCard
-                  key={e.label}
-                  bg={e.bg}
-                  imgUrl={(e as any).imgUrl}
-                  label={e.label}
-                  active={aparencia.corOlhos === e.label}
-                  onClick={() => updAp("corOlhos", e.label)}
-                />
+                <VisualCard key={e.label} bg="#0D0D0D" imgUrl={e.imgUrl}
+                  label={e.label} active={aparencia.corOlhos === e.label}
+                  onClick={() => updAp("corOlhos", e.label)} />
               ))}
             </div>
           </Field>
 
           <Field label="Cílios">
-            <ChipGroup options={["Natural", "Longos e levantados", "Volume intenso"]} value={aparencia.cilios} onChange={v => updAp("cilios", v)} />
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {LASH_OPTIONS.map(l => (
+                <VisualCard key={l.label} bg="#0D0D0D" imgUrl={l.imgUrl}
+                  label={l.label} active={aparencia.cilios === l.label}
+                  onClick={() => updAp("cilios", l.label)} />
+              ))}
+            </div>
           </Field>
 
           <Field label="Sobrancelhas">
-            <ChipGroup options={["Natural", "Cheias e definidas", "Finas e arqueadas"]} value={aparencia.sobrancelhas} onChange={v => updAp("sobrancelhas", v)} />
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {BROW_OPTIONS.map(b => (
+                <VisualCard key={b.label} bg="#0D0D0D" imgUrl={b.imgUrl}
+                  label={b.label} active={aparencia.sobrancelhas === b.label}
+                  onClick={() => updAp("sobrancelhas", b.label)} />
+              ))}
+            </div>
           </Field>
 
           <Field label="Expressão">
@@ -513,20 +643,21 @@ export default function AvatarPage() {
           <Field label="Cor do cabelo">
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {HAIR_COLOR_OPTIONS.map(h => (
-                <VisualCard
-                  key={h.label}
-                  bg={h.bg}
-                  imgUrl={(h as any).imgUrl}
-                  label={h.label}
-                  active={aparencia.corCabelo === h.label}
-                  onClick={() => updAp("corCabelo", h.label)}
-                />
+                <VisualCard key={h.label} bg="#0D0D0D" imgUrl={h.imgUrl}
+                  label={h.label} active={aparencia.corCabelo === h.label}
+                  onClick={() => updAp("corCabelo", h.label)} />
               ))}
             </div>
           </Field>
 
           <Field label="Tipo">
-            <ChipGroup options={["Liso", "Ondulado", "Cacheado"]} value={aparencia.tipoCabelo} onChange={v => updAp("tipoCabelo", v)} />
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {HAIR_STYLE_OPTIONS.map(h => (
+                <VisualCard key={h.label} bg="#0D0D0D" imgUrl={h.imgUrl}
+                  label={h.label} active={aparencia.tipoCabelo === h.label}
+                  onClick={() => updAp("tipoCabelo", h.label)} />
+              ))}
+            </div>
           </Field>
 
           <Field label="Comprimento">
@@ -539,14 +670,9 @@ export default function AvatarPage() {
           <Field label="Corpo">
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {BODY_OPTIONS.map(b => (
-                <VisualCard
-                  key={b.label}
-                  bg={b.bg}
-                  imgUrl={(b as any).imgUrl}
-                  label={b.label}
-                  active={aparencia.corpo === b.label}
-                  onClick={() => updAp("corpo", b.label)}
-                />
+                <VisualCard key={b.label} bg="#0D0D0D" imgUrl={b.imgUrl}
+                  label={b.label} active={aparencia.corpo === b.label}
+                  onClick={() => updAp("corpo", b.label)} />
               ))}
             </div>
           </Field>
@@ -580,14 +706,9 @@ export default function AvatarPage() {
           <Field label="Óculos">
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {GLASSES_OPTIONS.map(g => (
-                <VisualCard
-                  key={g.label}
-                  bg={g.bg}
-                  imgUrl={(g as any).imgUrl}
-                  label={g.label}
-                  active={estilo.oculos === g.label}
-                  onClick={() => updEs("oculos", g.label)}
-                />
+                <VisualCard key={g.label} bg="#0D0D0D" imgUrl={g.imgUrl}
+                  label={g.label} active={estilo.oculos === g.label}
+                  onClick={() => updEs("oculos", g.label)} />
               ))}
             </div>
           </Field>
@@ -783,21 +904,44 @@ export default function AvatarPage() {
                 </div>
               </div>
 
-              {/* Criar novo */}
-              <button
-                onClick={handleReset}
-                style={{
-                  alignSelf: "flex-start", display: "flex", alignItems: "center", gap: "6px",
-                  background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
-                  color: "rgba(245,245,245,0.45)", fontFamily: "'DM Sans', sans-serif",
-                  fontSize: "12px", fontWeight: 600, padding: "8px 16px",
-                  borderRadius: "8px", cursor: "pointer", transition: "all 150ms ease",
-                }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,77,0,0.4)"; el.style.color = "#FF4D00" }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,255,255,0.1)"; el.style.color = "rgba(245,245,245,0.45)" }}
-              >
-                <RotateCcw size={12} /> Criar novo avatar
-              </button>
+              {/* Ações: salvar + criar novo */}
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <button
+                  onClick={handleSaveAvatar}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "6px",
+                    background: saveMsg === "saved" ? "rgba(16,163,127,0.12)" : "rgba(255,77,0,0.1)",
+                    border: `1px solid ${saveMsg === "saved" ? "rgba(16,163,127,0.3)" : "rgba(255,77,0,0.3)"}`,
+                    color: saveMsg === "saved" ? "#10A37F" : "#FF4D00",
+                    fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
+                    padding: "8px 16px", borderRadius: "8px", cursor: "pointer", transition: "all 150ms ease",
+                  }}
+                >
+                  {saveMsg === "saved" ? <Check size={12} /> : <Save size={12} />}
+                  {saveMsg === "saved" ? "Salvo!" : saveMsg === "limit" ? "Limite atingido (Pro)" : "Salvar avatar"}
+                </button>
+
+                <button
+                  onClick={handleReset}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "6px",
+                    background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
+                    color: "rgba(245,245,245,0.45)", fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "12px", fontWeight: 600, padding: "8px 16px",
+                    borderRadius: "8px", cursor: "pointer", transition: "all 150ms ease",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,77,0,0.4)"; el.style.color = "#FF4D00" }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,255,255,0.1)"; el.style.color = "rgba(245,245,245,0.45)" }}
+                >
+                  <RotateCcw size={12} /> Criar novo avatar
+                </button>
+              </div>
+
+              {saveMsg === "limit" && (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#ef4444", margin: 0 }}>
+                  O plano Starter permite apenas 1 avatar salvo. Faça upgrade para Pro para salvar ilimitados.
+                </p>
+              )}
             </motion.div>
           )}
         </div>
@@ -813,59 +957,137 @@ export default function AvatarPage() {
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE }} style={{ marginBottom: "32px" }}
+        transition={{ duration: 0.5, ease: EASE }} style={{ marginBottom: "24px" }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "6px" }}>
-          <div style={{
-            width: "40px", height: "40px", borderRadius: "12px",
-            background: "rgba(255,77,0,0.12)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <UserCircle2 size={20} style={{ color: "#FF4D00" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "6px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{
+              width: "40px", height: "40px", borderRadius: "12px",
+              background: "rgba(255,77,0,0.12)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <UserCircle2 size={20} style={{ color: "#FF4D00" }} />
+            </div>
+            <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", margin: 0 }}>
+              Criador de Avatar IA
+            </h1>
           </div>
-          <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", margin: 0 }}>
-            Criador de Avatar IA
-          </h1>
+
+          {savedAvatares.length > 0 && (
+            <button
+              onClick={() => setShowSaved(s => !s)}
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                padding: "8px 14px", borderRadius: "8px", cursor: "pointer",
+                background: showSaved ? "rgba(255,77,0,0.1)" : "transparent",
+                border: `1px solid ${showSaved ? "rgba(255,77,0,0.3)" : "rgba(255,255,255,0.08)"}`,
+                color: showSaved ? "#FF4D00" : "rgba(245,245,245,0.45)",
+                fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 600,
+                transition: "all 150ms ease",
+              }}
+            >
+              <FolderOpen size={13} />
+              Meus avatares ({savedAvatares.length}{isStarter ? "/1" : ""})
+            </button>
+          )}
         </div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
           Configure seu avatar e receba um prompt fotorrealista pronto para Google Imagen, Midjourney ou DALL-E.
         </p>
       </motion.div>
 
+      {/* Painel de avatares salvos */}
+      {showSaved && savedAvatares.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          style={{
+            marginBottom: "24px", background: "#111111",
+            border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "16px",
+          }}
+        >
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.35)", textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 12px" }}>
+            Avatares salvos
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            {savedAvatares.map(av => (
+              <div key={av.id} style={{
+                display: "flex", alignItems: "center", gap: "10px",
+                background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.05)",
+                borderRadius: "8px", padding: "10px 12px",
+              }}>
+                <UserCircle2 size={16} style={{ color: "#FF4D00", flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 700, color: "#F5F5F5", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {av.nome}
+                  </p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "10px", color: "rgba(245,245,245,0.3)", margin: 0 }}>
+                    {new Date(av.savedAt).toLocaleDateString("pt-BR")}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleLoadAvatar(av)}
+                  style={{
+                    padding: "5px 10px", borderRadius: "6px", cursor: "pointer",
+                    background: "rgba(255,77,0,0.08)", border: "1px solid rgba(255,77,0,0.2)",
+                    color: "#FF4D00", fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700,
+                  }}
+                >
+                  Carregar
+                </button>
+                <button
+                  onClick={() => handleDeleteAvatar(av.id)}
+                  style={{
+                    width: "28px", height: "28px", borderRadius: "6px", cursor: "pointer",
+                    background: "transparent", border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(245,245,245,0.35)", display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Stepper */}
-      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", marginBottom: "24px" }}>
         {STEPS.map((s, i) => (
-          <div key={s} style={{ display: "flex", alignItems: "center", flex: i < STEPS.length - 1 ? 1 : "none", gap: "6px" }}>
-            <div
-              onClick={() => { if (i < step) setStep(i) }}
-              style={{
-                width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: i < step ? "#FF4D00" : i === step ? "rgba(255,77,0,0.15)" : "rgba(255,255,255,0.05)",
-                border: `1px solid ${i <= step ? "#FF4D00" : "rgba(255,255,255,0.08)"}`,
-                fontSize: "11px", fontWeight: 700,
-                color: i < step ? "#fff" : i === step ? "#FF4D00" : "rgba(245,245,245,0.3)",
-                fontFamily: "'DM Sans', sans-serif", cursor: i < step ? "pointer" : "default",
-                transition: "all 200ms ease",
-              }}
-            >
-              {i < step ? "✓" : i + 1}
+          <React.Fragment key={s}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+              <div
+                onClick={() => { if (i < step) { setStepError(""); setStep(i) } }}
+                style={{
+                  width: "28px", height: "28px", borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: i < step ? "#FF4D00" : i === step ? "rgba(255,77,0,0.15)" : "rgba(255,255,255,0.05)",
+                  border: `1px solid ${i <= step ? "#FF4D00" : "rgba(255,255,255,0.08)"}`,
+                  fontSize: "11px", fontWeight: 700,
+                  color: i < step ? "#fff" : i === step ? "#FF4D00" : "rgba(245,245,245,0.3)",
+                  fontFamily: "'DM Sans', sans-serif", cursor: i < step ? "pointer" : "default",
+                  transition: "all 200ms ease",
+                }}
+              >
+                {i < step ? "✓" : i + 1}
+              </div>
+              <span style={{
+                fontSize: "8px", fontWeight: i === step ? 700 : 400,
+                color: i === step ? "#FF4D00" : "rgba(245,245,245,0.25)",
+                fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase",
+                letterSpacing: "0.5px", whiteSpace: "nowrap",
+              }}>
+                {s}
+              </span>
             </div>
             {i < STEPS.length - 1 && (
-              <div style={{ flex: 1, height: "1px", background: i < step ? "#FF4D00" : "rgba(255,255,255,0.08)", transition: "background 300ms ease" }} />
+              <div style={{
+                flex: 1, height: "1px", marginTop: "14px",
+                background: i < step ? "#FF4D00" : "rgba(255,255,255,0.08)",
+                transition: "background 300ms ease",
+              }} />
             )}
-          </div>
-        ))}
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "24px" }}>
-        {STEPS.map((s, i) => (
-          <span key={s} style={{
-            fontSize: "9px", fontWeight: i === step ? 700 : 400,
-            color: i === step ? "#FF4D00" : "rgba(245,245,245,0.25)",
-            fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: "0.5px",
-          }}>
-            {s}
-          </span>
+          </React.Fragment>
         ))}
       </div>
 
@@ -889,35 +1111,47 @@ export default function AvatarPage() {
 
       {/* Navegação entre etapas */}
       {step < 4 && (
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
-          <button
-            onClick={() => setStep(s => Math.max(0, s - 1))}
-            disabled={step === 0}
-            style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
-              color: step === 0 ? "rgba(245,245,245,0.2)" : "rgba(245,245,245,0.5)",
-              fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 600,
-              padding: "11px 20px", borderRadius: "8px",
-              cursor: step === 0 ? "not-allowed" : "pointer", transition: "all 150ms ease",
-            }}
-          >
-            <ChevronLeft size={15} /> Voltar
-          </button>
-          <button
-            onClick={() => setStep(s => Math.min(4, s + 1))}
-            style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              background: "rgba(255,77,0,0.1)", border: "1px solid rgba(255,77,0,0.3)",
-              color: "#FF4D00", fontFamily: "'DM Sans', sans-serif",
-              fontSize: "13px", fontWeight: 700, padding: "11px 24px",
-              borderRadius: "8px", cursor: "pointer", transition: "all 150ms ease",
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,77,0,0.18)" }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,77,0,0.1)" }}
-          >
-            {step === 3 ? "Ver resumo e gerar" : "Continuar"} <ChevronRight size={15} />
-          </button>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {stepError && (
+            <div style={{
+              background: "rgba(255,77,0,0.08)", border: "1px solid rgba(255,77,0,0.3)",
+              borderRadius: "8px", padding: "10px 14px",
+              fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+              color: "#FF4D00", fontWeight: 600, textAlign: "center",
+            }}>
+              {stepError}
+            </div>
+          )}
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+            <button
+              onClick={() => { setStepError(""); setStep(s => Math.max(0, s - 1)) }}
+              disabled={step === 0}
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
+                color: step === 0 ? "rgba(245,245,245,0.2)" : "rgba(245,245,245,0.5)",
+                fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 600,
+                padding: "11px 20px", borderRadius: "8px",
+                cursor: step === 0 ? "not-allowed" : "pointer", transition: "all 150ms ease",
+              }}
+            >
+              <ChevronLeft size={15} /> Voltar
+            </button>
+            <button
+              onClick={handleNext}
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                background: "rgba(255,77,0,0.1)", border: "1px solid rgba(255,77,0,0.3)",
+                color: "#FF4D00", fontFamily: "'DM Sans', sans-serif",
+                fontSize: "13px", fontWeight: 700, padding: "11px 24px",
+                borderRadius: "8px", cursor: "pointer", transition: "all 150ms ease",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,77,0,0.18)" }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,77,0,0.1)" }}
+            >
+              {step === 3 ? "Ver resumo e gerar" : "Continuar"} <ChevronRight size={15} />
+            </button>
+          </div>
         </div>
       )}
     </div>

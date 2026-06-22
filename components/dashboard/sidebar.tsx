@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, Clock, Settings, LogOut, Users, DollarSign, Webhook, Cpu, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package, Wand2, UserCircle2 } from "lucide-react"
+import { Home, Settings, LogOut, Users, DollarSign, Webhook, Handshake, Shield, BookOpen, ShoppingBag, LayoutList, Package, Wand2, UserCircle2 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -21,7 +21,6 @@ const ADMIN_NAV_ITEMS = [
   { href: "/dashboard/admin/biblioteca", label: "Biblioteca",  icon: Package     },
   { href: "/dashboard/admin/financeiro", label: "Financeiro",  icon: DollarSign  },
   { href: "/dashboard/admin/webhooks",   label: "Webhooks",    icon: Webhook     },
-  { href: "/dashboard/admin/modelos",    label: "Modelos",     icon: Cpu         },
   { href: "/dashboard/admin/afiliados",  label: "Afiliados",   icon: Handshake   },
   { href: "/dashboard/admin/seguranca",  label: "Segurança",   icon: Shield      },
 ] as const
@@ -34,7 +33,6 @@ const NAV_ITEMS = [
   { href: "/dashboard/gerador",       label: "Gerador",     icon: Wand2,        special: false },
   { href: "/dashboard/avatar",        label: "Avatar IA",   icon: UserCircle2,  special: false },
   { href: "/dashboard/biblioteca",    label: "Biblioteca",  icon: ShoppingBag,  special: false },
-  { href: "/dashboard/historico",     label: "Histórico",   icon: Clock,       special: false },
   { href: "/dashboard/configuracoes", label: "Config.",     icon: Settings,    special: false },
 ] as const
 

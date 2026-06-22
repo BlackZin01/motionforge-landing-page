@@ -5,27 +5,7 @@ import { Camera, Save, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/components/dashboard/shared/toast"
 
-type ActiveTab = "perfil" | "preferencias" | "seguranca"
-
-const IMAGE_MODELS = [
-  { value: "nano-banana-2", label: "Nano Banana Pro" },
-  { value: "flux-2-dev", label: "FLUX 2 Dev" },
-  { value: "ideogram-v3", label: "Ideogram v3" },
-  { value: "recraft-v3", label: "Recraft v3" },
-  { value: "stable-diffusion-xl", label: "Stable Diffusion XL" },
-]
-
-const VIDEO_MODELS = [
-  { value: "seedance-20", label: "Seedance 2.0" },
-  { value: "seedance-fast", label: "Seedance Fast" },
-  { value: "kling-std", label: "Kling Std" },
-  { value: "kling-pro", label: "Kling Pro" },
-  { value: "wan-27", label: "Wan 2.7" },
-  { value: "hailuo-23", label: "Hailuo 2.3" },
-  { value: "veo-31-lite", label: "Veo 3.1 Lite" },
-]
-
-const ASPECT_OPTIONS = ["16:9", "9:16", "1:1"]
+type ActiveTab = "perfil" | "seguranca"
 
 export default function ConfiguracoesPage() {
   const { user, refreshUser } = useAuth()
@@ -38,12 +18,6 @@ export default function ConfiguracoesPage() {
   const plan  = user?.plan  ?? "Starter"
   const isAdmin = user?.isAdmin ?? false
   const [savingProfile, setSavingProfile] = useState(false)
-
-  // Preferências (client-side)
-  const [defaultImageModel, setDefaultImageModel] = useState("nano-banana-2")
-  const [defaultVideoModel, setDefaultVideoModel] = useState("seedance-20")
-  const [defaultAspect, setDefaultAspect] = useState("16:9")
-  const [autoSave, setAutoSave] = useState(true)
 
   // Segurança
   const [currentPassword, setCurrentPassword] = useState("")
@@ -175,8 +149,8 @@ export default function ConfiguracoesPage() {
 
       {/* Tabs */}
       <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "24px" }}>
-        {(["perfil", "preferencias", "seguranca"] as ActiveTab[]).map((tab) => {
-          const labels: Record<ActiveTab, string> = { perfil: "Perfil", preferencias: "Preferências", seguranca: "Segurança" }
+        {(["perfil", "seguranca"] as ActiveTab[]).map((tab) => {
+          const labels: Record<ActiveTab, string> = { perfil: "Perfil", seguranca: "Segurança" }
           const isActive = activeTab === tab
           return (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{
@@ -241,63 +215,6 @@ export default function ConfiguracoesPage() {
           <button onClick={handleSaveProfile} disabled={savingProfile} style={btnPrimary(savingProfile)}>
             <Save size={14} />
             {savingProfile ? "Salvando..." : "Salvar alterações"}
-          </button>
-        </div>
-      )}
-
-      {/* ─── ABA PREFERÊNCIAS ────────────────────────────────────────────────── */}
-      {activeTab === "preferencias" && (
-        <div style={{ ...cardStyle, gap: "20px" }}>
-          <div>
-            <label style={labelStyle}>Modelo padrão — Imagem</label>
-            <select value={defaultImageModel} onChange={(e) => setDefaultImageModel(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-              {IMAGE_MODELS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label style={labelStyle}>Modelo padrão — Vídeo</label>
-            <select value={defaultVideoModel} onChange={(e) => setDefaultVideoModel(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-              {VIDEO_MODELS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label style={labelStyle}>Aspecto padrão</label>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {ASPECT_OPTIONS.map((aspect) => {
-                const isActive = defaultAspect === aspect
-                return (
-                  <button key={aspect} onClick={() => setDefaultAspect(aspect)} style={{
-                    background: isActive ? "rgba(255,77,0,0.1)" : "rgba(255,255,255,0.04)",
-                    border: `1px solid ${isActive ? "rgba(255,77,0,0.4)" : "rgba(255,255,255,0.06)"}`,
-                    borderRadius: "8px", padding: "8px 16px",
-                    color: isActive ? "#FF4D00" : "rgba(245,245,245,0.4)",
-                    fontSize: "13px", fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif",
-                    cursor: "pointer", transition: "all 0.15s",
-                  }}>
-                    {aspect}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "13px", color: "#F5F5F5", fontFamily: "'DM Sans', sans-serif" }}>
-              Salvar automaticamente as gerações
-            </span>
-            <div onClick={() => setAutoSave(p => !p)} style={{
-              position: "relative", width: "40px", height: "22px", borderRadius: "11px",
-              background: autoSave ? "#FF4D00" : "rgba(255,255,255,0.1)", cursor: "pointer",
-              transition: "background 0.25s", flexShrink: 0,
-            }}>
-              <div style={{
-                position: "absolute", top: "3px", left: autoSave ? "20px" : "3px",
-                width: "16px", height: "16px", background: "white", borderRadius: "50%",
-                transition: "left 0.25s", boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-              }} />
-            </div>
-          </div>
-          <button onClick={() => toast({ message: "Preferências salvas.", type: "success" })} style={btnPrimary(false)}>
-            <Save size={14} /> Salvar preferências
           </button>
         </div>
       )}

@@ -2,7 +2,9 @@
 
 import { useState, useRef } from "react"
 import { motion } from "framer-motion"
-import { Wand2, Copy, Check, Loader2, ImagePlus, X } from "lucide-react"
+import { Wand2, Copy, Check, Loader2, ImagePlus, X, Infinity as InfinityIcon, Lock } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
+import Link from "next/link"
 
 // ─── Animação ─────────────────────────────────────────────────────────────────
 
@@ -27,6 +29,7 @@ interface CopyResult {
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function GeradorPage() {
+  const { user } = useAuth()
   const [produto, setProduto]         = useState("")
   const [nicho, setNicho]             = useState("")
   const [diferencial, setDiferencial] = useState("")
@@ -38,6 +41,8 @@ export default function GeradorPage() {
   const [loading, setLoading]           = useState(false)
   const [result, setResult]             = useState<CopyResult | null>(null)
   const [error, setError]               = useState("")
+  const [limitReached, setLimitReached] = useState(false)
+  const [geracoesUsadas, setGeracoesUsadas] = useState<number | null>(null)
   const [copiedKey, setCopiedKey]       = useState<string | null>(null)
   const fileInputRef                    = useRef<HTMLInputElement>(null)
 
@@ -110,13 +115,23 @@ export default function GeradorPage() {
     setLoading(true)
     setResult(null)
     try {
+      const token = localStorage.getItem("mf_token") ?? ""
       const res = await fetch("/api/generate-copy", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ produto, nicho, diferencial, tom, imageBase64, imageMimeType }),
       })
       const data = await res.json()
+      if (res.status === 429 && data.limitReached) {
+        setLimitReached(true)
+        setGeracoesUsadas(data.geracoes_usadas ?? 30)
+        return
+      }
       if (!res.ok) { setError(data.error ?? "Erro ao gerar."); return }
+      if (data.geracoes_usadas !== undefined) setGeracoesUsadas(data.geracoes_usadas)
       setResult(data)
     } catch {
       setError("Erro de conexão. Tente novamente.")
@@ -136,22 +151,102 @@ export default function GeradorPage() {
 
       {/* ── Header ── */}
       <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: "32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "6px" }}>
-          <div style={{
-            width: "40px", height: "40px", borderRadius: "12px",
-            background: "rgba(255,77,0,0.12)", display: "flex",
-            alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <Wand2 size={20} style={{ color: "#FF4D00" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "6px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{
+              width: "40px", height: "40px", borderRadius: "12px",
+              background: "rgba(255,77,0,0.12)", display: "flex",
+              alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <Wand2 size={20} style={{ color: "#FF4D00" }} />
+            </div>
+            <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", margin: 0 }}>
+              Gerador de Copy com IA
+            </h1>
           </div>
-          <h1 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "20px", fontWeight: 700, color: "#F5F5F5", margin: 0 }}>
-            Gerador de Copy com IA
-          </h1>
+
+          {/* Contador de uso por plano */}
+          {user?.plan === "Starter" ? (
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "6px 14px", borderRadius: "9999px",
+              background: (geracoesUsadas ?? user?.geracoes_usadas ?? 0) >= 30
+                ? "rgba(239,68,68,0.08)"
+                : "rgba(255,255,255,0.04)",
+              border: `1px solid ${(geracoesUsadas ?? user?.geracoes_usadas ?? 0) >= 30
+                ? "rgba(239,68,68,0.3)"
+                : "rgba(255,255,255,0.08)"}`,
+            }}>
+              <span style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: "13px", fontWeight: 700,
+                color: (geracoesUsadas ?? user?.geracoes_usadas ?? 0) >= 30 ? "#ef4444" : "#00E5FF",
+              }}>
+                {geracoesUsadas ?? user?.geracoes_usadas ?? "—"}/30
+              </span>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "rgba(245,245,245,0.4)" }}>
+                gerações este mês
+              </span>
+            </div>
+          ) : (
+            <div style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              padding: "6px 14px", borderRadius: "9999px",
+              background: "rgba(255,77,0,0.06)", border: "1px solid rgba(255,77,0,0.2)",
+            }}>
+              <InfinityIcon size={13} style={{ color: "#FF4D00" }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700, color: "#FF4D00" }}>
+                Ilimitado
+              </span>
+            </div>
+          )}
         </div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
           Descreva seu produto e a IA gera hooks, CTAs e script de vídeo prontos para o TikTok Shop.
         </p>
       </motion.div>
+
+      {/* ── Limite atingido ── */}
+      {limitReached && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          style={{
+            display: "flex", flexDirection: "column", alignItems: "center", gap: "16px",
+            padding: "48px 32px", marginBottom: "24px",
+            background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.2)",
+            borderRadius: "16px", textAlign: "center",
+          }}
+        >
+          <div style={{
+            width: "56px", height: "56px", borderRadius: "14px",
+            background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Lock size={24} style={{ color: "#ef4444" }} />
+          </div>
+          <div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "16px", fontWeight: 700, color: "#F5F5F5", margin: "0 0 6px" }}>
+              Limite de gerações atingido
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.4)", margin: 0, lineHeight: 1.6 }}>
+              Você usou todas as 30 gerações mensais do plano Starter.<br />
+              Faça upgrade para Pro e tenha geração de copy ilimitada.
+            </p>
+          </div>
+          <Link
+            href="/#planos"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
+              padding: "12px 28px", borderRadius: "8px",
+              background: "#FF4D00", color: "white", textDecoration: "none",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 700,
+            }}
+          >
+            Fazer upgrade para Pro
+          </Link>
+        </motion.div>
+      )}
 
       {/* ── Formulário ── */}
       <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
@@ -305,16 +400,16 @@ export default function GeradorPage() {
           <div style={{ marginTop: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <button
               onClick={handleGenerate}
-              disabled={loading}
+              disabled={loading || limitReached}
               style={{
                 display: "flex", alignItems: "center", gap: "8px",
-                background: loading ? "rgba(255,77,0,0.5)" : "#FF4D00",
+                background: (loading || limitReached) ? "rgba(255,77,0,0.5)" : "#FF4D00",
                 color: "#fff", border: "none", borderRadius: "8px",
                 padding: "12px 24px", fontSize: "13px", fontWeight: 700,
                 letterSpacing: "0.5px", fontFamily: "'DM Sans', sans-serif",
-                cursor: loading ? "not-allowed" : "pointer",
+                cursor: (loading || limitReached) ? "not-allowed" : "pointer",
                 transition: "background 150ms ease, transform 150ms ease",
-                boxShadow: loading ? "none" : "0 0 20px rgba(255,77,0,0.25)",
+                boxShadow: (loading || limitReached) ? "none" : "0 0 20px rgba(255,77,0,0.25)",
               }}
               onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.02)" }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)" }}

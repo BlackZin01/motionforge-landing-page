@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Plus, Trash2, Pencil, X, Check, LayoutList } from "lucide-react"
+import { Plus, Trash2, Pencil, X, Check, LayoutList, Upload, Loader2 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
+import { uploadFileToR2 } from "@/lib/upload-to-r2"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,8 @@ interface Prompt {
   categoria: string
   modelo_alvo: string
   plano_minimo: string
+  midia_url: string | null
+  tiktok_url: string | null
   ativo: boolean
   created_at: string
 }
@@ -23,6 +26,7 @@ interface Prompt {
 const CAMPOS_VAZIO = {
   titulo: "", descricao: "", conteudo: "",
   categoria: "Geral", modelo_alvo: "ChatGPT", plano_minimo: "starter",
+  midia_url: "", tiktok_url: "",
 }
 
 const MODELOS = ["ChatGPT", "Gemini", "Ambos"]
@@ -37,8 +41,15 @@ function PromptModal({
   onSalvar: (dados: typeof CAMPOS_VAZIO) => Promise<void>
   onFechar: () => void
 }) {
-  const [form, setForm] = useState({ ...CAMPOS_VAZIO, ...inicial, descricao: inicial?.descricao ?? "" })
+  const [form, setForm] = useState({
+    ...CAMPOS_VAZIO,
+    ...inicial,
+    descricao: inicial?.descricao ?? "",
+    midia_url: inicial?.midia_url ?? "",
+    tiktok_url: inicial?.tiktok_url ?? "",
+  })
   const [salvando, setSalvando] = useState(false)
+  const [uploadando, setUploadando] = useState(false)
   const isEdicao = Boolean(inicial?.id)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -49,6 +60,22 @@ function PromptModal({
 
   const inp = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [field]: e.target.value }))
+
+  async function handleUploadMidia(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadando(true)
+    try {
+      const token = localStorage.getItem("mf_token") ?? ""
+      const url = await uploadFileToR2(file, token)
+      setForm(f => ({ ...f, midia_url: url }))
+    } catch {
+      // silencia — usuário ainda pode colar URL manualmente
+    } finally {
+      setUploadando(false)
+      e.target.value = ""
+    }
+  }
 
   const inputStyle: React.CSSProperties = {
     width: "100%", background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.1)",
@@ -62,7 +89,7 @@ function PromptModal({
       position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 100,
       display: "flex", alignItems: "center", justifyContent: "center", padding: "16px",
     }}>
-      <div style={{
+      <div className="scrollbar-none" style={{
         background: "#111111", border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: "16px", width: "100%", maxWidth: "600px",
         maxHeight: "90vh", overflowY: "auto",
@@ -135,6 +162,64 @@ function PromptModal({
             </div>
           </div>
 
+          <div>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.4)", textTransform: "uppercase", letterSpacing: "1.5px", display: "block", marginBottom: "6px" }}>
+              Mídia (vídeo ou foto)
+            </label>
+
+            {/* Botão de upload */}
+            <label style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
+              padding: "9px 16px", borderRadius: "8px", cursor: uploadando ? "wait" : "pointer",
+              background: "rgba(255,77,0,0.08)", border: "1px solid rgba(255,77,0,0.25)",
+              color: uploadando ? "rgba(255,77,0,0.5)" : "#FF4D00",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
+              marginBottom: "10px", transition: "opacity 200ms ease",
+            }}>
+              {uploadando ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Upload size={13} />}
+              {uploadando ? "Enviando para CDN..." : "Enviar vídeo ou foto"}
+              <input
+                type="file"
+                accept="video/mp4,video/mov,video/webm,image/jpeg,image/png,image/webp"
+                style={{ display: "none" }}
+                disabled={uploadando}
+                onChange={handleUploadMidia}
+              />
+            </label>
+
+            {/* Preview da mídia atual */}
+            {form.midia_url && (
+              <div style={{ marginBottom: "10px", borderRadius: "8px", overflow: "hidden", maxHeight: "160px", background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.06)" }}>
+                {/\.(mp4|mov|webm)(\?.*)?$/i.test(form.midia_url) ? (
+                  <video src={form.midia_url} style={{ width: "100%", maxHeight: "160px", objectFit: "contain" }} controls muted playsInline />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={form.midia_url} alt="preview" style={{ width: "100%", maxHeight: "160px", objectFit: "contain", display: "block" }} />
+                )}
+              </div>
+            )}
+
+            {/* Input manual de URL */}
+            <input
+              value={form.midia_url}
+              onChange={inp("midia_url")}
+              placeholder="Ou cole uma URL diretamente..."
+              style={{ ...inputStyle, fontSize: "12px", color: "rgba(245,245,245,0.6)" }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.4)", textTransform: "uppercase", letterSpacing: "1.5px", display: "block", marginBottom: "6px" }}>
+              Link do TikTok (opcional)
+            </label>
+            <input
+              value={form.tiktok_url}
+              onChange={inp("tiktok_url")}
+              placeholder="https://www.tiktok.com/@usuario/video/..."
+              style={inputStyle}
+            />
+          </div>
+
           <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", paddingTop: "8px" }}>
             <button type="button" onClick={onFechar} style={{
               padding: "10px 20px", borderRadius: "8px", cursor: "pointer",
@@ -143,13 +228,13 @@ function PromptModal({
             }}>
               Cancelar
             </button>
-            <button type="submit" disabled={salvando} style={{
-              padding: "10px 24px", borderRadius: "8px", cursor: salvando ? "wait" : "pointer",
+            <button type="submit" disabled={salvando || uploadando} style={{
+              padding: "10px 24px", borderRadius: "8px", cursor: (salvando || uploadando) ? "wait" : "pointer",
               background: "#FF4D00", border: "none", color: "white",
               fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 700,
-              opacity: salvando ? 0.7 : 1,
+              opacity: (salvando || uploadando) ? 0.7 : 1,
             }}>
-              {salvando ? "Salvando..." : isEdicao ? "Salvar" : "Criar"}
+              {uploadando ? "Aguarde o upload..." : salvando ? "Salvando..." : isEdicao ? "Salvar" : "Criar"}
             </button>
           </div>
         </form>

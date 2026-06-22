@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { motion } from "framer-motion"
-import { ShoppingBag, ExternalLink, Search, Flame, TrendingUp, Crown, Sparkles } from "lucide-react"
+import { ShoppingBag, ExternalLink, Search, Flame, TrendingUp, Crown, Sparkles, Zap, Lock } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -241,6 +241,102 @@ export default function BibliotecaPage() {
           Produtos validados e em alta no TikTok Shopping. Curado semanalmente.
         </p>
       </motion.div>
+
+      {/* ── Alerta Viral (Pro+) ──────────────────────────────────────────────── */}
+      {user?.plan === "Starter" ? (
+        <motion.div
+          variants={fadeUp} custom={1} initial="hidden" animate="visible"
+          style={{
+            marginBottom: "24px",
+            padding: "16px 20px",
+            background: "rgba(255,77,0,0.04)",
+            border: "1px solid rgba(255,77,0,0.15)",
+            borderRadius: "12px",
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+          }}
+        >
+          <div style={{
+            width: "36px", height: "36px", borderRadius: "8px", flexShrink: 0,
+            background: "rgba(255,77,0,0.08)", border: "1px solid rgba(255,77,0,0.2)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Lock size={16} style={{ color: "#FF4D00" }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 700, color: "#F5F5F5", margin: "0 0 2px" }}>
+              Alertas de Produto Viral — disponível no Pro
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
+              Receba notificações em tempo real quando um produto explodir no TikTok Shop antes da concorrência.
+            </p>
+          </div>
+          <a
+            href="/#planos"
+            style={{
+              flexShrink: 0, padding: "8px 16px", borderRadius: "8px",
+              background: "#FF4D00", color: "white", textDecoration: "none",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Fazer upgrade
+          </a>
+        </motion.div>
+      ) : (
+        <motion.div
+          variants={fadeUp} custom={1} initial="hidden" animate="visible"
+          style={{ marginBottom: "24px" }}
+        >
+          <div style={{
+            padding: "16px 20px",
+            background: "rgba(255,77,0,0.06)",
+            border: "1px solid rgba(255,77,0,0.25)",
+            borderRadius: "12px",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+              <motion.div
+                animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                style={{
+                  width: "8px", height: "8px", borderRadius: "50%",
+                  background: "#FF4D00", boxShadow: "0 0 8px rgba(255,77,0,0.8)",
+                }}
+              />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700, color: "#FF4D00", textTransform: "uppercase", letterSpacing: "1.5px" }}>
+                Alertas Virais · Ao vivo
+              </span>
+            </div>
+            {produtos.filter(p => p.status === "viral").length === 0 ? (
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(245,245,245,0.4)", margin: 0 }}>
+                Nenhum produto explodindo no momento. Avisamos quando rolar.
+              </p>
+            ) : (
+              <div style={{ display: "flex", gap: "10px", overflowX: "auto", scrollbarWidth: "none", paddingBottom: "4px" }}>
+                {produtos.filter(p => p.status === "viral").slice(0, 5).map(p => (
+                  <div key={p.id} style={{
+                    flexShrink: 0, minWidth: "200px",
+                    background: "#111111", border: "1px solid rgba(255,77,0,0.2)",
+                    borderRadius: "10px", padding: "12px 14px",
+                    display: "flex", alignItems: "center", gap: "10px",
+                  }}>
+                    <Zap size={14} style={{ color: "#FF4D00", flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 700, color: "#F5F5F5", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {p.nome}
+                      </p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "10px", color: "rgba(245,245,245,0.4)", margin: 0, textTransform: "uppercase", letterSpacing: "1px" }}>
+                        {p.nicho} · Score {p.score}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats rápidos */}
       <motion.div

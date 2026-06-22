@@ -26,11 +26,17 @@ const BRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 
 export default function AdminFinanceiroPage() {
   const [data, setData] = useState<FinanceiroData | null>(null)
-  const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") ?? "" : ""
+  const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
+    const token = localStorage.getItem("mf_token") ?? ""
     fetch("/api/admin/financeiro", { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(setData).catch(() => {})
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+      .then(setData)
+      .catch(e => setErro(e.message ?? "Erro ao carregar dados financeiros"))
   }, [])
 
   // Dummy chart data (últimos 30 dias) - em produção viria da API
@@ -38,6 +44,12 @@ export default function AdminFinanceiroPage() {
     day: i + 1,
     pagantes: Math.floor(Math.random() * 3),
   }))
+
+  if (erro) return (
+    <div style={{ padding: "24px", color: "#ef4444", fontFamily: "'DM Sans', sans-serif", fontSize: "14px" }}>
+      Erro ao carregar financeiro: {erro}
+    </div>
+  )
 
   if (!data) return <div style={{ padding: "24px", color: "rgba(245,245,245,0.4)", fontFamily: "'DM Sans', sans-serif" }}>Carregando...</div>
 
@@ -58,7 +70,7 @@ export default function AdminFinanceiroPage() {
       <div style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "20px 24px", marginBottom: "20px" }}>
         <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.35)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "16px" }}>Breakdown por Plano</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {Object.entries(data.planBreakdown).map(([plan, info]) => (
+          {Object.entries(data.planBreakdown ?? {}).map(([plan, info]) => (
             <div key={plan} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ color: planColors[plan] ?? "#F5F5F5", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "13px", textTransform: "capitalize" }}>{plan}</span>
               <span style={{ color: "rgba(245,245,245,0.5)", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>{info.count} × {BRL(info.price)}</span>
@@ -90,7 +102,7 @@ export default function AdminFinanceiroPage() {
       {/* Tabela top-ups */}
       <div style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "20px 24px" }}>
         <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(245,245,245,0.35)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "12px" }}>Pagamentos Recentes</div>
-        {data.recentTopups.length === 0 ? (
+        {(data.recentTopups ?? []).length === 0 ? (
           <div style={{ color: "rgba(245,245,245,0.3)", fontSize: "13px", fontFamily: "'DM Sans', sans-serif" }}>Nenhum dado disponível</div>
         ) : (
           <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -98,7 +110,7 @@ export default function AdminFinanceiroPage() {
               <tr>{["Usuário", "Plano", "Data"].map(h => <th key={h} style={{ textAlign: "left", fontSize: "10px", fontWeight: 700, color: "rgba(245,245,245,0.3)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "1px", textTransform: "uppercase", padding: "6px 8px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>{h}</th>)}</tr>
             </thead>
             <tbody>
-              {data.recentTopups.map((t, i) => (
+              {(data.recentTopups ?? []).map((t, i) => (
                 <tr key={i}>
                   <td style={{ padding: "8px", fontSize: "12px", color: "#F5F5F5", fontFamily: "'DM Sans', sans-serif", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                     <div>{t.name}</div><div style={{ color: "rgba(245,245,245,0.4)", fontSize: "11px" }}>{t.email}</div>
