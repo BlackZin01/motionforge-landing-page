@@ -2,28 +2,29 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Settings, Shield, BookOpen, ShoppingBag, Wand2, UserCircle2 } from "lucide-react"
+import { Home, Settings, Shield, BookOpen, ShoppingBag, Wand2, UserCircle2, Flame, BarChart3, Layers, CreditCard } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
-// ─── Itens da navegação mobile ────────────────────────────────────────────────
-
 const NAV_ITEMS = [
-  { href: "/dashboard",               label: "Início",    icon: Home        },
-  { href: "/dashboard/prompts",       label: "Prompts",   icon: BookOpen    },
-  { href: "/dashboard/gerador",       label: "Gerador",   icon: Wand2        },
-  { href: "/dashboard/avatar",        label: "Avatar",    icon: UserCircle2  },
-  { href: "/dashboard/biblioteca",    label: "Biblioteca",icon: ShoppingBag  },
-  { href: "/dashboard/configuracoes", label: "Config.",   icon: Settings     },
-] as const
-
-const ADMIN_NAV_ITEM = { href: "/dashboard/admin/usuarios", label: "Admin", icon: Shield }
-
-// ─── Componente ───────────────────────────────────────────────────────────────
+  { href: "/dashboard",               label: "Início",     icon: Home,        admin: false },
+  { href: "/dashboard/prompts",       label: "Prompts",    icon: BookOpen,    admin: false },
+  { href: "/dashboard/gerador",       label: "Gerador",    icon: Wand2,       admin: false },
+  { href: "/dashboard/avatar",        label: "Avatar",     icon: UserCircle2, admin: false },
+  { href: "/dashboard/biblioteca",    label: "Biblioteca", icon: ShoppingBag, admin: false },
+  { href: "/dashboard/viral",         label: "Viral",      icon: Flame,       admin: false },
+  { href: "/dashboard/tendencias",    label: "Tendências", icon: BarChart3,   admin: false },
+  { href: "/dashboard/perfis",        label: "Perfis",     icon: Layers,      admin: false },
+  { href: "/dashboard/planos",        label: "Planos",     icon: CreditCard,  admin: false },
+  { href: "/dashboard/configuracoes", label: "Config.",    icon: Settings,    admin: false },
+  { href: "/dashboard/admin/usuarios",label: "Admin",      icon: Shield,      admin: true  },
+]
 
 export function MobileNav() {
   const pathname = usePathname()
   const { user } = useAuth()
   const isAdmin = user?.isAdmin ?? false
+
+  const visibleItems = NAV_ITEMS.filter(item => !item.admin || isAdmin)
 
   function isActive(href: string): boolean {
     if (href === "/dashboard") return pathname === "/dashboard"
@@ -31,11 +32,9 @@ export function MobileNav() {
     return pathname.startsWith(href)
   }
 
-  const allItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS
-
   return (
     <nav
-      className="flex md:hidden"
+      className="md:hidden"
       style={{
         position: "fixed",
         bottom: 0,
@@ -46,29 +45,34 @@ export function MobileNav() {
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         borderTop: "1px solid rgba(255,255,255,0.06)",
-        alignItems: "stretch",
-        justifyContent: "space-around",
         zIndex: 50,
-      }}
+        overflowX: "auto",
+        overflowY: "hidden",
+        display: "flex",
+        alignItems: "stretch",
+        /* esconde scrollbar mas mantém funcionalidade */
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      } as React.CSSProperties}
     >
-      {allItems.map((item) => {
+      {visibleItems.map((item) => {
         const active = isActive(item.href)
         const Icon = item.icon
-        const isAdminLink = item.href === "/dashboard/admin/usuarios"
+        const isAdminLink = item.admin
 
         return (
           <Link
             key={item.href}
             href={item.href}
             style={{
-              flex: 1,
+              flexShrink: 0,
+              width: "64px",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               gap: "3px",
               textDecoration: "none",
-              position: "relative",
               background: isAdminLink ? "rgba(0,229,255,0.04)" : "transparent",
               borderTop: active
                 ? isAdminLink ? "2px solid #00E5FF" : "2px solid #FF4D00"
