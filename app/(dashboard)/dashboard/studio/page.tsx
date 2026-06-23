@@ -73,10 +73,8 @@ export default function StudioPage() {
 
     pollingRef.current = setInterval(async () => {
       try {
-        const token = localStorage.getItem("mf_token") ?? ""
-        const res = await fetch(`/api/generations/${jobId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        // Cookie httpOnly enviado automaticamente pelo browser
+        const res = await fetch(`/api/generations/${jobId}`)
         if (!res.ok) return
         const data = await res.json()
 
@@ -115,13 +113,10 @@ export default function StudioPage() {
     if (isMobile) setMobileTab("output")
 
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
+      // Cookie httpOnly enviado automaticamente pelo browser
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           modelId: config.model,
           type: config.type,

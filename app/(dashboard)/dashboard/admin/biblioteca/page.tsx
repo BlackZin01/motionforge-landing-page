@@ -64,8 +64,7 @@ function ProdutoModal({
     setUploadando(true)
     setUploadErro(null)
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
-      const url = await uploadFileToR2(file, token)
+      const url = await uploadFileToR2(file)
       setForm(f => ({ ...f, imagem_url: url }))
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao enviar imagem"
@@ -229,12 +228,10 @@ export default function AdminBibliotecaPage() {
     if (!authLoading && !user?.isAdmin) router.replace("/dashboard")
   }, [authLoading, user, router])
 
-  const token = () => localStorage.getItem("mf_token") ?? ""
-
   const fetchProdutos = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/biblioteca?page=1", { headers: { Authorization: `Bearer ${token()}` } })
+      const res = await fetch("/api/admin/biblioteca?page=1")
       if (!res.ok) return
       const data = await res.json()
       setProdutos(data.produtos ?? [])
@@ -248,16 +245,14 @@ export default function AdminBibliotecaPage() {
     const url = isEdicao ? `/api/admin/biblioteca/${modal.produto!.id}` : "/api/admin/biblioteca"
     const res = await fetch(url, {
       method: isEdicao ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
     })
     if (res.ok) { setModal({ aberto: false }); fetchProdutos() }
   }
 
   async function deletar(id: string) {
-    const res = await fetch(`/api/admin/biblioteca/${id}`, {
-      method: "DELETE", headers: { Authorization: `Bearer ${token()}` },
-    })
+    const res = await fetch(`/api/admin/biblioteca/${id}`, { method: "DELETE" })
     if (res.ok) { setConfirmDelete(null); fetchProdutos() }
   }
 

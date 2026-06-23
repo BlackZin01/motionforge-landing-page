@@ -75,8 +75,7 @@ export default function AdminUsuariosPage() {
   const [saving, setSaving] = useState(false)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") ?? "" : ""
-  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+  const headers = { "Content-Type": "application/json" }
 
   const load = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), search, plan, status })

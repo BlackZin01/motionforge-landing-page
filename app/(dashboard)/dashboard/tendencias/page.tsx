@@ -32,10 +32,6 @@ interface TendenciasData {
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
-function getToken() {
-  return typeof window !== "undefined" ? (localStorage.getItem("mf_token") ?? "") : ""
-}
-
 export default function TendenciasPage() {
   const { user } = useAuth()
   const [data, setData] = useState<TendenciasData | null>(null)
@@ -45,9 +41,8 @@ export default function TendenciasPage() {
   const isAgency = user?.plan === "Agency" || user?.isAdmin
 
   useEffect(() => {
-    const token = getToken()
-    if (!token) return
-    fetch("/api/tendencias", { headers: { Authorization: `Bearer ${token}` } })
+    // Cookie httpOnly é enviado automaticamente pelo browser
+    fetch("/api/tendencias")
       .then(r => {
         if (r.status === 403) { setLocked(true); setLoading(false); return null }
         return r.json()

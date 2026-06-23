@@ -36,8 +36,7 @@ export default function AdminAfiliadosPage() {
   const [totais, setTotais] = useState<Totais>({ affiliates: 0, total: 0, paid: 0, pending: 0 })
   const [saving, setSaving] = useState<string | null>(null)
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") ?? "" : ""
-  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+  const headers = { "Content-Type": "application/json" }
 
   const load = () => fetch("/api/admin/afiliados", { headers }).then(r => r.json()).then(d => {
     setAfiliados(d.affiliates ?? [])

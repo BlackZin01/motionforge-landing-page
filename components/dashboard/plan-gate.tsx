@@ -2,7 +2,9 @@
 
 import { useState } from "react"
 import { Logo } from "@/components/ui/logo"
-import { Check, Zap, Building2, Star, ArrowRight } from "lucide-react"
+import { Check, Zap, Building2, Star, ArrowRight, CreditCard, QrCode, X } from "lucide-react"
+import { CheckoutPixModal } from "@/components/checkout-pix-modal"
+import { useAuth } from "@/lib/auth-context"
 
 // ─── Planos ───────────────────────────────────────────────────────────────────
 
@@ -13,8 +15,8 @@ const PLANS = [
     price: "R$97",
     period: "/mês",
     tagline: "Para quem está começando",
-    color: "rgba(245,245,245,0.4)",
-    colorSolid: "rgba(245,245,245,0.7)",
+    color: "#F5F5F5",
+    colorSolid: "#F5F5F5",
     icon: Star,
     features: [
       "30 gerações de copy/mês",
@@ -63,41 +65,43 @@ const PLANS = [
   },
 ]
 
-function getToken() {
-  if (typeof window === "undefined") return ""
-  return localStorage.getItem("mf_token") ?? ""
-}
-
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export function PlanGate() {
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+type PlanId = "starter" | "pro" | "agency"
 
-  async function handleSelect(planId: "starter" | "pro" | "agency") {
-    setLoadingPlan(planId)
-    setError(null)
+export function PlanGate() {
+  const { refreshUser } = useAuth()
+  const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null)
+  const [pixPlan, setPixPlan]           = useState<PlanId | null>(null)
+  const [loadingCard, setLoadingCard]   = useState(false)
+  const [cardError, setCardError]       = useState<string | null>(null)
+
+  async function handlePixSuccess() {
+    setPixPlan(null)
+    await refreshUser()
+  }
+
+  async function handleCard(planId: PlanId) {
+    setLoadingCard(true)
+    setCardError(null)
     try {
+      // Cookie httpOnly é enviado automaticamente pelo browser
       const res = await fetch("/api/payment/checkout", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planId }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Erro ao criar checkout. Tente novamente.")
-        return
-      }
+      if (!res.ok) { setCardError(data.error ?? "Erro ao criar checkout."); return }
       window.location.href = data.url
     } catch {
-      setError("Erro ao conectar com o servidor. Tente novamente.")
+      setCardError("Erro ao conectar com o servidor.")
     } finally {
-      setLoadingPlan(null)
+      setLoadingCard(false)
     }
   }
+
+  const selectedPlanDef = PLANS.find(p => p.id === selectedPlan)
 
   return (
     <div
@@ -113,6 +117,7 @@ export function PlanGate() {
         justifyContent: "center",
         padding: "24px 16px",
         overflowY: "auto",
+        scrollbarWidth: "none",
       }}
     >
       {/* Logo */}
@@ -144,22 +149,6 @@ export function PlanGate() {
         </p>
       </div>
 
-      {/* Erro */}
-      {error && (
-        <div style={{
-          background: "rgba(239,68,68,0.1)",
-          border: "1px solid rgba(239,68,68,0.3)",
-          borderRadius: "8px",
-          padding: "10px 16px",
-          marginBottom: "20px",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "13px",
-          color: "#ef4444",
-        }}>
-          {error}
-        </div>
-      )}
-
       {/* Cards */}
       <div style={{
         display: "grid",
@@ -170,7 +159,6 @@ export function PlanGate() {
       }}>
         {PLANS.map((plan) => {
           const Icon = plan.icon
-          const isLoading = loadingPlan === plan.id
 
           return (
             <div
@@ -185,6 +173,17 @@ export function PlanGate() {
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
+                transition: "border-color 200ms ease, transform 200ms ease",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget
+                el.style.transform = "translateY(-2px)"
+                if (!plan.featured) el.style.borderColor = "rgba(255,255,255,0.16)"
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget
+                el.style.transform = "translateY(0)"
+                if (!plan.featured) el.style.borderColor = "rgba(255,255,255,0.07)"
               }}
             >
               {/* Badge */}
@@ -270,33 +269,46 @@ export function PlanGate() {
 
               {/* CTA */}
               <button
-                onClick={() => handleSelect(plan.id)}
-                disabled={!!loadingPlan}
+                onClick={() => setSelectedPlan(plan.id)}
                 style={{
                   width: "100%", padding: "12px",
                   borderRadius: "8px",
-                  background: plan.featured
-                    ? (isLoading ? "rgba(255,77,0,0.5)" : "#FF4D00")
-                    : (isLoading ? `${plan.color}20` : `${plan.color}14`),
-                  border: plan.featured
-                    ? "none"
-                    : `1px solid ${plan.color}35`,
+                  background: plan.featured ? "#FF4D00" : `${plan.color}14`,
+                  border: plan.featured ? "none" : `1px solid ${plan.color}35`,
                   color: plan.featured ? "#fff" : plan.colorSolid,
                   fontSize: "12px", fontWeight: 700,
                   textTransform: "uppercase", letterSpacing: "1px",
                   fontFamily: "'DM Sans', sans-serif",
-                  cursor: loadingPlan ? "not-allowed" : "pointer",
+                  cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-                  transition: "opacity 150ms ease",
-                  opacity: (loadingPlan && !isLoading) ? 0.4 : 1,
+                  transition: "background 180ms ease, box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease",
+                  boxShadow: plan.featured ? "0 0 24px rgba(255,77,0,0.3)" : "none",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget
+                  if (plan.featured) {
+                    el.style.boxShadow = "0 0 44px rgba(255,77,0,0.55)"
+                    el.style.transform = "scale(1.02)"
+                  } else {
+                    el.style.background = `${plan.color}28`
+                    el.style.borderColor = `${plan.color}70`
+                    el.style.transform = "scale(1.01)"
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget
+                  if (plan.featured) {
+                    el.style.boxShadow = "0 0 24px rgba(255,77,0,0.3)"
+                    el.style.transform = "scale(1)"
+                  } else {
+                    el.style.background = `${plan.color}14`
+                    el.style.borderColor = `${plan.color}35`
+                    el.style.transform = "scale(1)"
+                  }
                 }}
               >
-                {isLoading ? "Aguarde..." : (
-                  <>
-                    Assinar {plan.name}
-                    <ArrowRight size={13} strokeWidth={2} />
-                  </>
-                )}
+                Assinar {plan.name}
+                <ArrowRight size={13} strokeWidth={2} />
               </button>
             </div>
           )
@@ -313,6 +325,100 @@ export function PlanGate() {
       }}>
         Cancele quando quiser · Sem fidelidade · Cobrança recorrente mensal
       </p>
+
+      {/* Modal: escolha de método de pagamento */}
+      {selectedPlan && selectedPlanDef && !pixPlan && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 1100,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
+            padding: "16px",
+          }}
+          onClick={() => { setSelectedPlan(null); setCardError(null) }}
+        >
+          <div
+            style={{
+              background: "#111111", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "16px", padding: "28px 24px", width: "100%", maxWidth: "360px",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Fechar */}
+            <button
+              onClick={() => { setSelectedPlan(null); setCardError(null) }}
+              style={{ position: "absolute", top: 14, right: 14, background: "transparent", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.35)" }}
+            >
+              <X size={16} />
+            </button>
+
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#FF4D00", marginBottom: 6 }}>
+              Forma de pagamento
+            </p>
+            <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: "1px", color: "#F5F5F5", marginBottom: 20 }}>
+              {selectedPlanDef.name} — {selectedPlanDef.price}{selectedPlanDef.period}
+            </h3>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {/* PIX */}
+              <button
+                onClick={() => { setSelectedPlan(null); setPixPlan(selectedPlan) }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
+                  background: "rgba(0,229,255,0.05)", border: "1px solid rgba(0,229,255,0.2)",
+                  borderRadius: "10px", cursor: "pointer", textAlign: "left",
+                  transition: "border-color 150ms ease, background 150ms ease",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(0,229,255,0.5)"; e.currentTarget.style.background = "rgba(0,229,255,0.1)" }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,229,255,0.2)"; e.currentTarget.style.background = "rgba(0,229,255,0.05)" }}
+              >
+                <QrCode size={20} style={{ color: "#00E5FF", flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: "#F5F5F5" }}>PIX</div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(245,245,245,0.4)", marginTop: 2 }}>Pagamento instantâneo · Acesso imediato</div>
+                </div>
+              </button>
+
+              {/* Cartão */}
+              <button
+                onClick={() => handleCard(selectedPlan)}
+                disabled={loadingCard}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
+                  background: "rgba(255,77,0,0.05)", border: "1px solid rgba(255,77,0,0.2)",
+                  borderRadius: "10px", cursor: loadingCard ? "not-allowed" : "pointer", textAlign: "left",
+                  transition: "border-color 150ms ease, background 150ms ease",
+                  opacity: loadingCard ? 0.6 : 1,
+                }}
+                onMouseEnter={(e) => { if (!loadingCard) { e.currentTarget.style.borderColor = "rgba(255,77,0,0.5)"; e.currentTarget.style.background = "rgba(255,77,0,0.1)" } }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,77,0,0.2)"; e.currentTarget.style.background = "rgba(255,77,0,0.05)" }}
+              >
+                <CreditCard size={20} style={{ color: "#FF4D00", flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: "#F5F5F5" }}>
+                    {loadingCard ? "Aguarde..." : "Cartão de crédito"}
+                  </div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(245,245,245,0.4)", marginTop: 2 }}>Visa, Mastercard, Elo · Recorrente mensal</div>
+                </div>
+              </button>
+            </div>
+
+            {cardError && (
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#ef4444", marginTop: 12, textAlign: "center" }}>{cardError}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal PIX */}
+      {pixPlan && (
+        <CheckoutPixModal
+          plan={pixPlan}
+          onSuccess={handlePixSuccess}
+          onClose={() => setPixPlan(null)}
+        />
+      )}
     </div>
   )
 }

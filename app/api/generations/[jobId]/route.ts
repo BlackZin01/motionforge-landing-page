@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getBearerToken } from "@/lib/server-auth"
 
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 
@@ -8,7 +9,7 @@ export async function GET(
 ) {
   try {
     const { jobId } = await params
-    const auth = req.headers.get("authorization") ?? ""
+    const auth = getBearerToken(req)
     const res = await fetch(`${API}/generations/${jobId}`, {
       headers: { Authorization: auth },
     })

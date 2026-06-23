@@ -57,8 +57,7 @@ export default function AdminGeracoesPage() {
   const router = useRouter()
   const userId = sp.get("userId") ?? ""
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") ?? "" : ""
-  const headers = { Authorization: `Bearer ${token}` }
+  const headers = {} as Record<string, string>
 
   const load = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), search, type, status, userId })

@@ -107,7 +107,7 @@ export default function Sidebar({ userName, plan, onLogout, isAdmin }: SidebarPr
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href)
           const Icon = item.icon
-          const PLAN_ORDER = { Starter: 0, Pro: 1, Agency: 2 }
+          const PLAN_ORDER = { Free: -1, Starter: 0, Pro: 1, Agency: 2 }
           const planOk = !item.minPlan || isAdmin || PLAN_ORDER[plan] >= PLAN_ORDER[item.minPlan]
           const badgeColor = item.minPlan === "Agency" ? "#4ADE80" : "#FF4D00"
 

@@ -21,10 +21,6 @@ interface ViralProduto {
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
-function getToken() {
-  return typeof window !== "undefined" ? (localStorage.getItem("mf_token") ?? "") : ""
-}
-
 export default function ViralPage() {
   const { user } = useAuth()
   const [produtos, setProdutos] = useState<ViralProduto[]>([])
@@ -36,14 +32,11 @@ export default function ViralPage() {
   const isStarter = user?.plan === "Starter" && !user?.isAdmin
 
   const fetchViral = useCallback(async () => {
-    const token = getToken()
-    if (!token) return
     setLoading(true)
     try {
       const qs = nichoAtivo ? `?nicho=${encodeURIComponent(nichoAtivo)}` : ""
-      const res = await fetch(`/api/viral${qs}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      // Cookie httpOnly é enviado automaticamente pelo browser
+      const res = await fetch(`/api/viral${qs}`)
       if (res.status === 403) { setLocked(true); setLoading(false); return }
       const data = await res.json()
       setProdutos(data.viral ?? [])

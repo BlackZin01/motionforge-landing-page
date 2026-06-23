@@ -47,8 +47,7 @@ export default function AdminWebhooksPage() {
   const [status, setStatus] = useState("")
   const [payload, setPayload] = useState<Record<string, unknown> | null>(null)
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") ?? "" : ""
-  const headers = { Authorization: `Bearer ${token}` }
+  const headers = {} as Record<string, string>
 
   const load = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), source, status })

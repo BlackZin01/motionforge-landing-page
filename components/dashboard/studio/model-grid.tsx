@@ -4,7 +4,7 @@ import { Lock } from "lucide-react"
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
-type Plan = "Starter" | "Pro" | "Agency"
+type Plan = "Free" | "Starter" | "Pro" | "Agency"
 type Tag = "FAST" | "STD" | "PRO" | "MAX"
 
 interface ImageModel {
@@ -59,6 +59,7 @@ const VIDEO_MODELS: VideoModel[] = [
 // ─── Hierarquia de planos ─────────────────────────────────────────────────────
 
 const PLAN_ORDER: Record<Plan, number> = {
+  Free: -1,
   Starter: 0,
   Pro: 1,
   Agency: 2,

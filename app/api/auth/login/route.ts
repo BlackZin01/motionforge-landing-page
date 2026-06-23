@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { COOKIE_OPTIONS } from "@/lib/server-auth"
 
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 
@@ -12,19 +13,14 @@ export async function POST(req: NextRequest) {
     })
     const data = await res.json()
 
-    const response = NextResponse.json(data, { status: res.status })
-
-    // Define cookie server-side para garantir que o middleware leia corretamente
-    if (res.ok && data.token) {
-      response.cookies.set("mf_token", data.token, {
-        httpOnly: false, // precisa ser false para o auth-context ler via document.cookie
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60,
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      })
+    if (!res.ok) {
+      return NextResponse.json(data, { status: res.status })
     }
 
+    // Token armazenado apenas em cookie httpOnly — JavaScript não consegue lê-lo
+    const { token, ...userWithoutToken } = data
+    const response = NextResponse.json(userWithoutToken, { status: 200 })
+    response.cookies.set("mf_token", token, COOKIE_OPTIONS)
     return response
   } catch {
     return NextResponse.json({ error: "Erro ao conectar com o servidor" }, { status: 503 })

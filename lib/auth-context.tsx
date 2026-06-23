@@ -43,17 +43,6 @@ export function useAuth() {
   return useContext(AuthContext)
 }
 
-// ─── Helpers de cookie ────────────────────────────────────────────────────────
-
-function setCookie(name: string, value: string, days = 7) {
-  const maxAge = days * 24 * 60 * 60
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`
-}
-
-function deleteCookie(name: string) {
-  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`
-}
-
 // ─── Normalizar user da API ───────────────────────────────────────────────────
 
 const VALID_PLANS: AuthUser["plan"][] = ["Free", "Starter", "Pro", "Agency"]
@@ -109,21 +98,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("mf_token")
+  const logout = useCallback(async () => {
+    // Apaga cookie httpOnly via API route (JS não consegue apagar cookie httpOnly diretamente)
+    try { await fetch("/api/auth/logout", { method: "POST" }) } catch { /* ignora */ }
     localStorage.removeItem("mf_user")
-    deleteCookie("mf_token")
     setUser(null)
     router.replace("/login")
   }, [router])
 
   const refreshUser = useCallback(async () => {
-    const token = localStorage.getItem("mf_token")
-    if (!token) return
     try {
-      const res = await fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      // Cookie httpOnly é enviado automaticamente pelo browser
+      const res = await fetch("/api/auth/me")
       if (!res.ok) return
       const data = await res.json()
       const userData = normalizeUser(data)
@@ -133,17 +119,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem("mf_token")
-
-    if (!token) {
-      setLoading(false)
-      router.replace("/login")
-      return
-    }
-
-    // Sincroniza cookie para o proxy server-side conseguir ler
-    setCookie("mf_token", token)
-
     // Carrega cache imediatamente — evita spinner se já passou pelo login antes
     const cached = localStorage.getItem("mf_user")
     if (cached) {
@@ -155,14 +130,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Valida token e atualiza dados em background (timeout de 8s)
-    fetchWithTimeout(
-      "/api/auth/me",
-      { headers: { Authorization: `Bearer ${token}` } },
-      8000
-    )
+    // Valida sessão via cookie httpOnly (enviado automaticamente pelo browser)
+    fetchWithTimeout("/api/auth/me", {}, 8000)
       .then((r) => {
-        // Apenas 401 = token definitivamente inválido → logout
+        // 401 = cookie ausente ou expirado → logout
         if (r.status === 401) {
           logout()
           return null
@@ -178,11 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {
         // Timeout ou erro de rede → se tem cache, mantém logado
-        // Se não tem cache, mostra tela de erro mas não força logout
-        if (!cached) {
-          // Sem cache e sem API: força logout para evitar tela vazia
-          logout()
-        }
+        if (!cached) logout()
       })
       .finally(() => {
         setLoading(false)

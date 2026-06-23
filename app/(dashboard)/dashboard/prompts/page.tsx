@@ -305,17 +305,14 @@ export default function PromptsPage() {
   const [modeloAtivo, setModeloAtivo] = useState("")
 
   const fetchPrompts = useCallback(async () => {
-    const token = localStorage.getItem("mf_token")
-    if (!token) return
     setLoading(true)
     try {
       const qs = new URLSearchParams({
         ...(categoriaAtiva ? { categoria: categoriaAtiva } : {}),
         ...(modeloAtivo    ? { modelo: modeloAtivo }       : {}),
       })
-      const res = await fetch(`/api/prompts?${qs}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      // Cookie httpOnly enviado automaticamente pelo browser
+      const res = await fetch(`/api/prompts?${qs}`)
       if (!res.ok) return
       const data = await res.json()
       setPrompts(data.prompts ?? [])

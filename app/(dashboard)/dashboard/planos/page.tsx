@@ -207,20 +207,13 @@ export default function PlanosPage() {
     }
   }, [searchParams, refreshUser, router, showToast])
 
-  function getToken() {
-    if (typeof window === "undefined") return ""
-    return localStorage.getItem("mf_token") ?? ""
-  }
-
   async function handleSubscribe(plan: Plan) {
     setLoadingPlan(plan)
     try {
+      // Cookie httpOnly enviado automaticamente pelo browser
       const res = await fetch("/api/payment/checkout", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       })
       const data = await res.json()
@@ -239,10 +232,7 @@ export default function PlanosPage() {
   async function handleCancel() {
     setCancelLoading(true)
     try {
-      const res = await fetch("/api/payment/cancel", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      })
+      const res = await fetch("/api/payment/cancel", { method: "POST" })
       const data = await res.json()
       if (!res.ok) {
         showToast("error", data.error ?? "Erro ao cancelar")

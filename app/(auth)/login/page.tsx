@@ -48,16 +48,6 @@ function EyeIcon({ open }: { open: boolean }) {
 /* ── Tipos de estado ────────────────────────────────────────── */
 type Status = "idle" | "loading" | "error"
 
-/* ── Helpers de auth ─────────────────────────────────────────── */
-function saveSession(token: string) {
-  if (typeof window === "undefined") return
-  localStorage.setItem("mf_token", token)
-  // Cookie já é definido pelo servidor no header Set-Cookie da rota /api/auth/login
-  // Aqui apenas sincronizamos para garantir compatibilidade (ex: OAuth)
-  const maxAge = 7 * 24 * 60 * 60
-  document.cookie = `mf_token=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; SameSite=Lax`
-}
-
 /* ── Página ─────────────────────────────────────────────────── */
 export default function LoginPage() {
   const router = useRouter()
@@ -98,12 +88,10 @@ export default function LoginPage() {
         setStatus("error")
         return
       }
-      saveSession(data.token)
-      // Busca e cacheia dados do usuário antes de redirecionar (evita spinner no dashboard)
+      // Cookie httpOnly já foi definido pelo servidor na resposta
+      // Pré-cacheia dados do usuário para evitar spinner no dashboard
       try {
-        const meRes = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${data.token}` },
-        })
+        const meRes = await fetch("/api/auth/me") // cookie enviado automaticamente
         if (meRes.ok) {
           const userData = await meRes.json()
           localStorage.setItem("mf_user", JSON.stringify(userData))

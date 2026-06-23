@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getBearerToken } from "@/lib/server-auth"
 
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 
 export async function requireAdmin(req: NextRequest): Promise<{ userId: string } | NextResponse> {
-  const auth = req.headers.get("authorization") ?? ""
+  const auth = getBearerToken(req)
   if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
 
   try {
@@ -23,7 +24,7 @@ export async function adminProxy(
   method = "GET",
   body?: unknown
 ): Promise<NextResponse> {
-  const auth = req.headers.get("authorization") ?? ""
+  const auth = getBearerToken(req)
   const url = new URL(req.url)
   const query = url.search
   try {

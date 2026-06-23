@@ -30,16 +30,13 @@ function CallbackInner() {
       return
     }
 
-    // Salva o token (mesma chave usada no login normal)
-    localStorage.setItem("mf_token", token)
-    // Sincroniza cookie para o middleware
-    const maxAge = 7 * 24 * 60 * 60
-    document.cookie = `mf_token=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; SameSite=Lax`
-
-    // Busca dados do usuário para guardar no storage
-    fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
+    // Seta o cookie httpOnly via servidor (JS não pode setar httpOnly diretamente)
+    fetch("/api/auth/set-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
     })
+      .then((r) => (r.ok ? fetch("/api/auth/me") : Promise.reject()))
       .then((r) => (r.ok ? r.json() : null))
       .then((user) => {
         if (user) localStorage.setItem("mf_user", JSON.stringify(user))

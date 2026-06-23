@@ -145,8 +145,7 @@ export const ImageNode = memo(({ id, data, selected }: NodeProps<ImageNodeType>)
     setUploading(true)
 
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
-      const cdnUrl = await uploadFileToR2(file, token)
+      const cdnUrl = await uploadFileToR2(file)
       updateNodeData(id, { imageUrl: cdnUrl })
       setPreviewUrl(null)
     } catch {

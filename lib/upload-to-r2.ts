@@ -1,12 +1,12 @@
 // Faz upload de um File para o R2 via servidor Next.js (evita CORS)
 // Retorna a URL pública do arquivo no CDN
-export async function uploadFileToR2(file: File, token: string): Promise<string> {
+export async function uploadFileToR2(file: File): Promise<string> {
   const formData = new FormData()
   formData.append("file", file)
 
+  // Cookie httpOnly enviado automaticamente pelo browser
   const res = await fetch("/api/storage/upload", {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     body: formData,
   })
 

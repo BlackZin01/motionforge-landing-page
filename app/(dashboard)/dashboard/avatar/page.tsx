@@ -379,10 +379,6 @@ interface SavedAvatar {
   savedAt: string
 }
 
-function getToken(): string {
-  return typeof window !== "undefined" ? (localStorage.getItem("mf_token") ?? "") : ""
-}
-
 // ─── Etapas ───────────────────────────────────────────────────────────────────
 
 const STEPS = ["Identidade", "Aparência", "Estilo", "Ambiente", "Gerar"]
@@ -402,9 +398,8 @@ export default function AvatarPage() {
   const isStarter = user?.plan === "Starter" && !user?.isAdmin
 
   useEffect(() => {
-    const token = getToken()
-    if (!token) return
-    fetch("/api/avatares", { headers: { Authorization: `Bearer ${token}` } })
+    // Cookie httpOnly enviado automaticamente pelo browser
+    fetch("/api/avatares")
       .then(r => r.json())
       .then((data: Array<{ id: string; nome: string; prompt: string; negative: string; config: SavedAvatar["config"]; created_at: string }>) => {
         if (Array.isArray(data)) {
@@ -416,8 +411,6 @@ export default function AvatarPage() {
 
   async function handleSaveAvatar() {
     if (!prompt) return
-    const token = getToken()
-    if (!token) return
 
     const body = {
       nome: identidade.nome || `Avatar ${savedAvatares.length + 1}`,
@@ -429,7 +422,7 @@ export default function AvatarPage() {
     try {
       const res = await fetch("/api/avatares", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
       if (res.status === 429) {
@@ -446,13 +439,8 @@ export default function AvatarPage() {
   }
 
   async function handleDeleteAvatar(id: string) {
-    const token = getToken()
-    if (!token) return
     try {
-      await fetch(`/api/avatares/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      await fetch(`/api/avatares/${id}`, { method: "DELETE" })
     } catch { /* silently ignore */ }
     setSavedAvatares(prev => prev.filter(a => a.id !== id))
   }

@@ -60,8 +60,7 @@ export default function AdminSegurancaPage() {
   const [rateValues, setRateValues] = useState({ max_generations_per_hour: 20, max_generations_per_day: 100, max_login_attempts_per_hour: 10 })
   const [msgValue, setMsgValue] = useState("")
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("mf_token") ?? "" : ""
-  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+  const headers = { "Content-Type": "application/json" }
 
   const loadStatus = useCallback(async () => {
     const res = await fetch("/api/admin/seguranca/status", { headers })

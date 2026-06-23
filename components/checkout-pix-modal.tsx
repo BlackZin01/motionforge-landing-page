@@ -56,10 +56,6 @@ export function CheckoutPixModal({ plan, onSuccess, onClose }: CheckoutPixModalP
   const pollingRef   = useRef<ReturnType<typeof setInterval> | null>(null)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  function getToken() {
-    return typeof window !== "undefined" ? localStorage.getItem("mf_token") : null
-  }
-
   function handleCpfChange(e: React.ChangeEvent<HTMLInputElement>) {
     setCpf(formatCpf(e.target.value))
     setCpfError("")
@@ -77,13 +73,11 @@ export function CheckoutPixModal({ plan, onSuccess, onClose }: CheckoutPixModalP
     setStatus("PENDING")
     setSecondsLeft(EXPIRES_SECS)
 
-    const token = getToken()
-    if (!token) { setError("Sessão expirada. Faça login novamente."); setLoading(false); return }
-
     try {
+      // Cookie httpOnly é enviado automaticamente pelo browser
       const res  = await fetch("/api/checkout/pix", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, cpf: userCpf }),
       })
       const data = await res.json()
@@ -101,14 +95,12 @@ export function CheckoutPixModal({ plan, onSuccess, onClose }: CheckoutPixModalP
 
   function startPolling(id: string) {
     if (pollingRef.current) clearInterval(pollingRef.current)
-    const token = getToken()
-    if (!token || !id) return
+    if (!id) return
 
     pollingRef.current = setInterval(async () => {
       try {
-        const res  = await fetch(`/api/checkout/pix/status?pixId=${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        // Cookie httpOnly é enviado automaticamente pelo browser
+        const res  = await fetch(`/api/checkout/pix/status?pixId=${id}`)
         const data = await res.json()
         const s    = (data.status ?? "PENDING") as PixStatus
         setStatus(s)

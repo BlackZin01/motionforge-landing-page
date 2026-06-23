@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getBearerToken } from "@/lib/server-auth"
 
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 
@@ -6,7 +7,7 @@ export const maxDuration = 30
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("authorization") ?? ""
+    const auth = getBearerToken(req)
     const formData = await req.formData()
     const file = formData.get("file") as File | null
 

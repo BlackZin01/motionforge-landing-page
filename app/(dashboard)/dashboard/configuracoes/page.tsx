@@ -33,10 +33,9 @@ export default function ConfiguracoesPage() {
     }
     setSavingProfile(true)
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
       const res = await fetch("/api/auth/profile", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim() }),
       })
       const data = await res.json()
@@ -69,10 +68,9 @@ export default function ConfiguracoesPage() {
     }
     setSavingPassword(true)
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
       const res = await fetch("/api/auth/change-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),
       })
       const data = await res.json()

@@ -92,11 +92,10 @@ export default function DashboardHomePage() {
   }, [authLoading])
 
   useEffect(() => {
-    const token = localStorage.getItem("mf_token")
-    if (!token) return
+    // Cookies httpOnly enviados automaticamente pelo browser
     Promise.all([
-      fetch("/api/prompts", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
-      fetch("/api/biblioteca", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+      fetch("/api/prompts").then(r => r.ok ? r.json() : null),
+      fetch("/api/biblioteca").then(r => r.ok ? r.json() : null),
     ]).then(([p, b]) => {
       if (p) setTotalPrompts(p.prompts?.length ?? 0)
       if (b) setTotalProdutos(b.produtos?.length ?? 0)

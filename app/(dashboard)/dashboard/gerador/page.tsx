@@ -123,13 +123,10 @@ export default function GeradorPage() {
     setLoading(true)
     setResult(null)
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
+      // Cookie httpOnly enviado automaticamente pelo browser
       const res = await fetch("/api/generate-copy", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ produto, nicho, diferencial, tom, imageBase64, imageMimeType }),
       })
       const data = await res.json()

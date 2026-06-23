@@ -29,8 +29,8 @@ export default function AdminFinanceiroPage() {
   const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem("mf_token") ?? ""
-    fetch("/api/admin/financeiro", { headers: { Authorization: `Bearer ${token}` } })
+    // Cookie httpOnly enviado automaticamente pelo browser
+    fetch("/api/admin/financeiro")
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return r.json()

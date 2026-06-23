@@ -208,17 +208,15 @@ export default function BibliotecaPage() {
   const [statusAtivo, setStatusAtivo] = useState("")
 
   const fetchBiblioteca = useCallback(async () => {
-    const token = localStorage.getItem("mf_token")
-    if (!token || !user) return
+    if (!user) return
     setLoading(true)
     try {
       const qs = new URLSearchParams({
         ...(nichoAtivo  ? { nicho: nichoAtivo }   : {}),
         ...(statusAtivo ? { status: statusAtivo } : {}),
       })
-      const res = await fetch(`/api/biblioteca?${qs}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      // Cookie httpOnly enviado automaticamente pelo browser
+      const res = await fetch(`/api/biblioteca?${qs}`)
       if (!res.ok) return
       const data = await res.json()
       setProdutos(data.produtos ?? [])

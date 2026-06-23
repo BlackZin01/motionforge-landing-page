@@ -15,10 +15,6 @@ interface Profile {
 const EASE = [0.22, 1, 0.36, 1] as const
 const MAX_PROFILES = 5
 
-function getToken() {
-  return typeof window !== "undefined" ? (localStorage.getItem("mf_token") ?? "") : ""
-}
-
 export default function PerfisPage() {
   const { user, refreshUser } = useAuth()
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -37,8 +33,8 @@ export default function PerfisPage() {
 
   useEffect(() => {
     if (!isAgency) { setLoading(false); return }
-    const token = getToken()
-    fetch("/api/profiles", { headers: { Authorization: `Bearer ${token}` } })
+    // Cookie httpOnly enviado automaticamente pelo browser
+    fetch("/api/profiles")
       .then(r => r.json())
       .then(d => {
         setProfiles(d.profiles ?? [])
@@ -56,11 +52,10 @@ export default function PerfisPage() {
   async function handleCreate() {
     if (!newNome.trim()) return
     setSaving(true)
-    const token = getToken()
     try {
       const res = await fetch("/api/profiles", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome: newNome.trim(), nicho: newNicho.trim() || null }),
       })
       const data = await res.json()
@@ -73,13 +68,9 @@ export default function PerfisPage() {
   }
 
   async function handleActivate(id: string | null) {
-    const token = getToken()
     const targetId = id ?? "none"
     try {
-      const res = await fetch(`/api/profiles/${targetId}/activate`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`/api/profiles/${targetId}/activate`, { method: "PUT" })
       if (!res.ok) return
       setActiveId(id)
       await refreshUser()
@@ -89,11 +80,10 @@ export default function PerfisPage() {
 
   async function handleEdit(p: Profile) {
     if (!editNome.trim()) return
-    const token = getToken()
     try {
       const res = await fetch(`/api/profiles/${p.id}`, {
         method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome: editNome.trim(), nicho: editNicho.trim() || null }),
       })
       const data = await res.json()
@@ -105,12 +95,8 @@ export default function PerfisPage() {
   }
 
   async function handleDelete(id: string) {
-    const token = getToken()
     try {
-      const res = await fetch(`/api/profiles/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`/api/profiles/${id}`, { method: "DELETE" })
       if (!res.ok) return
       setProfiles(prev => prev.filter(p => p.id !== id))
       if (activeId === id) { setActiveId(null); await refreshUser() }

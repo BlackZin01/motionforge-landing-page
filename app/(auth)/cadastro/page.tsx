@@ -111,20 +111,16 @@ export default function CadastroPage() {
         setStatus("idle")
         return
       }
-      if (typeof window !== "undefined") {
-        localStorage.setItem("mf_token", data.token)
-        // Cacheia dados do usuário para evitar spinner no dashboard
-        try {
-          const meRes = await fetch("/api/auth/me", {
-            headers: { Authorization: `Bearer ${data.token}` },
-          })
-          if (meRes.ok) {
-            const userData = await meRes.json()
-            localStorage.setItem("mf_user", JSON.stringify(userData))
-          }
-        } catch {
-          // Falha silenciosa — AuthProvider vai buscar depois
+      // Cookie httpOnly já foi definido pelo servidor na resposta
+      // Pré-cacheia dados do usuário para evitar spinner no dashboard
+      try {
+        const meRes = await fetch("/api/auth/me") // cookie enviado automaticamente
+        if (meRes.ok) {
+          const userData = await meRes.json()
+          localStorage.setItem("mf_user", JSON.stringify(userData))
         }
+      } catch {
+        // Falha silenciosa — AuthProvider vai buscar depois
       }
       router.push("/dashboard")
     } catch {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getBearerToken } from "@/lib/server-auth"
 
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 
@@ -6,7 +7,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = req.headers.get("authorization") ?? ""
+  const auth = getBearerToken(req)
   if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   const { id } = await params
   try {

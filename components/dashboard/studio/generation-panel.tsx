@@ -92,8 +92,7 @@ export function GenerationPanel({ onGenerate, credits, generating, isAdmin }: Ge
     setUploadingImage(true)
 
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
-      const cdnUrl = await uploadFileToR2(file, token)
+      const cdnUrl = await uploadFileToR2(file)
       setRefImage(cdnUrl)
     } catch {
       setRefImagePreview(null)

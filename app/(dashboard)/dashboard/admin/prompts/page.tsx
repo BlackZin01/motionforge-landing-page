@@ -66,8 +66,7 @@ function PromptModal({
     if (!file) return
     setUploadando(true)
     try {
-      const token = localStorage.getItem("mf_token") ?? ""
-      const url = await uploadFileToR2(file, token)
+      const url = await uploadFileToR2(file)
       setForm(f => ({ ...f, midia_url: url }))
     } catch {
       // silencia — usuário ainda pode colar URL manualmente
@@ -257,12 +256,10 @@ export default function AdminPromptsPage() {
     if (!authLoading && !user?.isAdmin) router.replace("/dashboard")
   }, [authLoading, user, router])
 
-  const token = () => localStorage.getItem("mf_token") ?? ""
-
   const fetchPrompts = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/prompts?page=1", { headers: { Authorization: `Bearer ${token()}` } })
+      const res = await fetch("/api/admin/prompts?page=1")
       if (!res.ok) return
       const data = await res.json()
       setPrompts(data.prompts ?? [])
@@ -276,23 +273,21 @@ export default function AdminPromptsPage() {
     const url = isEdicao ? `/api/admin/prompts/${modal.prompt!.id}` : "/api/admin/prompts"
     const res = await fetch(url, {
       method: isEdicao ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
     })
     if (res.ok) { setModal({ aberto: false }); fetchPrompts() }
   }
 
   async function deletar(id: string) {
-    const res = await fetch(`/api/admin/prompts/${id}`, {
-      method: "DELETE", headers: { Authorization: `Bearer ${token()}` },
-    })
+    const res = await fetch(`/api/admin/prompts/${id}`, { method: "DELETE" })
     if (res.ok) { setConfirmDelete(null); fetchPrompts() }
   }
 
   async function toggleAtivo(p: Prompt) {
     await fetch(`/api/admin/prompts/${p.id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ativo: !p.ativo }),
     })
     fetchPrompts()

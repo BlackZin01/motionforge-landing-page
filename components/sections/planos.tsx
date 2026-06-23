@@ -106,21 +106,22 @@ function PlanCard({ plan }: { plan: Plan }) {
 
   async function handleCTA() {
     trackEvent("InitiateCheckout", { value: price, currency: "BRL", content_name: id })
-    const token  = typeof window !== "undefined" ? localStorage.getItem("mf_token") : null
     const planId = id.toLowerCase()
+    // Detecta se usuário está logado pelo cache local (token fica em cookie httpOnly)
+    const isLoggedIn = typeof window !== "undefined" && !!localStorage.getItem("mf_user")
 
-    if (!token) {
+    if (!isLoggedIn) {
       // Sem conta — vai para cadastro com plano pré-selecionado
       window.location.href = `/cadastro?plan=${planId}`
       return
     }
 
-    // Usuário logado — cria checkout direto
+    // Usuário logado — cria checkout direto (cookie enviado automaticamente)
     setLoading(true)
     try {
       const res  = await fetch("/api/payment/checkout", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planId }),
       })
       const data = await res.json()

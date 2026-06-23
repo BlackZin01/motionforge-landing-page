@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getBearerToken } from "@/lib/server-auth"
 
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 
 export async function GET(req: NextRequest) {
-  const auth = req.headers.get("authorization") ?? ""
+  const auth = getBearerToken(req)
   if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   try {
     const res = await fetch(`${API}/profiles`, { headers: { Authorization: auth } })
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = req.headers.get("authorization") ?? ""
+  const auth = getBearerToken(req)
   if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   try {
     const body = await req.json()

@@ -47,14 +47,12 @@ export default function HistoricoPage() {
   const isStarter = user?.plan === "Starter" && !user?.isAdmin
 
   const fetchGenerations = useCallback(async (reset = false) => {
-    const token = localStorage.getItem("mf_token") ?? ""
     const currentOffset = reset ? 0 : offset
     try {
       reset ? setLoading(true) : setLoadingMore(true)
       setError(false)
-      const res = await fetch(`/api/generations?limit=${ITEMS_PER_PAGE}&offset=${currentOffset}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      // Cookie httpOnly enviado automaticamente pelo browser
+      const res = await fetch(`/api/generations?limit=${ITEMS_PER_PAGE}&offset=${currentOffset}`)
       if (!res.ok) { setError(true); return }
       const data = await res.json()
       const newItems: Generation[] = data.items ?? []
