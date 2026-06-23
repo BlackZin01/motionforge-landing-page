@@ -77,12 +77,11 @@ function getConnectedImageNode(modelNodeId: string, nodes: Node[], edges: Edge[]
   return null
 }
 
-async function pollJob(jobId: string, token: string, maxAttempts = 120): Promise<string | null> {
+async function pollJob(jobId: string, maxAttempts = 120): Promise<string | null> {
   for (let i = 0; i < maxAttempts; i++) {
     await new Promise((r) => setTimeout(r, 2000))
-    const res = await fetch(`/api/generations/${jobId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    // Cookie httpOnly enviado automaticamente pelo browser
+    const res = await fetch(`/api/generations/${jobId}`)
     if (!res.ok) continue
     const data = await res.json()
     if (data.status === "completed") return data.output_url ?? null
@@ -506,8 +505,6 @@ export default function WorkflowsPage() {
     }
 
     const quantity = ((wf.nodes.find((n) => n.type === "result")?.data as OutputData)?.quantity ?? 1)
-    const token = localStorage.getItem("mf_token") ?? ""
-
     // Abrir modal e iniciar
     setExecutingId(wf.id)
     setExecutionWorkflowName(wf.name)
@@ -569,11 +566,11 @@ export default function WorkflowsPage() {
           setExecutionResults([...allResults])
 
           try {
+            // Cookie httpOnly enviado automaticamente pelo browser
             const res: Response = await fetch("/api/generate", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify({
                 modelId,
@@ -597,7 +594,7 @@ export default function WorkflowsPage() {
               outputUrl = data.outputUrl
             } else if (res.status === 202 && data.jobId) {
               // Assíncrono (fal.ai) — faz polling
-              outputUrl = await pollJob(data.jobId, token)
+              outputUrl = await pollJob(data.jobId)
             }
 
             previousOutputUrl = outputUrl
