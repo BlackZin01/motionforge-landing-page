@@ -6,6 +6,7 @@ const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 export async function POST(req: NextRequest) {
   try {
     const auth = getBearerToken(req)
+    if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
     const body = await req.json()
     const res = await fetch(`${API}/generate`, {
       method: "POST",

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getBearerToken } from "@/lib/server-auth"
 
 const API = process.env.API_INTERNAL_URL ?? "http://2.25.196.231/api"
 
 export async function GET(req: NextRequest) {
+  const auth = getBearerToken(req)
+  if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   try {
-    const auth = req.headers.get("authorization") ?? ""
     const { searchParams } = req.nextUrl
     const qs = searchParams.toString()
     const res = await fetch(`${API}/admin/prompts${qs ? "?" + qs : ""}`, {
@@ -18,8 +20,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = getBearerToken(req)
+  if (!auth) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   try {
-    const auth = req.headers.get("authorization") ?? ""
     const body = await req.json()
     const res = await fetch(`${API}/admin/prompts`, {
       method: "POST",
