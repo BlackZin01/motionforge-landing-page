@@ -83,6 +83,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const planStatus  = user?.plan_status ?? "active"
   const isSuspended = !!user && !isAdmin && planStatus === "suspended"
 
+  // Calcula dias restantes para vencimento do plano
+  const daysUntilExpiry = (() => {
+    if (!user || isAdmin || user.plan === "Free" || isSuspended) return null
+    if (!user.plan_expires_at) return null
+    const diff = new Date(user.plan_expires_at).getTime() - Date.now()
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
+    return days <= 3 ? days : null
+  })()
+
   return (
     <div
       style={{
@@ -141,6 +150,36 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               }}
             >
               Ver planos
+            </a>
+          </div>
+        )}
+
+        {/* Banner vencimento próximo (≤ 3 dias) */}
+        {daysUntilExpiry !== null && (
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 12, background: "rgba(245,158,11,0.08)",
+            borderBottom: "1px solid rgba(245,158,11,0.25)",
+            padding: "10px 20px", flexShrink: 0,
+          }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#F5F5F5", margin: 0 }}>
+              🕐 Seu plano vence em{" "}
+              <strong style={{ color: "#F59E0B" }}>
+                {daysUntilExpiry <= 0 ? "hoje" : daysUntilExpiry === 1 ? "1 dia" : `${daysUntilExpiry} dias`}
+              </strong>
+              . Renove para não perder o acesso.
+            </p>
+            <a
+              href="/dashboard/planos"
+              style={{
+                flexShrink: 0, padding: "6px 16px",
+                background: "#F59E0B", color: "#000",
+                fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 700,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                textDecoration: "none", borderRadius: 4,
+              }}
+            >
+              Renovar agora
             </a>
           </div>
         )}

@@ -18,6 +18,7 @@ export interface AuthUser {
   email: string
   plan: "Free" | "Starter" | "Pro" | "Agency"
   plan_status?: string
+  plan_expires_at?: string | null
   isAdmin: boolean
   geracoes_usadas?: number
   active_profile_id?: string | null
@@ -69,6 +70,7 @@ function normalizeUser(data: Record<string, unknown>): AuthUser {
     email: String(data.email ?? ""),
     plan: normalizePlan(data.plan),
     plan_status: typeof data.plan_status === "string" ? data.plan_status : "active",
+    plan_expires_at: typeof data.plan_expires_at === "string" ? data.plan_expires_at : null,
     isAdmin: Boolean(data.isAdmin ?? data.is_admin ?? false),
     geracoes_usadas: typeof data.geracoes_usadas === "number" ? data.geracoes_usadas : undefined,
     active_profile_id: (data.active_profile_id as string | null | undefined) ?? null,
